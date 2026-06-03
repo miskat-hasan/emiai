@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+.theme-influencer {
+  --color-primary: #f57802;
+  --color-secondary: #eb4a35;
+}
+
+.theme-advertiser {
+  --color-primary: #125896;
+  --color-secondary: #0082a2;
+}
+
+.theme-agency {
+  --color-primary: #de4385;
+  --color-secondary: #bd3a80;
+}
+
+.theme-business {
+  --color-primary: #b05ee0;
+  --color-secondary: #45036c;
+}
+
+.theme-guest {
+  --color-primary: #d20061;
+  --color-secondary: #980e4e;
+}
+
+@theme {
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+
+  /* Font Family */
+  --font-dm-sans: var(--font-dm-sans);
+}
+
+body {
+  @apply font-dm-sans;
+}
+
+.container {
+  @apply max-w-415 mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;
+}
