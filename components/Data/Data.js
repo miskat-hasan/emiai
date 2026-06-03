@@ -24,7 +24,11 @@ import {
 
 export const NAV_ITEMS = {
   influencer: [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      href: "/dashboard/influencer",
+    },
     { label: "Inbox", icon: Inbox, href: "/dashboard/inbox" },
     { label: "Deals", icon: Briefcase, href: "/dashboard/deals" },
     { label: "Portfolio", icon: FolderOpen, href: "/dashboard/portfolio" },
