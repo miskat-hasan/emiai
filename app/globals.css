@@ -25,11 +25,12 @@
   --color-secondary: #980e4e;
 }
 
+
 @theme {
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
-
-  /* Font Family */
+  --color-gray: #63716e;
+  --color-black: #63716e;
   --font-dm-sans: var(--font-dm-sans);
 }
 
@@ -37,6 +38,23 @@ body {
   @apply font-dm-sans;
 }
 
+/* ── Scrollbar (sidebar)  */
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* other css */
 .container {
-  @apply max-w-415 mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;
+  @apply max-w-[1660px] mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;
 }
