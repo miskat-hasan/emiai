@@ -1,5 +1,5 @@
 @import "tailwindcss";
-
+@tailwind utilities;
 .theme-influencer {
   --color-primary: #f57802;
   --color-secondary: #eb4a35;

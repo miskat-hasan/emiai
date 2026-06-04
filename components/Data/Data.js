@@ -36,14 +36,14 @@ export const NAV_ITEMS = {
     {
       label: "Peer Invitations",
       icon: Users,
-      href: "/dashboard/peer-invitations",
+      href: "/dashboard/influencer/peer-invitations",
     },
     {
       label: "Collaborations",
       icon: Handshake,
-      href: "/dashboard/collaborations",
+      href: "/dashboard/influencer/collaborations",
     },
-    { label: "Smart Feed", icon: Zap, href: "/dashboard/smart-feed" },
+    { label: "Smart Feed", icon: Zap, href: "/dashboard/influencer/smart-feed" },
     {
       label: "Image Generation",
       icon: Wand2,
