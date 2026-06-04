@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-/* ── Role-based theme tokens ──────────────────────────────────────────────── */
+@tailwind utilities;
 
+/* ── Role-based theme tokens ──────────────────────────────────────────────── */
 .theme-influencer {
   --color-primary: #F57802;
   --color-secondary: #EB4A35;
