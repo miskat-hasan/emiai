@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { X } from "lucide-react";
 import { toast } from "react-toastify";
+import SentInvitationCard, { sentInvitationRequests } from "../components/SentInvitationCard";
+import Image from "next/image";
 
 export const invitationTabs = [
     {
@@ -151,10 +153,12 @@ const InvitationCard = ({ invitation, onRequestPayment }) => {
                 <div className="mb-3 flex items-center gap-3">
                     <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary to-secondary">
                         {invitation.from.avatar ? (
-                            <img
+                            <Image
                                 src={invitation.from.avatar}
                                 alt={invitation.from.name}
                                 className="h-full w-full object-cover"
+                                height={36}
+                                width={36}
                             />
                         ) : (
                             <div className="flex h-full w-full items-center justify-center text-xs font-bold text-white">
@@ -339,8 +343,17 @@ export default function EventsPage() {
     const [selectedInvitation, setSelectedInvitation] = useState(null);
 
     const filteredInvitations = useMemo(() => {
-        return invitationRequests.filter((item) => item.type === activeTab);
+        if (activeTab === "sent") {
+            return sentInvitationRequests;
+        }
+
+        return invitationRequests;
     }, [activeTab]);
+
+    const handlePaymentNow = (invitation) => {
+        console.log("Payment now clicked:", invitation);
+        toast.info("Payment flow will be connected with API/payment gateway later");
+    };
 
     return (
         <section className="w-full">
@@ -366,13 +379,22 @@ export default function EventsPage() {
 
             {filteredInvitations.length > 0 ? (
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-2 2xl:grid-cols-3">
-                    {filteredInvitations.map((invitation) => (
-                        <InvitationCard
-                            key={invitation.id}
-                            invitation={invitation}
-                            onRequestPayment={setSelectedInvitation}
-                        />
-                    ))}
+                    {filteredInvitations.map((invitation) =>
+                        activeTab === "sent" ? (
+                            <SentInvitationCard
+                                key={invitation.id}
+                                invitation={invitation}
+                                onRequestPayment={setSelectedInvitation}
+                                onPaymentNow={handlePaymentNow}
+                            />
+                        ) : (
+                            <InvitationCard
+                                key={invitation.id}
+                                invitation={invitation}
+                                onRequestPayment={setSelectedInvitation}
+                            />
+                        )
+                    )}
                 </div>
             ) : (
                 <div className="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
@@ -380,6 +402,7 @@ export default function EventsPage() {
                         <h3 className="mb-2 text-lg font-bold text-[#252525]">
                             No {activeTab} requests found
                         </h3>
+
                         <p className="text-sm font-medium text-[#7a8582]">
                             Your {activeTab} event invitations will appear here.
                         </p>
