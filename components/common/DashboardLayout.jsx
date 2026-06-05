@@ -10,17 +10,32 @@ export default function DashboardLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const user = useSelector(state => state.auth?.user) ?? {
+  const user = useSelector((state) => state.auth?.user) ?? {
     name: "Charli Levin",
     role: "influencer",
     avatar: null,
   };
 
-  const role = user?.role ?? "advertiser";
+  const role = user?.role ?? " ";
   const themeClass = `theme-${role}`;
 
+  const bgColors = {
+    advertiser: "#DDE8F0",
+    influencer: "#FFF6EE",
+    agency: "#EDE0E6",
+    manager: "#ECE1F2",
+    business: "#ECE1F2",
+    guest: "#EDDFE6",
+  };
+
+  const bgColorClass = bgColors[role] || "#FFF6EE";
   return (
-    <div className={`${themeClass} flex h-screen bg-gray-50 overflow-hidden`}>
+    <div
+      className={`${themeClass} flex h-screen overflow-hidden`}
+      style={{
+        background: `linear-gradient(180deg, #FFFFFF 0%, #FFFFFF 58%, ${bgColorClass} 100%)`,
+      }}
+    >
       {/* ── Mobile sidebar backdrop ── */}
       {mobileSidebarOpen && (
         <div
@@ -47,15 +62,17 @@ export default function DashboardLayout({ children }) {
           onToggleSidebar={() => {
             // On mobile → toggle the drawer; on desktop → collapse
             if (window.innerWidth < 1024) {
-              setMobileSidebarOpen(v => !v);
+              setMobileSidebarOpen((v) => !v);
             } else {
-              setSidebarCollapsed(v => !v);
+              setSidebarCollapsed((v) => !v);
             }
           }}
         />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-5 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-5 lg:p-6 bg-transparent">
+          {children}
+        </main>
       </div>
     </div>
   );

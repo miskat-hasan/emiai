@@ -6,14 +6,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "../Data/Data";
 
-export default function Sidebar({ role = "advertiser", collapsed = false }) {
+export default function Sidebar({ role = "influencer", collapsed = false }) {
   const pathname = usePathname();
   const navItems = NAV_ITEMS[role] ?? NAV_ITEMS.advertiser;
 
   return (
     <aside
       className={`
-        flex flex-col h-screen px-4 py-5 bg-white border-r border-gray-100
+        flex flex-col h-screen px-4 py-5
         transition-all duration-300 ease-in-out shrink-0
         ${collapsed ? "w-[72px]" : "w-[245px]"}
         sticky top-0 overflow-y-auto overflow-x-hidden
