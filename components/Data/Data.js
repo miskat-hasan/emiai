@@ -64,7 +64,7 @@ export const NAV_ITEMS = {
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { label: "Inbox", icon: Inbox, href: "/dashboard/inbox" },
     { label: "Deals", icon: Briefcase, href: "/dashboard/deals" },
-    { label: "Portfolio", icon: FolderOpen, href: "/dashboard/portfolio" },
+    { label: "Portfolio", icon: FolderOpen, href: "/dashboard/advertiser/portfolio" },
     { label: "Wallet", icon: Wallet, href: "/dashboard/wallet" },
     { label: "Influencers", icon: Users, href: "/dashboard/influencers" },
     { label: "Agencies", icon: Building2, href: "/dashboard/agencies" },
@@ -96,7 +96,7 @@ export const NAV_ITEMS = {
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { label: "Inbox", icon: Inbox, href: "/dashboard/inbox" },
     { label: "Deals", icon: Briefcase, href: "/dashboard/deals" },
-    { label: "Portfolio", icon: FolderOpen, href: "/dashboard/portfolio" },
+    { label: "Portfolio", icon: FolderOpen, href: "/dashboard/agency/portfolio" },
     { label: "Wallet", icon: Wallet, href: "/dashboard/wallet" },
     {
       label: "Smart Matching",
