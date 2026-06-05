@@ -78,13 +78,13 @@ export default function AgencyPortfolioDetailsModal({
           {portfolio.items &&
             portfolio.items.map((item, index) => (
               <div key={index}>
-                <div className="mb-4 h-[250px] w-full overflow-hidden bg-gray-100">
+                <div className="mb-4 h-[350px] w-full overflow-hidden bg-gray-100">
                   <Image
                     src={item.image}
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-300"
                     width={700}
-                    height={250}
+                    height={450}
                   />
                 </div>
                 <div className="pb-4 flex flex-col justify-center items-center text-gray-600 text-sm">
@@ -149,15 +149,15 @@ export default function AgencyPortfolioDetailsModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-4 gap-2 mt-2">
+              <div className="grid grid-cols-2 h-50 xl:grid-cols-4 gap-2 mt-2">
                 {gallery.images.map((img, i) => (
                   <Image
                     key={i}
                     src={img}
                     alt={`Gallery ${i}`}
                     width={100}
-                    height={100}
-                    className="h-24 w-full rounded-lg object-cover"
+                    height={200}
+                    className="h-full w-full rounded-lg object-cover"
                   />
                 ))}
               </div>
