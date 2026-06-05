@@ -2,6 +2,7 @@
 
 import { useForm, useFieldArray } from "react-hook-form";
 import { useState } from "react";
+import Image from "next/image";
 
 export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio }) {
   const { register, control, handleSubmit, watch, setValue, reset } = useForm({
@@ -70,7 +71,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio }) 
                 />
 
                 {photoPreview && (
-                  <img
+                  <Image
                     src={photoPreview}
                     alt="Preview"
                     className="mt-3 h-36 w-full rounded-lg object-cover"
