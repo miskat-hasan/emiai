@@ -3,19 +3,14 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+import { useGetMeQuery } from "@/redux/api/authApi";
 import { setUser, removeUser } from "@/redux/slices/authSlice";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
-import { useGetMeQuery } from "@/redux/api/authApi";
 
 export default function DashboardLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-
-
-  const user = useSelector((state) => state.auth?.user);
-
-  const role = user?.role ?? "advertiser";
 
   const dispatch = useDispatch();
   const router = useRouter();

@@ -10,9 +10,6 @@ import {
   User,
 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -53,28 +50,6 @@ export default function Topbar({ onToggleSidebar }) {
     if (h < 17) return "Good Afternoon";
     return "Good Evening";
   };
- const router = useRouter();
-  const handleProfileAction = (label) => {
-  setProfileOpen(false);
-
-  switch (label) {
-    case "Profile":
-      router.push("/dashboard/influencer/profile");
-      break;
-
-    case "Settings":
-      router.push("/dashboard/influencer/settings");
-      break;
-
-    case "Sign out":
-      // Add your logout logic here
-      console.log("Sign out");
-      break;
-
-    default:
-      break;
-  }
-};
 
   const handleLogout = async () => {
     try {
@@ -229,11 +204,9 @@ export default function Topbar({ onToggleSidebar }) {
               {profileMenuItems.map(({ label, icon: Icon, action, danger }) => (
                 <button
                   key={label}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   onClick={() => {
                     setProfileOpen(false);
                     action();
-                    handleProfileAction(label)
                   }}
                   disabled={isLoggingOut && danger}
                   className={`
