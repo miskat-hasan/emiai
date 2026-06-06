@@ -12,7 +12,7 @@ export default function DashboardLayout({ children }) {
 
   const user = useSelector((state) => state.auth?.user) ?? {
     name: "Charli Levin",
-    role: "influencer",
+    role: "agency",
     avatar: null,
   };
 
