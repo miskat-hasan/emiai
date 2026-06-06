@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "../Data/Data";
 
-export default function Sidebar({ role = "influencer", collapsed = false }) {
+export default function Sidebar({ role = "advertiser", collapsed = false }) {
   const pathname = usePathname();
   const navItems = NAV_ITEMS[role] ?? NAV_ITEMS.advertiser;
 

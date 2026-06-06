@@ -12,11 +12,11 @@ export default function DashboardLayout({ children }) {
 
   const user = useSelector((state) => state.auth?.user) ?? {
     name: "Charli Levin",
-    role: "agency",
+    role: "advertiser",
     avatar: null,
   };
 
-  const role = user?.role ?? " ";
+  const role = user?.role ?? "advertiser";
   const themeClass = `theme-${role}`;
 
   const bgColors = {

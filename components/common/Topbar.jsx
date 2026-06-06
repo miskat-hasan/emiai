@@ -2,6 +2,7 @@
 
 import { Bell, Search, ChevronDown, Menu } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Topbar({ user, onToggleSidebar }) {
@@ -14,6 +15,28 @@ export default function Topbar({ user, onToggleSidebar }) {
     if (h < 17) return "Good Afternoon";
     return "Good Evening";
   };
+ const router = useRouter();
+  const handleProfileAction = (label) => {
+  setProfileOpen(false);
+
+  switch (label) {
+    case "Profile":
+      router.push("/dashboard/influencer/profile");
+      break;
+
+    case "Settings":
+      router.push("/dashboard/influencer/settings");
+      break;
+
+    case "Sign out":
+      // Add your logout logic here
+      console.log("Sign out");
+      break;
+
+    default:
+      break;
+  }
+};
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 py-3.5">
@@ -120,6 +143,7 @@ export default function Topbar({ user, onToggleSidebar }) {
               {["Profile", "Settings", "Sign out"].map((label) => (
                 <button
                   key={label}
+                  onClick={() => handleProfileAction(label)}
                   className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   {label}
