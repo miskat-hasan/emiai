@@ -1,0 +1,69 @@
+import React from "react";
+import Image from "next/image";
+
+const EventCard = ({
+  imageUrl = "/images/demo-event-photo.png",
+  title = "Digital Marketing Forum 2025",
+  location = "Hello this is about my portfolio",
+  sponsor = "Event CO.",
+  date = "Feb 17, 2026",
+  buttonText = "Create Invite",
+  onButtonClick,
+}) => {
+  return (
+    <div className="bg-white border border-gray-200 rounded-[2rem] p-3 w-full shadow-sm">
+      {/* Image Section */}
+      <div className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          className="object-cover"
+          sizes="(max-width: 768px) 100vw, 400px"
+        />
+      </div>
+
+      {/* Details Section */}
+      <div className="bg-[#f9fafb] rounded-[1.5rem] p-5 mt-3 flex flex-col gap-3.5">
+        {/* Title Row */}
+        <div className="flex items-start gap-4">
+          <span className="w-20 text-gray-500 text-[15px] shrink-0">Title</span>
+          <span className="flex-1 text-gray-900 text-[17px] font-medium leading-tight">
+            {title}
+          </span>
+        </div>
+
+        {/* Location Row */}
+        <div className="flex items-start gap-4">
+          <span className="w-20 text-gray-500 text-[12px] shrink-0">
+            Location
+          </span>
+          <span className="flex-1 text-gray-800 text-[12px] leading-snug">
+            {location}
+          </span>
+        </div>
+
+        {/* Sponsored & Date Row */}
+        <div className="flex items-center gap-4 mt-1">
+          <span className="w-20 text-gray-500 text-[12px] shrink-0">
+            Sponsored
+          </span>
+          <div className="flex-1 flex justify-between items-center text-[12px]">
+            <span className="text-gray-800 font-medium">{sponsor}</span>
+            <span className="text-gray-800">{date}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Button */}
+      <button
+        onClick={onButtonClick}
+        className="mt-3 w-full bg-gradient-to-r from-[#f77721] to-[#f04f37] hover:from-[#ea6615] hover:to-[#e33e25] text-white py-3.5 rounded-2xl font-medium text-[17px] transition-all duration-200 active:scale-[0.98]"
+      >
+        {buttonText}
+      </button>
+    </div>
+  );
+};
+
+export default EventCard;
