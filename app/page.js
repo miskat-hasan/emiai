@@ -1,11 +1,6 @@
-import React from 'react';
+// app/page.js
+import { redirect } from "next/navigation";
 
-const page = () => {
-  return (
-    <div className='text-primary'>
-      Landing Page
-    </div>
-  );
-};
-
-export default page;
+export default function Page() {
+  redirect("/dashboard");
+}
