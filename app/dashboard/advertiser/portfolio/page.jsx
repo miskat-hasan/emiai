@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import PortfolioCard from "../../influencer/Portfolio/components/PortfolioCard";
-import AddPortfolioModal from "../../influencer/Portfolio/components/AddPortfolioModal";
-import PortfolioDetailsModal from "../../influencer/Portfolio/components/PortfolioDetailsModal";
-import AgencyPortfolioDetailsModal from "../../influencer/Portfolio/components/AgencyPortfolioDetailsModal";
+import PortfolioCard from "../../influencer/portfolio/components/PortfolioCard";
+import AddPortfolioModal from "../../influencer/portfolio/components/AddPortfolioModal";
+import PortfolioDetailsModal from "../../influencer/portfolio/components/PortfolioDetailsModal";
+import AgencyPortfolioDetailsModal from "../../influencer/portfolio/components/AgencyPortfolioDetailsModal";
 
 export const portfolioTabs = [
   { label: "My Portfolio", value: "my_portfolio" },
@@ -311,12 +311,12 @@ export default function PortfolioPage() {
       : agencyPortfolioData;
   }, [activeTab]);
 
-  const openPersonalModal = (id) => {
+  const openPersonalModal = id => {
     setSelectedPersonalId(id);
     setPersonalModalOpen(true);
   };
 
-  const openAgencyModal = (id) => {
+  const openAgencyModal = id => {
     setSelectedAgencyId(id);
     setAgencyModalOpen(true);
   };
@@ -326,7 +326,7 @@ export default function PortfolioPage() {
       {/* Tabs */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          {portfolioTabs.map((tab) => {
+          {portfolioTabs.map(tab => {
             const isActive = activeTab === tab.value;
             return (
               <button
@@ -358,7 +358,7 @@ export default function PortfolioPage() {
       {/* Portfolio Cards */}
       {filteredPortfolioItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredPortfolioItems.map((item) => (
+          {filteredPortfolioItems.map(item => (
             <PortfolioCard
               key={item.id}
               item={item}
@@ -385,13 +385,13 @@ export default function PortfolioPage() {
       <AddPortfolioModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSubmitPortfolio={(data) => console.log("Portfolio added:", data)}
+        onSubmitPortfolio={data => console.log("Portfolio added:", data)}
       />
       <PortfolioDetailsModal
         open={personalModalOpen}
         onClose={() => setPersonalModalOpen(false)}
         portfolioId={selectedPersonalId}
-        portfolioData={portfolioDetailsData} 
+        portfolioData={portfolioDetailsData}
         user={{
           name: "John Doe",
           role: "Influencer",
@@ -403,7 +403,7 @@ export default function PortfolioPage() {
         open={agencyModalOpen}
         onClose={() => setAgencyModalOpen(false)}
         portfolioId={selectedAgencyId}
-        portfolioData={agencyPortfolioDetailsData} 
+        portfolioData={agencyPortfolioDetailsData}
         user={{
           name: "Agency Name",
           role: "Marketing Agency",

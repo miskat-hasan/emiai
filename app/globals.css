@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-@tailwind utilities;
-
 /* ── Role-based theme tokens ──────────────────────────────────────────────── */
+
 .theme-influencer {
   --color-primary: #F57802;
   --color-secondary: #EB4A35;
@@ -27,7 +26,7 @@
   --stat-sublabel-text: #a02860;
 }
 
-.theme-business_manager {
+.theme-business {
   --color-primary: #B05EE0;
   --color-secondary: #45036C;
   --color-primary-rgb: 176, 94, 224;
@@ -48,8 +47,6 @@
 @theme {
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
-  --color-black: #203430;
-  --color-gray: #63716E;
   --font-dm-sans: var(--font-dm-sans);
 }
 
@@ -75,16 +72,30 @@ body {
   background: #d1d5db;
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+.theme-influencer       { --dashboard-bg-color: 245, 120, 2;   }
+.theme-advertiser       { --dashboard-bg-color: 18, 88, 150;   }
+.theme-agency           { --dashboard-bg-color: 222, 67, 133;  }
+.theme-business_manager { --dashboard-bg-color: 176, 94, 224;  }
+.theme-guest            { --dashboard-bg-color: 210, 0, 97;    }
+
+.dashboard-bg {
+  position: relative;
 }
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+.dashboard-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.50)  56.57%,
+      rgba(var(--dashboard-bg-color, 245, 120, 2), 0.50) 206.38%
+    ),
+    #fff;
 }
-
-/* ── Container ────────────────────────────────────────────────────────────── */
 
 .container {
   @apply max-w-[1660px] mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;

@@ -21,8 +21,10 @@ export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  // Read user from Redux
+  
   const user = useSelector(state => state.auth?.user);
+
+  console.log("topbar user", user);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -32,7 +34,7 @@ export default function Topbar({ onToggleSidebar }) {
 
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
-  // Close dropdowns on outside click
+  
   useEffect(() => {
     const handler = e => {
       if (notifRef.current && !notifRef.current.contains(e.target))
@@ -57,15 +59,11 @@ export default function Topbar({ onToggleSidebar }) {
     } catch {
       // Logout silently even if the API call fails
     } finally {
-      // 1. Clear Redux state
       dispatch(removeUser());
-
-      // 2. Clear token cookie
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
 
       toast.success("Logged out successfully");
 
-      // 3. Redirect to login
       router.push("/login");
     }
   };
@@ -74,7 +72,7 @@ export default function Topbar({ onToggleSidebar }) {
     {
       label: "Profile",
       icon: User,
-      action: () => router.push("/dashboard/profile"),
+      action: () => router.push(`/dashboard/${user?.role}/profile`),
     },
     {
       label: "Settings",
@@ -85,7 +83,7 @@ export default function Topbar({ onToggleSidebar }) {
   ];
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-gray-100 px-5 py-3.5">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-primary/10 px-5 py-3.5">
       {/* ── Left — hamburger + greeting ── */}
       <div className="flex items-center gap-3 min-w-0">
         <button
@@ -109,14 +107,14 @@ export default function Topbar({ onToggleSidebar }) {
       {/* ── Right — search, bell, profile ── */}
       <div className="flex items-center gap-2 shrink-0">
         {/* Search */}
-        <div className="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 w-52 focus-within:border-primary/40 focus-within:bg-white transition-all">
+        {/* <div className="hidden md:flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 w-52 focus-within:border-primary/40 focus-within:bg-white transition-all">
           <Search size={15} className="text-gray-400 shrink-0" />
           <input
             type="text"
             placeholder="Search..."
             className="bg-transparent text-sm text-[#203430] placeholder-gray-400 outline-none w-full"
           />
-        </div>
+        </div> */}
 
         {/* Notification bell */}
         <div ref={notifRef} className="relative">
@@ -161,7 +159,7 @@ export default function Topbar({ onToggleSidebar }) {
               setProfileOpen(v => !v);
               setNotifOpen(false);
             }}
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
@@ -210,7 +208,7 @@ export default function Topbar({ onToggleSidebar }) {
                   }}
                   disabled={isLoggingOut && danger}
                   className={`
-                    w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors
+                    w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer
                     ${
                       danger
                         ? "text-red-500 hover:bg-red-50"
