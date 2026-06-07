@@ -1,42 +1,91 @@
 @import "tailwindcss";
 
+@tailwind utilities;
+
+/* ── Role-based theme tokens ──────────────────────────────────────────────── */
 .theme-influencer {
-  --color-primary: #f57802;
-  --color-secondary: #eb4a35;
+  --color-primary: #F57802;
+  --color-secondary: #EB4A35;
+  --color-primary-rgb: 245, 120, 2;
+  --stat-sublabel-bg: rgba(245, 120, 2, 0.10);
+  --stat-sublabel-text: #C04A2A;
 }
 
 .theme-advertiser {
   --color-primary: #125896;
-  --color-secondary: #0082a2;
+  --color-secondary: #0082A2;
+  --color-primary-rgb: 18, 88, 150;
+  --stat-sublabel-bg: rgba(18, 88, 150, 0.08);
+  --stat-sublabel-text: #0d4070;
 }
 
 .theme-agency {
-  --color-primary: #de4385;
-  --color-secondary: #bd3a80;
+  --color-primary: #DE4385;
+  --color-secondary: #BD3A80;
+  --color-primary-rgb: 222, 67, 133;
+  --stat-sublabel-bg: rgba(222, 67, 133, 0.09);
+  --stat-sublabel-text: #a02860;
 }
 
-.theme-business {
-  --color-primary: #b05ee0;
-  --color-secondary: #45036c;
+.theme-business_manager {
+  --color-primary: #B05EE0;
+  --color-secondary: #45036C;
+  --color-primary-rgb: 176, 94, 224;
+  --stat-sublabel-bg: rgba(176, 94, 224, 0.09);
+  --stat-sublabel-text: #6b2fa0;
 }
 
 .theme-guest {
-  --color-primary: #d20061;
-  --color-secondary: #980e4e;
+  --color-primary: #D20061;
+  --color-secondary: #980E4E;
+  --color-primary-rgb: 210, 0, 97;
+  --stat-sublabel-bg: rgba(210, 0, 97, 0.09);
+  --stat-sublabel-text: #960045;
 }
+
+/* ── Tailwind theme wiring ────────────────────────────────────────────────── */
 
 @theme {
   --color-primary: var(--color-primary);
   --color-secondary: var(--color-secondary);
-
-  /* Font Family */
+  --color-black: #203430;
+  --color-gray: #63716E;
   --font-dm-sans: var(--font-dm-sans);
 }
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
 
 body {
   @apply font-dm-sans;
 }
 
+/* ── Scrollbar (sidebar) ──────────────────────────────────────────────────── */
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* ── Container ────────────────────────────────────────────────────────────── */
+
 .container {
-  @apply max-w-415 mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;
+  @apply max-w-[1660px] mx-auto px-4 md:px-5 xl:px-12 2xl:px-5;
 }
