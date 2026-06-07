@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import PortfolioCard from "./PortfolioCard";
-import AddPortfolioModal from "../../portfolio/components/AddPortfolioModal";
+// import AddPortfolioModal from "../../portfolio/components/AddPortfolioModal";
 
 const profilePortfolioItems = [
   {
@@ -78,11 +78,11 @@ export default function PortfolioView() {
       )}
 
       {/* Add Portfolio Modal */}
-      <AddPortfolioModal
+      {/* <AddPortfolioModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmitPortfolio={data => console.log("Portfolio added:", data)}
-      />
+      /> */}
     </div>
   );
 }
