@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { toast } from "react-toastify";
-import PortfolioCard from "../../influencer/portfolio/components/PortfolioCard";
-import AddPortfolioModal from "../../influencer/portfolio/components/AddPortfolioModal";
-import PortfolioDetailsModal from "../../influencer/portfolio/components/PortfolioDetailsModal";
-import AgencyPortfolioDetailsModal from "../../influencer/portfolio/components/AgencyPortfolioDetailsModal";
+
+import PortfolioCard from "@/app/dashboard/influencer/portfolio/components/PortfolioCard";
+import AddPortfolioModal from "@/app/dashboard/influencer/portfolio/components/AddPortfolioModal";
+import PortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/PortfolioDetailsModal";
+import AgencyPortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/AgencyPortfolioDetailsModal";
 
 // Tabs
 export const portfolioTabs = [

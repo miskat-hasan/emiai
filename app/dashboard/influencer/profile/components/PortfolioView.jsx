@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import PortfolioCard from "./PortfolioCard";
-import AddPortfolioModal from "../../portfolio/components/AddPortfolioModal";
+import AddPortfolioModal from "@/app/dashboard/influencer/portfolio/components/AddPortfolioModal";
+
 
 const profilePortfolioItems = [
   {
