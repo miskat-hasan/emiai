@@ -15,23 +15,18 @@ export default function DashboardLayout({ children }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  // Try to read user from Redux first (set during login)
   const reduxUser = useSelector(state => state.auth?.user);
 
-  // Always call getMe to rehydrate after reload — skips if no token cookie
   const { data, isError, isLoading } = useGetMeQuery(undefined, {
-    // Only fetch if Redux user is missing (i.e. after a reload)
     skip: !!reduxUser,
   });
 
-  // When getMe succeeds, hydrate Redux
   useEffect(() => {
     if (data?.success && data?.data) {
-      dispatch(setUser({ ...data.data, token: null })); // token stays in cookie
+      dispatch(setUser(data?.data));
     }
   }, [data, dispatch]);
 
-  // If getMe fails (401), token is invalid — log out
   useEffect(() => {
     if (isError) {
       dispatch(removeUser());
@@ -40,12 +35,11 @@ export default function DashboardLayout({ children }) {
     }
   }, [isError, dispatch, router]);
 
-  // Resolve the user from Redux (either from login or from getMe hydration)
   const user = reduxUser;
-  const role = user?.role ?? "influencer";
+  const role = user?.role ?? "guest";
+
   const themeClass = `theme-${role}`;
 
-  // Show nothing while fetching user on reload (avoids the map crash)
   if (!user && isLoading) {
     return (
       <div
@@ -60,8 +54,7 @@ export default function DashboardLayout({ children }) {
   }
 
   return (
-    <div className={`${themeClass} flex h-screen bg-gray-50 overflow-hidden`}>
-      {/* Mobile sidebar backdrop */}
+    <div className={`${themeClass} dashboard-bg flex h-screen overflow-hidden`}>
       {mobileSidebarOpen && (
         <div
           className="fixed inset-0 bg-black/30 z-40 lg:hidden"
@@ -69,10 +62,10 @@ export default function DashboardLayout({ children }) {
         />
       )}
 
-      {/* Sidebar */}
       <div
         className={`
-          fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
+          fixed inset-y-0 left-0 z-50
+          lg:relative lg:inset-auto lg:z-10
           transition-transform duration-300 ease-in-out
           ${mobileSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
@@ -80,8 +73,7 @@ export default function DashboardLayout({ children }) {
         <Sidebar role={role} collapsed={sidebarCollapsed} />
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden">
         <Topbar
           onToggleSidebar={() => {
             if (window.innerWidth < 1024) {

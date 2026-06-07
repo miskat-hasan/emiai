@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm, useFieldArray } from "react-hook-form";
-import { useState } from "react";
 import Image from "next/image";
 
 export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio }) {
