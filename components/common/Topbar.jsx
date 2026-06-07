@@ -74,11 +74,11 @@ export default function Topbar({ onToggleSidebar }) {
       icon: User,
       action: () => router.push(`/dashboard/${user?.role}/profile`),
     },
-    {
-      label: "Settings",
-      icon: Settings,
-      action: () => router.push("/dashboard/settings"),
-    },
+    // {
+    //   label: "Settings",
+    //   icon: Settings,
+    //   action: () => router.push("/dashboard/settings"),
+    // },
     { label: "Sign out", icon: LogOut, action: handleLogout, danger: true },
   ];
 
@@ -159,7 +159,7 @@ export default function Topbar({ onToggleSidebar }) {
               setProfileOpen(v => !v);
               setNotifOpen(false);
             }}
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
@@ -212,7 +212,7 @@ export default function Topbar({ onToggleSidebar }) {
                     ${
                       danger
                         ? "text-red-500 hover:bg-red-50"
-                        : "text-[#203430] hover:bg-gray-50"
+                        : "text-[#203430] hover:bg-primary/5"
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
