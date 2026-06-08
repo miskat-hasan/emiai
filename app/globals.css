@@ -63,13 +63,16 @@ body {
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-track {
   background: transparent;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: #e5e7eb;
   border-radius: 999px;
 }
+
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #d1d5db;
 }
@@ -77,15 +80,19 @@ body {
 .theme-influencer {
   --dashboard-bg-color: 245, 120, 2;
 }
+
 .theme-advertiser {
   --dashboard-bg-color: 18, 88, 150;
 }
+
 .theme-agency {
   --dashboard-bg-color: 222, 67, 133;
 }
+
 .theme-business_manager {
   --dashboard-bg-color: 176, 94, 224;
 }
+
 .theme-guest {
   --dashboard-bg-color: 210, 0, 97;
 }
@@ -101,11 +108,9 @@ body {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       rgba(255, 255, 255, 0.5) 56.57%,
-      rgba(var(--dashboard-bg-color, 245, 120, 2), 0.5) 206.38%
-    ),
+      rgba(var(--dashboard-bg-color, 245, 120, 2), 0.5) 206.38%),
     #fff;
 }
 

@@ -1,208 +1,167 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import EventCard from "@/app/dashboard/influencer/events/components/EventCard";
+import { Plus } from "lucide-react";
+import TabSwitcher from "@/components/common/TabSwitcher";
+import EventCard from "./components/EventCard";
+import MyEventCard from "./components/MyEventCard";
+import CreateEventModal from "./components/CreateEventModal";
 
-// Mock Events Data
-const mockEvents = [
-  // Upcoming Events
-  {
-    id: 1,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 2,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 3,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 4,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 5,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 6,
-    title: "Digital Marketing Forum 2025",
-    location: "Hello this is about my portfolio",
-    sponsor: "Event CO.",
-    date: "Feb 17, 2026",
-    category: "upcoming",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  // My Events
-  {
-    id: 7,
-    title: "Tech Innovators Summit",
-    location: "San Francisco, CA",
-    sponsor: "TechCorp",
-    date: "Mar 10, 2026",
-    category: "my-event",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 8,
-    title: "Content Creator Expo",
-    location: "Los Angeles, CA",
-    sponsor: "CreatorSpace",
-    date: "Apr 05, 2026",
-    category: "my-event",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 9,
-    title: "Brand Influencer Meetup",
-    location: "New York, NY",
-    sponsor: "BrandHub",
-    date: "May 12, 2026",
-    category: "my-event",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  // My Tickets
-  {
-    id: 10,
-    title: "Social Media Masterclass",
-    location: "Miami, FL",
-    sponsor: "MediaPro",
-    date: "Mar 20, 2026",
-    category: "my-ticket",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 11,
-    title: "Influencer Bootcamp 2026",
-    location: "Austin, TX",
-    sponsor: "InfluenceHub",
-    date: "Apr 15, 2026",
-    category: "my-ticket",
-    imageUrl: "/images/demo-event-photo.png",
-  },
-  {
-    id: 12,
-    title: "Digital Strategy Conference",
-    location: "Chicago, IL",
-    sponsor: "StrategyWorks",
-    date: "May 25, 2026",
-    category: "my-ticket",
-    imageUrl: "/images/demo-event-photo.png",
-  },
+//  Tabs 
+
+const TABS = [
+  { key: "upcoming", label: "Upcoming Event" },
+  { key: "my-event", label: "My Event" },
+  { key: "my-ticket", label: "My Ticket" },
 ];
 
-// Filter options
-const filterOptions = [
-  { id: "upcoming", label: "Upcoming Event", value: "upcoming" },
-  { id: "my-event", label: "My Event", value: "my-event" },
-  { id: "my-ticket", label: "My Ticket", value: "my-ticket" },
-];
+//  Mock data 
 
-export default function EventsPage() {
-  const [activeFilter, setActiveFilter] = useState("upcoming");
-  const router = useRouter();
+const UPCOMING_EVENTS = Array.from({ length: 12 }, (_, i) => ({
+  id: i + 1,
+  title: "Digital Marketing Forum 2025",
+  location: "Hello this is about my portfolio",
+  sponsor: "Event CO.",
+  date: "Feb 17, 2026",
+  imageUrl:
+    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60",
+}));
 
-  // Filter events based on active category
-  const filteredEvents = mockEvents.filter(
-    (event) => event.category === activeFilter,
-  );
+const MY_EVENTS = Array.from({ length: 12 }, (_, i) => ({
+  id: i + 1,
+  title: "Digital Marketing Forum 2025",
+  description: "Hello this is about my portfolio",
+  organizer: "Event CO.",
+  date: "Feb 17, 2026",
+  imageUrl:
+    "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&auto=format&fit=crop&q=60",
+}));
 
-  const handleDetailsClick = (eventId) => {
-    router.push(`/dashboard/influencer/events/${eventId}`);
-  };
+//  Tab panel 
+
+function UpcomingPanel({ events, onCardClick }) {
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+        <p className="text-base font-medium">No upcoming events found</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-6 p-6 md:p-8 w-full">
-      {/* Breadcrumb Navigation */}
-      <div className="flex items-center gap-2 text-sm text-gray-600">
-        <a
-          href="/dashboard/influencer"
-          className="hover:text-orange-600 transition"
-        >
-          Dashboard
-        </a>
-        <span className="text-gray-400">/</span>
-        <span className="text-gray-900 font-medium">Events</span>
-      </div>
-
-      {/* Header Section with Title and Create Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-
-        {/* Create New Event Button */}
-        <button className="px-6 py-2.5 bg-gradient-to-r from-[#f77721] to-[#f04f37] hover:from-[#ea6615] hover:to-[#e33e25] text-white font-semibold rounded-full transition-all shadow-md hover:shadow-lg">
-          Create New Event
-        </button>
-      </div>
-
-      {/* Filter Buttons */}
-      <div className="flex flex-wrap gap-3">
-        {filterOptions.map((option) => (
-          <button
-            key={option.id}
-            onClick={() => setActiveFilter(option.value)}
-            className={`px-6 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 ${
-              activeFilter === option.value
-                ? "bg-gradient-to-r from-[#f77721] to-[#f04f37] text-white shadow-md hover:shadow-lg"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <EventCard
-              key={event.id}
-              imageUrl={event.imageUrl}
-              title={event.title}
-              location={event.location}
-              sponsor={event.sponsor}
-              date={event.date}
-              buttonText="Create Invite"
-              onButtonClick={() => handleDetailsClick(event.id)}
-            />
-          ))
-        ) : (
-          <div className="col-span-full py-16 text-center">
-            <p className="text-gray-500 text-lg font-medium">
-              No events found in this category
-            </p>
-          </div>
-        )}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {events.map(event => (
+        <EventCard
+          key={event.id}
+          imageUrl={event.imageUrl}
+          title={event.title}
+          location={event.location}
+          sponsor={event.sponsor}
+          date={event.date}
+          buttonText="Create Invite"
+          onCardClick={() => onCardClick(event.id)}
+        />
+      ))}
     </div>
+  );
+}
+
+function MyEventPanel({ events, onCardClick }) {
+  if (events.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+        <p className="text-base font-medium">No events found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {events.map(event => (
+        <MyEventCard
+          key={event.id}
+          imageUrl={event.imageUrl}
+          title={event.title}
+          description={event.description}
+          organizer={event.organizer}
+          date={event.date}
+          onClick={() => onCardClick(event.id)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MyTicketPanel() {
+  return (
+    <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <p className="text-base font-medium">No tickets found</p>
+      <p className="text-sm mt-1 text-[#63716E]/70">
+        Tickets for events you join will appear here
+      </p>
+    </div>
+  );
+}
+
+//  Page 
+
+export default function EventsPage() {
+  const [activeTab, setActiveTab] = useState("upcoming");
+  const [modalOpen, setModalOpen] = useState(false);
+  const router = useRouter();
+
+  const handleCardClick = id => {
+    router.push(`/dashboard/influencer/events/${id}`);
+  };
+
+  const handleMyEventCardClick = id => {
+    router.push(`/dashboard/influencer/events/my-events/${id}`);
+  };
+
+  // when backend is ready we will use these hooks to fetch data
+  // const upcomingQuery = useGetUpcomingEventsQuery(undefined, { skip: activeTab !== "upcoming" });
+  // const myEventsQuery = useGetMyEventsQuery(undefined, { skip: activeTab !== "my-event" });
+  // const myTicketsQuery = useGetMyTicketsQuery(undefined, { skip: activeTab !== "my-ticket" });
+
+  return (
+    <>
+      <div className="space-y-4">
+        {/* Page heading */}
+        <div>
+          <h1 className="text-2xl font-bold text-[#203430]">Events</h1>
+          <p className="text-sm text-[#63716E] mt-0.5">
+            <span className="text-primary font-medium">Dashboard</span>
+            {" / "}
+            <span>{activeTab === "upcoming" ? "Upcoming Event" : activeTab === "my-event" ? "My Event" : "My Ticket"}</span>
+          </p>
+        </div>
+
+        {/* Toolbar: tabs + Create button */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <TabSwitcher tabs={TABS} active={activeTab} onChange={setActiveTab} />
+
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
+          >
+            <Plus size={15} />
+            Create New Event
+          </button>
+        </div>
+
+        {/* Content */}
+        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} />}
+        {activeTab === "my-event" && <MyEventPanel events={MY_EVENTS} onCardClick={handleMyEventCardClick} />}
+        {activeTab === "my-ticket" && <MyTicketPanel />}
+      </div>
+
+      {/* Create Event Modal */}
+      <CreateEventModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={() => { }}
+      />
+    </>
   );
 }
