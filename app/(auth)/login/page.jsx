@@ -38,10 +38,7 @@ export default function LoginPage() {
         const userData = res.data;
 
         dispatch(
-          setUser({
-            user: userData,
-            token: userData.token,
-          }),
+          setUser(userData),
         );
 
         document.cookie = `token=${userData.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
@@ -107,7 +104,7 @@ export default function LoginPage() {
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-sm font-semibold text-[#203430] hover:text-primary transition-colors"
+              className="text-sm font-semibold text-[#203430] hover:text-primary transition-colors hover:underline"
             >
               Forgot Password
             </Link>

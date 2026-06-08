@@ -143,7 +143,7 @@ export const NAV_ITEMS = {
     {
       label: "Portfolio",
       icon: FolderOpen,
-      href: "/dashboard/agency/agency/portfolio",
+      href: "/dashboard/agency/portfolio",
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/agency/wallet" },
     {

@@ -18,6 +18,7 @@ export default function AuthButton({
   onClick,
   variant = "primary",
   className = "",
+  ...props
 }) {
   if (variant === "social") {
     return (
@@ -28,7 +29,7 @@ export default function AuthButton({
           flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl
           border border-gray-200 bg-white text-sm font-medium text-[#203430]
           hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm
-          active:scale-[0.98] transition-all duration-150
+          active:scale-[0.98] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
           ${className}
         `}
       >
@@ -42,6 +43,7 @@ export default function AuthButton({
       type={type}
       onClick={onClick}
       disabled={loading}
+      {...props}
       className={`
         relative w-full py-3.5 rounded-xl font-semibold text-sm text-white
         bg-gradient-to-r from-[#F57802] to-[#E54500]
@@ -49,7 +51,7 @@ export default function AuthButton({
         hover:shadow-lg hover:shadow-orange-500/25
         active:scale-[0.98]
         disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
-        transition-all duration-200
+        transition-all duration-200 cursor-pointer
         ${className}
       `}
     >
