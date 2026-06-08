@@ -21,6 +21,7 @@ import {
   Building2,
   SlidersHorizontal,
 } from "lucide-react";
+import { AdsSVG } from "../common/Svg";
 
 export const NAV_ITEMS = {
   influencer: [
@@ -69,6 +70,7 @@ export const NAV_ITEMS = {
       href: "/dashboard/influencer/events",
     },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/influencer/vouchers" },
+    { label: "Ads", icon: AdsSVG, href: "/dashboard/influencer/ads" },
     { label: "Block Person", icon: UserX, href: "/dashboard/influencer/block" },
     {
       label: "Contact Support",

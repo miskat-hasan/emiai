@@ -8,10 +8,14 @@ const EventCard = ({
   sponsor = "Event CO.",
   date = "Feb 17, 2026",
   buttonText = "Create Invite",
+  onCardClick,
   onButtonClick,
 }) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-[2rem] p-3 w-full shadow-sm">
+    <div
+      onClick={onCardClick}
+      className="bg-white border border-gray-200 rounded-[2rem] p-3 w-full shadow-sm cursor-pointer hover:shadow-md transition-shadow duration-200"
+    >
       {/* Image Section */}
       <div className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden">
         <Image
@@ -57,8 +61,11 @@ const EventCard = ({
 
       {/* Action Button */}
       <button
-        onClick={onButtonClick}
-        className="mt-3 w-full bg-gradient-to-r from-[#f77721] to-[#f04f37] hover:from-[#ea6615] hover:to-[#e33e25] text-white py-3.5 rounded-2xl font-medium text-[17px] transition-all duration-200 active:scale-[0.98]"
+        onClick={e => {
+          e.stopPropagation();
+          onButtonClick?.();
+        }}
+        className="mt-3 w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white py-3.5 rounded-2xl font-medium text-[17px] transition-all duration-200 active:scale-[0.98] cursor-pointer"
       >
         {buttonText}
       </button>

@@ -37,11 +37,10 @@ export default function LoginPage() {
       if (res?.success && res?.data) {
         const userData = res.data;
 
-        dispatch(
-          setUser(userData),
-        );
+        dispatch(setUser(userData));
 
         document.cookie = `token=${userData.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        document.cookie = `role=${userData.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
 
         toast.success("Welcome back!");
 

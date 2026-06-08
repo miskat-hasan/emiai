@@ -1,13 +1,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
-const Button = ({
-  type,
-  text,
-  onClick,
-  variant = "primary_btn",
-  ...props
-}) => {
+const Button = ({ type, text, onClick, variant = "primary_btn", ...props }) => {
   return (
     <button
       type={type}

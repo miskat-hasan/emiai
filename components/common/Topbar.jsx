@@ -21,7 +21,6 @@ export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  
   const user = useSelector(state => state.auth?.user);
 
   console.log("topbar user", user);
@@ -34,7 +33,6 @@ export default function Topbar({ onToggleSidebar }) {
 
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
-  
   useEffect(() => {
     const handler = e => {
       if (notifRef.current && !notifRef.current.contains(e.target))
@@ -57,13 +55,12 @@ export default function Topbar({ onToggleSidebar }) {
     try {
       await logoutUser().unwrap();
     } catch {
-      // Logout silently even if the API call fails
+      // fail silently
     } finally {
       dispatch(removeUser());
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
-
+      document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
       toast.success("Logged out successfully");
-
       router.push("/login");
     }
   };

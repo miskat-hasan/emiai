@@ -1,6 +1,6 @@
 import React from "react";
 
-const infoData = [
+const DEFAULT_INFO = [
   { label: "Event Type", value: "Offline" },
   { label: "Participants", value: "213" },
   { label: "Sponsored", value: "Events CO." },
@@ -8,21 +8,21 @@ const infoData = [
   { label: "Event Start", value: "Feb 15, 2026" },
 ];
 
-export default function EventInfoCard() {
+export default function EventInfoCard({ items = DEFAULT_INFO }) {
   return (
-    <div className="bg-orange-50 rounded-3xl p-6 md:p-8 border border-orange-100">
-      <h2 className="text-lg font-bold text-gray-900 mb-5">
+    <div className="bg-primary/5 rounded-3xl p-6 md:p-8 border border-primary/10 h-full">
+      <h2 className="text-lg font-bold text-black mb-4">
         Event Information
       </h2>
-      <hr className="my-5 border-orange-100" />
+      <hr className="border-primary/10 mb-4" />
       <div className="flex flex-col gap-4">
-        {infoData.map((item, index) => (
+        {items.map((item, index) => (
           <div
             key={index}
-            className="flex justify-between items-center text-[14px]"
+            className="flex justify-between items-center text-sm"
           >
-            <span className="text-gray-600 font-medium">{item.label}</span>
-            <span className="font-semibold text-gray-900 text-right">
+            <span className="text-gray font-medium">{item.label}</span>
+            <span className="font-semibold text-black text-right">
               {item.value}
             </span>
           </div>
