@@ -40,8 +40,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-[#203430]">Forgot Password</h1>
-        <p className="text-sm text-[#63716E] mt-1">
+        <h1 className="text-xl font-bold text-black">Forgot Password</h1>
+        <p className="text-sm text-gray mt-1">
           Enter your email and we&apos;ll send you a reset code.
         </p>
       </div>
@@ -72,7 +72,7 @@ export default function ForgotPasswordPage() {
         </div>
       </form>
 
-      <p className="text-center text-sm text-[#63716E]">
+      <p className="text-center text-sm text-gray">
         Remember your password?{" "}
         <Link
           href="/login"

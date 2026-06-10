@@ -41,7 +41,7 @@ export const InboxSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -58,7 +58,7 @@ export const BriefCaseSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -77,7 +77,7 @@ export const FolderSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -96,7 +96,7 @@ export const WalletSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -117,7 +117,7 @@ export const InfluencerSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -168,7 +168,7 @@ export const AgenciesSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -212,7 +212,7 @@ export const SmartMatchingSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -305,7 +305,7 @@ export const ImageGenSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -345,7 +345,7 @@ export const ContestsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -392,7 +392,7 @@ export const EventsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -417,7 +417,7 @@ export const AdsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -443,7 +443,7 @@ export const PublishedAdsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -474,7 +474,7 @@ export const VoucherSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -499,7 +499,7 @@ export const BlockPersonSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -524,7 +524,7 @@ export const SupportSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -541,7 +541,7 @@ export const ShareAppSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -642,7 +642,7 @@ export const EyeSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5.5 h-3.8 text-[#63716e]", className)}
+      className={cn("w-5.5 h-3.8 text-gray", className)}
       viewBox="0 0 22 15"
       fill="none"
       {...props}
@@ -750,3 +750,74 @@ export function AppleIcon() {
     </svg>
   );
 }
+
+export const StarSVG = ({ className, ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("w-5 h-5", className)}
+      viewBox="0 0 20 19"
+      fill="none"
+      {...props}
+    >
+      <path
+        d="M9.76333 0L12.7803 6.11311L19.5266 7.09342L14.645 11.852L15.7975 18.5709L9.76333 15.3987L3.72919 18.5709L4.88167 11.852L0 7.09342L6.74638 6.11311L9.76333 0Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+};
+
+export const TicketSVG = ({ className, ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("w-full h-auto", className)}
+      viewBox="0 0 564 241"
+      fill="none"
+      {...props}
+    >
+      <path
+        d="M554.648 36.9371C554.648 32.0501 558.611 28.0883 563.5 28.0883V21.2505C558.611 21.2505 554.648 17.2887 554.648 12.4017C554.648 7.51467 558.611 3.55287 563.5 3.55287V0H0V4.44256C0.0316386 4.44231 0.0622988 4.4379 0.0939374 4.4379C4.98296 4.4379 8.94636 8.3997 8.94636 13.2867C8.94636 18.1738 4.98296 22.1356 0.0939374 22.1356C0.0622988 22.1356 0.0316386 22.1311 0 22.1309V28.978C0.0316386 28.9778 0.0622988 28.9733 0.0939374 28.9733C4.98296 28.9733 8.94636 32.9351 8.94636 37.8222C8.94636 42.7092 4.98296 46.671 0.0939374 46.671C0.0622988 46.671 0.0316386 46.6666 0 46.6663V53.5137C0.0316386 53.5134 0.0622988 53.509 0.0939374 53.509C4.98296 53.509 8.94636 57.4708 8.94636 62.3579C8.94636 67.2449 4.98296 71.2067 0.0939374 71.2067C0.0622988 71.2067 0.0316386 71.2023 0 71.202V77.4681C23.7343 77.4681 42.9748 96.7007 42.9748 120.425C42.9748 144.15 23.7343 163.383 0 163.383V170.078C0.0316386 170.078 0.0622988 170.073 0.0939374 170.073C4.98296 170.073 8.94636 174.035 8.94636 178.922C8.94636 183.809 4.98296 187.771 0.0939374 187.771C0.0622988 187.771 0.0316386 187.766 0 187.766V194.613C0.0316386 194.613 0.0622988 194.609 0.0939374 194.609C4.98296 194.609 8.94636 198.571 8.94636 203.458C8.94636 208.345 4.98296 212.306 0.0939374 212.306C0.0622988 212.306 0.0316386 212.302 0 212.302V219.149C0.0316386 219.149 0.0622988 219.144 0.0939374 219.144C4.98296 219.144 8.94636 223.106 8.94636 227.993C8.94636 232.88 4.98296 236.842 0.0939374 236.842C0.0622988 236.842 0.0316386 236.838 0 236.837V240.851H563.5V236.842C558.611 236.842 554.648 232.88 554.648 227.993C554.648 223.106 558.611 219.144 563.5 219.144V212.306C558.611 212.306 554.648 208.345 554.648 203.458C554.648 198.571 558.611 194.609 563.5 194.609V187.771C558.611 187.771 554.648 183.809 554.648 178.922C554.648 174.035 558.611 170.073 563.5 170.073V163.383C539.766 163.383 520.525 144.151 520.525 120.426C520.525 96.7012 539.766 77.4686 563.5 77.4686V70.3224C558.611 70.3224 554.648 66.3606 554.648 61.4736C554.648 56.5865 558.611 52.6247 563.5 52.6247V45.787C558.611 45.787 554.648 41.8242 554.648 36.9371Z"
+        fill="url(#paint0_linear_4898_24924)"
+      />
+      <defs>
+        <linearGradient
+          id="paint0_linear_4898_24924"
+          x1="0"
+          y1="120.425"
+          x2="563.5"
+          y2="120.425"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stopColor="#F57802" />
+          <stop offset="1" stopColor="#EB4A35" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+};
+
+export const DownloadIconSVG = ({ className, ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className={cn("w-5 h-5", className)}
+      viewBox="0 0 32 32"
+      fill="none"
+      {...props}
+    >
+      <g clipPath="url(#clip0_4573_17883)">
+        <path
+          d="M16 0C12.8355 0 9.74207 0.938384 7.11088 2.69649C4.4797 4.45459 2.42894 6.95345 1.21793 9.87706C0.00693258 12.8007 -0.309921 16.0177 0.307443 19.1214C0.924806 22.2251 2.44866 25.0761 4.6863 27.3137C6.92394 29.5513 9.77487 31.0752 12.8786 31.6926C15.9823 32.3099 19.1993 31.9931 22.1229 30.7821C25.0466 29.5711 27.5454 27.5203 29.3035 24.8891C31.0616 22.2579 32 19.1645 32 16C32 11.7565 30.3143 7.68687 27.3137 4.68629C24.3131 1.68571 20.2435 0 16 0ZM21.2487 26.3067H10.7513C10.3977 26.3067 10.0586 26.1662 9.80853 25.9161C9.55848 25.6661 9.41801 25.327 9.41801 24.9733C9.41801 24.6197 9.55848 24.2806 9.80853 24.0305C10.0586 23.7805 10.3977 23.64 10.7513 23.64H21.2487C21.6023 23.64 21.9414 23.7805 22.1915 24.0305C22.4415 24.2806 22.582 24.6197 22.582 24.9733C22.582 25.327 22.4415 25.6661 22.1915 25.9161C21.9414 26.1662 21.6023 26.3067 21.2487 26.3067ZM22.1913 16.2773L16.9387 21.5333C16.6886 21.7833 16.3496 21.9237 15.996 21.9237C15.6425 21.9237 15.3034 21.7833 15.0533 21.5333L9.80867 16.2893C9.55813 16.0393 9.41717 15.7 9.41679 15.3461C9.41642 14.9921 9.55666 14.6525 9.80667 14.402C10.0567 14.1515 10.396 14.0105 10.7499 14.0101C11.1039 14.0097 11.4435 14.15 11.694 14.4L14.6667 17.3727V5.57667C14.6667 5.22304 14.8072 4.88391 15.0572 4.63386C15.3072 4.38381 15.6464 4.24333 16 4.24333C16.3536 4.24333 16.6928 4.38381 16.9428 4.63386C17.1929 4.88391 17.3333 5.22304 17.3333 5.57667V17.3647L20.306 14.392C20.5575 14.1491 20.8943 14.0147 21.2439 14.0178C21.5935 14.0208 21.9279 14.161 22.1751 14.4082C22.4223 14.6555 22.5625 14.9899 22.5656 15.3395C22.5686 15.6891 22.4342 16.0259 22.1913 16.2773Z"
+          fill="currentColor"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_4573_17883">
+          <rect width="32" height="32" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};

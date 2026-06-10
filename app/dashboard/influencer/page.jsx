@@ -42,14 +42,13 @@ const PORTFOLIO_VIEW = [
   { month: "Dec", This: 2300, Prev: 1800 },
 ];
 
-
 // chart button
 
 function PeriodButton({ label }) {
   return (
     <button className="flex items-center gap-1.5 text-sm font-medium text-black bg-white border border-gray-200 hover:border-primary/40 px-3 py-1.5 rounded-xl transition-colors shadow-sm">
       {label}
-      <ChevronDown size={13} className="text-[#63716E]" />
+      <ChevronDown size={13} className="text-gray" />
     </button>
   );
 }
@@ -71,7 +70,7 @@ function BarTooltip({ active, payload, label }) {
               className="w-2 h-2 rounded-full shrink-0"
               style={{ background: p.fill }}
             />
-            <span className="text-[#63716E]">{p.name}</span>
+            <span className="text-gray">{p.name}</span>
           </div>
           <span className="font-semibold text-black">
             {Math.round(
@@ -96,7 +95,7 @@ function LineTooltip({ active, payload }) {
           key={p.name}
           className="flex items-center justify-between gap-4 mb-0.5"
         >
-          <span className="text-[#63716E]">
+          <span className="text-gray">
             {p.name === "This" ? "This month" : "Previews Month"}
           </span>
           <span className="font-semibold text-black">{p.value}</span>
@@ -208,8 +207,7 @@ export default function InfluencerDashboardPage() {
                 stackId="a"
                 fill="var(--color-secondary, #EB4A35)"
                 radius={[0, 0, 0, 0]}
-              >
-              </Bar>
+              ></Bar>
 
               {/* Middle segment */}
               <Bar
@@ -276,10 +274,7 @@ export default function InfluencerDashboardPage() {
                   />
                 </linearGradient>
               </defs>
-              <CartesianGrid
-                stroke="#f3f4f6"
-                vertical={false}
-              />
+              <CartesianGrid stroke="#f3f4f6" vertical={false} />
               <XAxis
                 dataKey="month"
                 tick={{ fontSize: 11, fill: "#9ca3af" }}

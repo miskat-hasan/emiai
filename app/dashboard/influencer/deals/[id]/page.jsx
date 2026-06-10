@@ -34,8 +34,8 @@ export default function DealDetailPage({ params }) {
     <div className="space-y-6   ">
       {/* ── Breadcrumb ── */}
       <div>
-        <h1 className="text-2xl font-bold text-[#203430]">Deals</h1>
-        <p className="text-sm text-[#63716E] mt-0.5">
+        <h1 className="text-2xl font-bold text-black">Deals</h1>
+        <p className="text-sm text-gray mt-0.5">
           <span
             className="text-primary font-medium cursor-pointer hover:underline"
             onClick={() => router.push("/dashboard/influencer")}
@@ -58,11 +58,11 @@ export default function DealDetailPage({ params }) {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Card header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <span className="text-sm font-semibold text-[#203430]">Statas</span>
+          <span className="text-sm font-semibold text-black">Statas</span>
           <div className="flex items-center gap-3">
             {/* Support icon */}
             <button
-              className="flex flex-col items-center gap-0.5 text-[#63716E] hover:text-primary transition-colors"
+              className="flex flex-col items-center gap-0.5 text-gray hover:text-primary transition-colors"
               title="Contact Support"
             >
               <Headphones size={18} />
@@ -70,7 +70,7 @@ export default function DealDetailPage({ params }) {
             </button>
             {/* Flag icon */}
             <button
-              className="text-[#63716E] hover:text-red-500 transition-colors"
+              className="text-gray hover:text-red-500 transition-colors"
               title="Report"
             >
               <Flag size={18} />
@@ -97,29 +97,29 @@ export default function DealDetailPage({ params }) {
                 </span>
               )}
             </div>
-            <span className="text-base font-semibold text-[#203430]">
+            <span className="text-base font-semibold text-black">
               {deal.person}
             </span>
           </div>
           <div className="text-right">
-            <p className="text-xs text-[#63716E]">Date</p>
-            <p className="text-sm font-semibold text-[#203430]">{deal.date}</p>
+            <p className="text-xs text-gray">Date</p>
+            <p className="text-sm font-semibold text-black">{deal.date}</p>
           </div>
         </div>
 
         {/* Description + payout */}
         <div className="flex items-start justify-between gap-8 px-6 py-5">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[#203430] mb-2">
+            <p className="text-sm font-semibold text-black mb-2">
               Offer Description
             </p>
-            <p className="text-sm text-[#63716E] leading-relaxed">
+            <p className="text-sm text-gray leading-relaxed">
               {deal.description}
             </p>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-sm font-semibold text-[#203430]">Net Payout</p>
-            <p className="text-sm font-bold text-[#203430] mt-0.5">
+            <p className="text-sm font-semibold text-black">Net Payout</p>
+            <p className="text-sm font-bold text-black mt-0.5">
               {deal.netPayout}
             </p>
           </div>
@@ -163,7 +163,7 @@ export default function DealDetailPage({ params }) {
             </div>
           )}
         </div>
-        <p className="text-base font-semibold text-[#203430]">
+        <p className="text-base font-semibold text-black">
           {deal.sponsor.name}
         </p>
       </div>

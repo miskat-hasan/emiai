@@ -4,7 +4,7 @@ const ROLE_HOME = {
   influencer: "/dashboard/influencer",
   advertiser: "/dashboard/advertiser",
   agency: "/dashboard/marketing-agency",
-  business_manager: "/dashboard/business-manager",
+  business_manager: "/dashboard/business_manager",
   guest: "/dashboard/guest/explore",
 };
 

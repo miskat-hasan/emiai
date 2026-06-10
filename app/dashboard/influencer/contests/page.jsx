@@ -63,7 +63,7 @@ function TabPanel({ query }) {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-20 text-gray">
         <p className="text-base font-medium">Failed to load contests</p>
         <button
           onClick={refetch}
@@ -79,7 +79,7 @@ function TabPanel({ query }) {
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-20 text-gray">
         <p className="text-base font-medium">No contests found</p>
       </div>
     );
@@ -127,8 +127,8 @@ export default function ContestsPage() {
       <div className="space-y-6">
         {/* Page heading */}
         <div>
-          <h1 className="text-2xl font-bold text-[#203430]">Contests</h1>
-          <p className="text-sm text-[#63716E] mt-0.5">
+          <h1 className="text-2xl font-bold text-black">Contests</h1>
+          <p className="text-sm text-gray mt-0.5">
             <span className="text-primary font-medium">Dashboard</span>
             {" / "}
             <span>Contests</span>
