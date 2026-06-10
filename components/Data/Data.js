@@ -89,7 +89,7 @@ export const NAV_ITEMS = {
     {
       label: "Portfolio",
       icon: FolderOpen,
-      href: "/dashboard/advertiser/advertiser/portfolio",
+      href: "/dashboard/advertiser/portfolio",
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/advertiser/wallet" },
     {

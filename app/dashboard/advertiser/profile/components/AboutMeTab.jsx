@@ -13,8 +13,7 @@ export default function AboutMeTab() {
       email: "ghuiodshglhdsglh@gmail.com",
       number: "+1 236 564 4598",
       country: "Bangladesh",
-    },
-  });
+    },  });
 
   const onSubmit = async (data) => {
     // Integrate your axios payload triggers here smoothly
