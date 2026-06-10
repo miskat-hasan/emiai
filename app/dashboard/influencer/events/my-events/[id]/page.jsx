@@ -89,11 +89,11 @@ export default async function MyEventDetailsPage({ params }) {
       </div>
 
       {/* Bottom Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="md:col-span-2 lg:col-span-2">
           <EventLocation mapUrl={event.mapUrl} />
         </div>
-        <div className="lg:col-span-1">
+        <div className="md:col-span-1 lg:col-span-1">
           <EventParticipants />
         </div>
       </div>
