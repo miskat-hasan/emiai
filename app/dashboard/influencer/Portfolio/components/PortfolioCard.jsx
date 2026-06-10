@@ -21,7 +21,7 @@ export default function PortfolioCard({ item, onClick }) {
         </div>
 
         <div className="pb-4 pt-3">
-          <div className="mb-3 flex items-center gap-4 text-[#63716e]">
+          <div className="mb-3 flex items-center gap-4 text-gray">
             <div className="flex items-center gap-1.5">
               <Heart size={19} strokeWidth={1.8} />
               <span className="text-xs font-medium">{item.likes}</span>
@@ -35,7 +35,7 @@ export default function PortfolioCard({ item, onClick }) {
 
           <div className="overflow-hidden rounded-[10px] bg-[#f8f8f8]">
             <div className="grid grid-cols-[70px_1fr] border-b border-[#eeeeee]">
-              <div className="px-3 py-2 text-[11px] font-medium text-[#63716e]">
+              <div className="px-3 py-2 text-[11px] font-medium text-gray">
                 Title
               </div>
 
@@ -45,7 +45,7 @@ export default function PortfolioCard({ item, onClick }) {
             </div>
 
             <div className="grid grid-cols-[70px_1fr]">
-              <div className="px-3 py-2 text-[11px] font-medium text-[#63716e]">
+              <div className="px-3 py-2 text-[11px] font-medium text-gray">
                 Details
               </div>
 

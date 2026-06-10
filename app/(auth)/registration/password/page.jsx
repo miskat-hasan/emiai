@@ -1,16 +1,24 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useResetPasswordMutation } from "@/redux/api/authApi";
+import { useRegisterUserMutation } from "@/redux/api/authApi";
 import AuthInput from "@/components/ui/AuthInput";
 import AuthButton from "@/components/ui/AuthButton";
 
-export default function ResetPasswordPage() {
+export default function RegistrationPasswordPage() {
   const router = useRouter();
-  const [resetPassword, { isLoading }] = useResetPasswordMutation();
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
+
+  // Guard: need both previous steps
+  useEffect(() => {
+    const role = sessionStorage.getItem("reg_role");
+    const info = sessionStorage.getItem("reg_info");
+    if (!role || !info) router.replace("/registration");
+  }, [router]);
 
   const {
     register,
@@ -19,44 +27,42 @@ export default function ResetPasswordPage() {
     formState: { errors },
   } = useForm();
 
-  // Guard: if session data is missing, send back to step 1
-  useEffect(() => {
-    const token = sessionStorage.getItem("fp_token");
-    const email = sessionStorage.getItem("fp_email");
-    if (!token || !email) router.replace("/forgot-password");
-  }, [router]);
-
   const onSubmit = async ({ password, password_confirmation }) => {
-    const token = sessionStorage.getItem("fp_token");
-    const email = sessionStorage.getItem("fp_email");
+    const role = sessionStorage.getItem("reg_role");
+    const info = JSON.parse(sessionStorage.getItem("reg_info") ?? "{}");
 
     try {
-      const res = await resetPassword({
-        email,
-        token,
+      const res = await registerUser({
+        role,
+        name: info.name,
+        email: info.email,
+        phone: info.phone,
+        country: info.country,
         password,
         password_confirmation,
       }).unwrap();
 
       if (res?.success) {
-        toast.success(res.message ?? "Password reset successfully!");
-        // Clean up session
-        sessionStorage.removeItem("fp_email");
-        sessionStorage.removeItem("fp_token");
-        sessionStorage.removeItem("fp_otp_hint");
-        router.push("/login");
+        toast.success(
+          res.message ?? "Account created! Please verify your email.",
+        );
+        // Keep email for OTP step
+        sessionStorage.setItem("reg_email", info.email);
+        router.push("/registration/verify-otp");
       }
     } catch (err) {
-      toast.error(err?.data?.message ?? "Reset failed. Please try again.");
+      toast.error(
+        err?.data?.message ?? "Registration failed. Please try again.",
+      );
     }
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-black">Reset Password</h1>
+        <h1 className="text-xl font-bold text-black">Set Your Password</h1>
         <p className="text-sm text-gray mt-1">
-          Choose a strong new password for your account.
+          Choose a strong password to secure your account.
         </p>
       </div>
 
@@ -66,19 +72,15 @@ export default function ResetPasswordPage() {
         noValidate
       >
         <AuthInput
-          label="New Password"
+          label="Password"
           type="password"
           placeholder="Create a strong password"
           error={errors.password?.message}
           registration={register("password", {
             required: "Password is required",
-            minLength: {
-              value: 8,
-              message: "Password must be at least 8 characters",
-            },
+            minLength: { value: 8, message: "At least 8 characters" },
           })}
         />
-
         <AuthInput
           label="Confirm Password"
           type="password"
@@ -93,10 +95,20 @@ export default function ResetPasswordPage() {
 
         <div className="mt-2">
           <AuthButton type="submit" loading={isLoading}>
-            Reset Password
+            Create Account
           </AuthButton>
         </div>
       </form>
+
+      <p className="text-center text-sm text-gray">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="font-semibold text-primary hover:underline"
+        >
+          Login
+        </Link>
+      </p>
     </div>
   );
 }
