@@ -7,6 +7,7 @@ import TabSwitcher from "@/components/common/TabSwitcher";
 import EventCard from "./components/EventCard";
 import MyEventCard from "./components/MyEventCard";
 import CreateEventModal from "./components/CreateEventModal";
+import { Ticket } from "@/components/common/Ticket";
 
 //  Tabs
 
@@ -38,7 +39,14 @@ const MY_EVENTS = Array.from({ length: 12 }, (_, i) => ({
     "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&auto=format&fit=crop&q=60",
 }));
 
-//  Tab panel
+const MY_TICKETS = Array.from({ length: 12 }, (_, i) => ({
+  id: i + 1,
+  title: "Digital Marketing Forum 2025",
+  ticketNumber: "1234567890",
+  qrCode: "/images/demo-qrcode.png",
+}));
+
+//  Tab panel 
 
 function UpcomingPanel({ events, onCardClick }) {
   if (events.length === 0) {
@@ -93,13 +101,28 @@ function MyEventPanel({ events, onCardClick }) {
   );
 }
 
-function MyTicketPanel() {
+function MyTicketPanel({ tickets }) {
+  if (!tickets || tickets.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+        <p className="text-base font-medium">No tickets found</p>
+        <p className="text-sm mt-1 text-[#63716E]/70">
+          Tickets for events you join will appear here
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-gray">
-      <p className="text-base font-medium">No tickets found</p>
-      <p className="text-sm mt-1 text-gray/70">
-        Tickets for events you join will appear here
-      </p>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {tickets.map(ticket => (
+        <Ticket
+          key={ticket.id}
+          title={ticket.title}
+          ticketNumber={ticket.ticketNumber}
+          qrCode={ticket.qrCode}
+        />
+      ))}
     </div>
   );
 }
@@ -157,19 +180,9 @@ export default function EventsPage() {
         </div>
 
         {/* Content */}
-        {activeTab === "upcoming" && (
-          <UpcomingPanel
-            events={UPCOMING_EVENTS}
-            onCardClick={handleCardClick}
-          />
-        )}
-        {activeTab === "my-event" && (
-          <MyEventPanel
-            events={MY_EVENTS}
-            onCardClick={handleMyEventCardClick}
-          />
-        )}
-        {activeTab === "my-ticket" && <MyTicketPanel />}
+        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} />}
+        {activeTab === "my-event" && <MyEventPanel events={MY_EVENTS} onCardClick={handleMyEventCardClick} />}
+        {activeTab === "my-ticket" && <MyTicketPanel tickets={MY_TICKETS} />}
       </div>
 
       {/* Create Event Modal */}
