@@ -1,117 +1,102 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-import AuthInput from "@/components/ui/AuthInput";
+import { Mic, ShoppingCart, Handshake, Settings, Eye } from "lucide-react";
 import AuthButton from "@/components/ui/AuthButton";
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+const ROLES = [
+  { key: "influencer", label: "Influencer", icon: Mic, color: "#F57802" },
+  {
+    key: "advertiser",
+    label: "Advertiser",
+    icon: ShoppingCart,
+    color: "#125896",
+  },
+  { key: "agency", label: "Agency", icon: Handshake, color: "#DE4385" },
+  {
+    key: "business_manager",
+    label: "Business Manager",
+    icon: Settings,
+    color: "#B05EE0",
+  },
+  { key: "guest", label: "Guest", icon: Eye, color: "#D20061" },
+];
 
 export default function RegistrationPage() {
   const router = useRouter();
+  const [selected, setSelected] = useState(null);
+  const [error, setError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm();
-
-  const onSubmit = async data => {
-    try {
-      // Store step-1 data and proceed to step 2 (role selection / password)
-      // Replace with your actual registration API call or step navigation
-      sessionStorage.setItem("reg_step1", JSON.stringify(data));
-      router.push("/registration/step2");
-    } catch (err) {
-      toast.error(
-        err?.data?.message ?? "Something went wrong. Please try again.",
-      );
+  const handleNext = () => {
+    if (!selected) {
+      setError("Please select a role to continue.");
+      return;
     }
+    setError("");
+    sessionStorage.setItem("reg_role", selected);
+    router.push("/registration/info");
   };
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Heading */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-[#203430]">Join the Network</h1>
-        <p className="text-sm text-[#63716E] mt-1">
+        <h1 className="text-xl font-bold text-black">Choose your role</h1>
+        <p className="text-sm text-gray mt-1">
           Create your account and start connecting today.
         </p>
       </div>
 
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col gap-4"
-        noValidate
-      >
-        <AuthInput
-          label="Name"
-          type="text"
-          placeholder="e.g. Johnson"
-          error={errors.name?.message}
-          registration={register("name", {
-            required: "Name is required",
-            minLength: {
-              value: 2,
-              message: "Name must be at least 2 characters",
-            },
-          })}
-        />
+      <div className="flex flex-col gap-3">
+        {ROLES.map(({ key, label, icon: Icon, color }) => {
+          const isSelected = selected === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => {
+                setSelected(key);
+                setError("");
+              }}
+              className={`
+                flex items-center gap-3 w-full px-4 py-3.5 rounded-xl text-sm font-medium
+                border-2 transition-all duration-150 text-left cursor-pointer
+                ${
+                  isSelected
+                    ? "border-primary bg-primary/5 text-black"
+                    : "border-transparent bg-gray-100 text-gray hover:bg-gray-200"
+                }
+              `}
+            >
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: `${color}20` }}
+              >
+                <Icon size={14} style={{ color }} />
+              </div>
+              {label}
+              {isSelected && (
+                <span className="ml-auto w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center">
+                  <span className="w-2 h-2 rounded-full bg-primary" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-        <AuthInput
-          label="Email Address"
-          type="email"
-          placeholder="e.g. jonson@gmailcom"
-          error={errors.email?.message}
-          registration={register("email", {
-            required: "Email is required",
-            pattern: {
-              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-              message: "Enter a valid email address",
-            },
-          })}
-        />
+      {error && <p className="text-xs text-red-500 -mt-2">{error}</p>}
 
-        <AuthInput
-          label="Phone Number"
-          type="tel"
-          placeholder="+880 123 654 7896"
-          error={errors.phone?.message}
-          registration={register("phone", {
-            required: "Phone number is required",
-            pattern: {
-              value: /^\+?[\d\s\-()]{7,15}$/,
-              message: "Enter a valid phone number",
-            },
-          })}
-        />
+      <AuthButton type="button" onClick={handleNext}>
+        Next
+      </AuthButton>
 
-        <AuthInput
-          label="Country"
-          type="text"
-          placeholder="Country"
-          error={errors.country?.message}
-          registration={register("country", {
-            required: "Country is required",
-          })}
-        />
-
-        <div className="mt-2">
-          <AuthButton type="submit" loading={isSubmitting}>
-            Next
-          </AuthButton>
-        </div>
-      </form>
-
-      {/* Login link */}
-      <p className="text-center text-sm text-[#63716E]">
+      <p className="text-center text-sm text-gray">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-semibold text-primary hover:underline transition-colors"
+          className="font-semibold text-primary hover:underline"
         >
           Login
         </Link>

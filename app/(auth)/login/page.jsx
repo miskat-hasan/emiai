@@ -15,7 +15,7 @@ const ROLE_ROUTES = {
   influencer: "/dashboard/influencer",
   advertiser: "/dashboard/advertiser",
   agency: "/dashboard/agency",
-  business_manager: "/dashboard/business",
+  business_manager: "/dashboard/business_manager",
   guest: "/dashboard/guest/explore",
 };
 
@@ -60,8 +60,8 @@ export default function LoginPage() {
     <div className="flex flex-col gap-6">
       {/* Heading */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-[#203430]">Welcome Back</h1>
-        <p className="text-sm text-[#63716E] mt-1">
+        <h1 className="text-xl font-bold text-black">Welcome Back</h1>
+        <p className="text-sm text-gray mt-1">
           Log in to your Reelup to continue managing your account
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function LoginPage() {
           <div className="flex justify-end">
             <Link
               href="/forgot-password"
-              className="text-sm font-semibold text-[#203430] hover:text-primary transition-colors hover:underline"
+              className="text-sm font-semibold text-black hover:text-primary transition-colors hover:underline"
             >
               Forgot Password
             </Link>
@@ -121,7 +121,7 @@ export default function LoginPage() {
       <div className="flex flex-col gap-3">
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-xs text-[#63716E] font-medium">
+          <span className="text-xs text-gray font-medium">
             Or Continue With
           </span>
           <div className="flex-1 h-px bg-gray-200" />
@@ -140,7 +140,7 @@ export default function LoginPage() {
       </div>
 
       {/* Sign up link */}
-      <p className="text-center text-sm text-[#63716E]">
+      <p className="text-center text-sm text-gray">
         Don&apos;t have an account?{" "}
         <Link
           href="/registration"

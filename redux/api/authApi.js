@@ -1,3 +1,4 @@
+// redux/api/authApi.js
 import { apiSlice } from "./apiSlice";
 
 export const authApi = apiSlice.injectEndpoints({
@@ -13,7 +14,7 @@ export const authApi = apiSlice.injectEndpoints({
 
     registerUser: builder.mutation({
       query: body => ({
-        url: "/api/register",
+        url: "/api/users/register",
         method: "POST",
         body,
       }),

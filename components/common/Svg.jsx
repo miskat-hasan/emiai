@@ -41,7 +41,7 @@ export const InboxSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -58,7 +58,7 @@ export const BriefCaseSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -77,7 +77,7 @@ export const FolderSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -96,7 +96,7 @@ export const WalletSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -117,7 +117,7 @@ export const InfluencerSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -168,7 +168,7 @@ export const AgenciesSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -212,7 +212,7 @@ export const SmartMatchingSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -305,7 +305,7 @@ export const ImageGenSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -345,7 +345,7 @@ export const ContestsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -392,7 +392,7 @@ export const EventsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -417,7 +417,7 @@ export const AdsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -443,7 +443,7 @@ export const PublishedAdsSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -474,7 +474,7 @@ export const VoucherSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -499,7 +499,7 @@ export const BlockPersonSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -524,7 +524,7 @@ export const SupportSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -541,7 +541,7 @@ export const ShareAppSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5 h-5 text-[#63716e]", className)}
+      className={cn("w-5 h-5 text-gray", className)}
       viewBox="0 0 20 20"
       fill="none"
       {...props}
@@ -642,7 +642,7 @@ export const EyeSVG = ({ className, ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      className={cn("w-5.5 h-3.8 text-[#63716e]", className)}
+      className={cn("w-5.5 h-3.8 text-gray", className)}
       viewBox="0 0 22 15"
       fill="none"
       {...props}

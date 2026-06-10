@@ -5,23 +5,32 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import OtpInput from "react-otp-input";
 import {
-  useVerifyOtpMutation,
-  useResendOtpMutation,
+  useVerifyRegistrationOtpMutation,
+  useResendRegistrationOtpMutation,
 } from "@/redux/api/authApi";
 import AuthButton from "@/components/ui/AuthButton";
 
 const TIMER_SECONDS = 90;
 
-export default function VerifyOtpPage() {
+export default function RegistrationVerifyOtpPage() {
   const router = useRouter();
-  const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
-  const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
+  const [verifyOtp, { isLoading: isVerifying }] =
+    useVerifyRegistrationOtpMutation();
+  const [resendOtp, { isLoading: isResending }] =
+    useResendRegistrationOtpMutation();
 
   const [otp, setOtp] = useState("");
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [expired, setExpired] = useState(false);
 
-  // ── Countdown ─────────────────────────────────────────────────────────────
+  // Guard: need email from previous step
+  useEffect(() => {
+    if (!sessionStorage.getItem("reg_email")) {
+      router.replace("/registration");
+    }
+  }, [router]);
+
+  // Countdown
   useEffect(() => {
     if (timeLeft <= 0) {
       setExpired(true);
@@ -31,31 +40,25 @@ export default function VerifyOtpPage() {
     return () => clearTimeout(id);
   }, [timeLeft]);
 
-  const formatTime = s => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
-  };
+  const formatTime = s =>
+    `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
-  // ── Submit ────────────────────────────────────────────────────────────────
   const handleVerify = async () => {
     if (otp.length < 4) {
       toast.error("Please enter the complete 4-digit code");
       return;
     }
-    const email = sessionStorage.getItem("fp_email");
-    if (!email) {
-      router.push("/forgot-password");
-      return;
-    }
 
+    const email = sessionStorage.getItem("reg_email");
     try {
       const res = await verifyOtp({ email, otp: Number(otp) }).unwrap();
       if (res?.success) {
-        toast.success(res.message ?? "OTP verified!");
-        sessionStorage.setItem("fp_token", res.data.token);
-        sessionStorage.setItem("fp_email", res.data.email);
-        router.push("/forgot-password/reset-password");
+        toast.success(res.message ?? "Email verified! Welcome to ReelUP 🎉");
+        // Clean up all registration session keys
+        ["reg_role", "reg_info", "reg_email"].forEach(k =>
+          sessionStorage.removeItem(k),
+        );
+        router.push("/login");
       }
     } catch (err) {
       toast.error(err?.data?.message ?? "Invalid or expired OTP.");
@@ -63,14 +66,8 @@ export default function VerifyOtpPage() {
     }
   };
 
-  // ── Resend ────────────────────────────────────────────────────────────────
   const handleResend = async () => {
-    const email = sessionStorage.getItem("fp_email");
-    if (!email) {
-      router.push("/forgot-password");
-      return;
-    }
-
+    const email = sessionStorage.getItem("reg_email");
     try {
       await resendOtp({ email }).unwrap();
       toast.success("New code sent to your email");
@@ -84,15 +81,13 @@ export default function VerifyOtpPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Heading */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-black">Verify Your Identity</h1>
+        <h1 className="text-xl font-bold text-black">Verify Your Email</h1>
         <p className="text-sm text-gray mt-1">
-          Enter the 4-digit code we sent to your Email to continue.
+          Enter the 4-digit code we sent to your email to activate your account.
         </p>
       </div>
 
-      {/* OTP Input */}
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium text-black">Code</label>
         <OtpInput
@@ -132,29 +127,31 @@ export default function VerifyOtpPage() {
             <button
               onClick={handleResend}
               disabled={isResending}
-              className="font-semibold text-primary hover:underline disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="font-semibold text-primary hover:underline disabled:opacity-50"
             >
               {isResending ? "Sending..." : "Resend"}
             </button>
           </>
         ) : (
           <>
-            Try after{" "}
+            Time remain{" "}
             <span className="font-semibold text-primary">
               {formatTime(timeLeft)}
             </span>
+            {" · "}
+            <button
+              onClick={handleResend}
+              disabled={isResending}
+              className="font-semibold text-primary hover:underline disabled:opacity-50"
+            >
+              {isResending ? "Sending..." : "Resend"}
+            </button>
           </>
         )}
       </p>
 
-      {/* Verify button */}
-      <AuthButton
-        type="button"
-        loading={isVerifying}
-        onClick={handleVerify}
-        disabled={otp.length < 4}
-      >
-        Verify
+      <AuthButton type="button" loading={isVerifying} onClick={handleVerify}>
+        Verify & Continue
       </AuthButton>
     </div>
   );

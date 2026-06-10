@@ -16,7 +16,6 @@ export default function ContestCard({
 }) {
   const detailHref = href ?? `/dashboard/influencer/contests/${id}`;
 
-  // If prize is a number, show "Prices: $X" overlay instead of an image
   const isMoneyPrize = !prizePhotoUrl && typeof prize === "number";
 
   const formattedDate = endDate
@@ -40,7 +39,7 @@ export default function ContestCard({
           />
         ) : isMoneyPrize ? (
           <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <p className="text-xl font-bold text-[#203430]">
+            <p className="text-xl font-bold text-black">
               Prices: ${prize.toLocaleString()}
             </p>
           </div>
@@ -52,33 +51,33 @@ export default function ContestCard({
       {/* ── Info rows ── */}
       <div className="p-4 flex flex-col gap-1.5 flex-1">
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs text-[#63716E]">Title</span>
-          <span className="text-xs font-bold text-[#203430] text-right truncate max-w-[60%]">
+          <span className="text-xs text-gray">Title</span>
+          <span className="text-xs font-bold text-black text-right truncate max-w-[60%]">
             {title}
           </span>
         </div>
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs text-[#63716E]">Host By</span>
-          <span className="text-xs font-semibold text-[#203430]">{hostBy}</span>
+          <span className="text-xs text-gray">Host By</span>
+          <span className="text-xs font-semibold text-black">{hostBy}</span>
         </div>
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs text-[#63716E]">Prize</span>
+          <span className="text-xs text-gray">Prize</span>
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold text-[#203430]">
+            <span className="text-xs font-semibold text-black">
               {typeof prize === "number" ? `$${prize.toLocaleString()}` : prize}
             </span>
             {formattedDate && (
-              <span className="text-xs text-[#63716E]">{formattedDate}</span>
+              <span className="text-xs text-gray">{formattedDate}</span>
             )}
           </div>
         </div>
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs text-[#63716E]">Description</span>
+          <span className="text-xs text-gray">Description</span>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-[#63716E] truncate max-w-[120px]">
+            <span className="text-xs text-gray truncate max-w-[120px]">
               {description}
             </span>
-            <span className="text-xs text-[#63716E] shrink-0">
+            <span className="text-xs text-gray shrink-0">
               {totalParticipants}/{totalSlots}
             </span>
           </div>

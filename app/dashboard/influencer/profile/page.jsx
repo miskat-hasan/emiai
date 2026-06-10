@@ -11,7 +11,11 @@ import SocialMediaConnect from "./components/SocialMediaConnect";
 import LogoutModal from "./components/LogoutModal";
 
 // Dummy placeholder components for your other navigation paths
-const SocialConnectView = () => <div className="text-black font-medium text-sm">Social Media Connection Portal</div>;
+const SocialConnectView = () => (
+  <div className="text-black font-medium text-sm">
+    Social Media Connection Portal
+  </div>
+);
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("about-me");
@@ -19,7 +23,7 @@ export default function ProfilePage() {
   // Sidebar link schema matching your layout perfectly
   const sidebarTabs = [
     { id: "about-me", label: "About Me" },
-    { id: "business-manager", label: "Business Manager" },
+    { id: "business_manager", label: "Business Manager" },
     { id: "agency", label: "Agency" },
     { id: "portfolio", label: "My Portfolio" },
     { id: "social-connect", label: "Social media connect" },
@@ -34,20 +38,29 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-8 pb-16">
-      
       {/* ── Top Header Card (Employment Info Component Block) ── */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6 flex flex-col md:flex-row gap-8 items-center">
         <div className="flex flex-col items-center text-center space-y-3 shrink-0 xl:w-[350px]">
           <div className="relative w-28 h-28 rounded-2xl overflow-hidden group border border-gray-100 shadow-xs">
             <Image
-              src="https://i.pravatar.cc/300" 
+              src="https://i.pravatar.cc/300"
               alt="Mia Torres Profile"
               fill
               className="object-cover"
             />
             <button className="absolute bottom-2 right-2 p-1.5 bg-primary text-white rounded-lg shadow-sm hover:scale-105 transition-transform">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
               </svg>
             </button>
           </div>
@@ -79,10 +92,9 @@ export default function ProfilePage() {
 
       {/* ── Navigation Side Grid Content Architecture ── */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        
         {/* Left Side Sidebar Rail Links */}
         <nav className="flex flex-col gap-1 lg:col-span-1 bg-white border border-gray-100 rounded-2xl p-4">
-          {sidebarTabs.map((tab) => {
+          {sidebarTabs.map(tab => {
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -98,9 +110,9 @@ export default function ProfilePage() {
               </button>
             );
           })}
-          
+
           {/* Explicit Logout Trigger Separation Point */}
-<button
+          <button
             type="button"
             onClick={() => setLogoutModalOpen(true)}
             className="w-full px-5 py-3.5 rounded-xl text-sm font-semibold text-gray hover:bg-red-50 hover:text-red-600 transition-all text-left mt-2 cursor-pointer"
@@ -112,7 +124,7 @@ export default function ProfilePage() {
         {/* Right Panel Main Canvas Window Workspace */}
         <div className="lg:col-span-3 bg-white border border-gray-100 rounded-2xl p-6 min-h-[450px]">
           {activeTab === "about-me" && <ProfileForm />}
-          {activeTab === "business-manager" && <BusinessManagerView />}
+          {activeTab === "business_manager" && <BusinessManagerView />}
           {activeTab === "agency" && <AgencyView />}
           {activeTab === "portfolio" && <PortfolioView />}
           {activeTab === "social-connect" && <SocialMediaConnect />}
