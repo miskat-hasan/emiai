@@ -149,11 +149,11 @@ function FilterDropdown({ value, onChange }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 pl-3 pr-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-[#203430] hover:border-primary/40 transition-colors"
+        className="flex items-center gap-2 pl-3 pr-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-black hover:border-primary/40 transition-colors"
       >
-        <SlidersHorizontal size={14} className="text-[#63716E]" />
+        <SlidersHorizontal size={14} className="text-gray" />
         {value}
-        <ChevronDown size={13} className="text-[#63716E]" />
+        <ChevronDown size={13} className="text-gray" />
       </button>
 
       {open && (
@@ -169,7 +169,7 @@ function FilterDropdown({ value, onChange }) {
                 ${
                   value === f
                     ? "text-primary font-semibold bg-primary/5"
-                    : "text-[#63716E] hover:bg-gray-50 hover:text-[#203430]"
+                    : "text-gray hover:bg-gray-50 hover:text-black"
                 }`}
             >
               {f}
@@ -271,8 +271,8 @@ export default function AllBookmarkPage() {
     <div className="space-y-6">
       {/* Page heading */}
       <div>
-        <h1 className="text-2xl font-bold text-[#203430]">All Bookmark</h1>
-        <p className="text-sm text-[#63716E] mt-0.5">
+        <h1 className="text-2xl font-bold text-black">All Bookmark</h1>
+        <p className="text-sm text-gray mt-0.5">
           <span className="text-primary font-medium">Dashboard</span>
           {" / "}
           <span>All Bookmark</span>
@@ -281,18 +281,18 @@ export default function AllBookmarkPage() {
 
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-base font-semibold text-[#203430]">Bookmark</h2>
+        <h2 className="text-base font-semibold text-black">Bookmark</h2>
 
         <div className="flex items-center gap-2">
           {/* Search */}
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 focus-within:border-primary/40 transition-colors">
-            <Search size={14} className="text-[#63716E] shrink-0" />
+            <Search size={14} className="text-gray shrink-0" />
             <input
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search in name"
-              className="bg-transparent text-sm text-[#203430] placeholder-[#63716E]/60 outline-none w-40"
+              className="bg-transparent text-sm text-black placeholder-gray/60 outline-none w-40"
             />
           </div>
 

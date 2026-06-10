@@ -86,17 +86,15 @@ export default function VerifyOtpPage() {
     <div className="flex flex-col gap-6">
       {/* Heading */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-[#203430]">
-          Verify Your Identity
-        </h1>
-        <p className="text-sm text-[#63716E] mt-1">
+        <h1 className="text-xl font-bold text-black">Verify Your Identity</h1>
+        <p className="text-sm text-gray mt-1">
           Enter the 4-digit code we sent to your Email to continue.
         </p>
       </div>
 
       {/* OTP Input */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-[#203430]">Code</label>
+        <label className="text-sm font-medium text-black">Code</label>
         <OtpInput
           value={otp}
           onChange={setOtp}
@@ -112,7 +110,7 @@ export default function VerifyOtpPage() {
               style={{}}
               className={`
                 !w-full h-16 text-center text-xl font-bold rounded-2xl
-                bg-gray-100 border-2 outline-none text-[#203430]
+                bg-gray-100 border-2 outline-none text-black
                 placeholder:text-gray-300 placeholder:font-normal placeholder:text-base
                 transition-all duration-150
                 ${
@@ -127,7 +125,7 @@ export default function VerifyOtpPage() {
       </div>
 
       {/* Timer + resend */}
-      <p className="text-center text-sm text-[#63716E]">
+      <p className="text-center text-sm text-gray">
         {expired ? (
           <>
             Code expired.{" "}

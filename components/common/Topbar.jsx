@@ -21,7 +21,6 @@ export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  
   const user = useSelector(state => state.auth?.user);
 
   console.log("topbar user", user);
@@ -34,7 +33,6 @@ export default function Topbar({ onToggleSidebar }) {
 
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
-  
   useEffect(() => {
     const handler = e => {
       if (notifRef.current && !notifRef.current.contains(e.target))
@@ -57,13 +55,12 @@ export default function Topbar({ onToggleSidebar }) {
     try {
       await logoutUser().unwrap();
     } catch {
-      // Logout silently even if the API call fails
+      // fail silently
     } finally {
       dispatch(removeUser());
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
-
+      document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
       toast.success("Logged out successfully");
-
       router.push("/login");
     }
   };
@@ -74,11 +71,11 @@ export default function Topbar({ onToggleSidebar }) {
       icon: User,
       action: () => router.push(`/dashboard/${user?.role}/profile`),
     },
-    {
-      label: "Settings",
-      icon: Settings,
-      action: () => router.push("/dashboard/settings"),
-    },
+    // {
+    //   label: "Settings",
+    //   icon: Settings,
+    //   action: () => router.push("/dashboard/settings"),
+    // },
     { label: "Sign out", icon: LogOut, action: handleLogout, danger: true },
   ];
 
@@ -95,10 +92,10 @@ export default function Topbar({ onToggleSidebar }) {
         </button>
 
         <div className="hidden sm:block min-w-0">
-          <p className="text-xs text-[#63716E] leading-none mb-0.5">
+          <p className="text-xs text-gray leading-none mb-0.5">
             Hello {user?.name?.split(" ")[0]}!
           </p>
-          <h1 className="text-base font-semibold text-[#203430] truncate leading-tight">
+          <h1 className="text-base font-semibold text-black truncate leading-tight">
             {greeting()}
           </h1>
         </div>
@@ -112,7 +109,7 @@ export default function Topbar({ onToggleSidebar }) {
           <input
             type="text"
             placeholder="Search..."
-            className="bg-transparent text-sm text-[#203430] placeholder-gray-400 outline-none w-full"
+            className="bg-transparent text-sm text-black placeholder-gray-400 outline-none w-full"
           />
         </div> */}
 
@@ -132,7 +129,7 @@ export default function Topbar({ onToggleSidebar }) {
 
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50">
-              <p className="px-4 pb-2 text-xs font-semibold text-[#63716E] uppercase tracking-wider">
+              <p className="px-4 pb-2 text-xs font-semibold text-gray uppercase tracking-wider">
                 Notifications
               </p>
               {[
@@ -144,8 +141,8 @@ export default function Topbar({ onToggleSidebar }) {
                   key={i}
                   className="px-4 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"
                 >
-                  <p className="text-sm text-[#203430]">{n.msg}</p>
-                  <p className="text-xs text-[#63716E] mt-0.5">{n.time}</p>
+                  <p className="text-sm text-black">{n.msg}</p>
+                  <p className="text-xs text-gray mt-0.5">{n.time}</p>
                 </div>
               ))}
             </div>
@@ -159,7 +156,7 @@ export default function Topbar({ onToggleSidebar }) {
               setProfileOpen(v => !v);
               setNotifOpen(false);
             }}
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"
           >
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
@@ -177,24 +174,24 @@ export default function Topbar({ onToggleSidebar }) {
               )}
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-sm font-semibold text-[#203430] leading-tight">
+              <p className="text-sm font-semibold text-black leading-tight">
                 {user?.name ?? "User"}
               </p>
-              <p className="text-xs text-[#63716E] capitalize">
+              <p className="text-xs text-gray capitalize">
                 {user?.role ?? "Member"}
               </p>
             </div>
-            <ChevronDown size={14} className="text-[#63716E] hidden sm:block" />
+            <ChevronDown size={14} className="text-gray hidden sm:block" />
           </button>
 
           {profileOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
               {/* User info header */}
               <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                <p className="text-sm font-semibold text-[#203430] truncate">
+                <p className="text-sm font-semibold text-black truncate">
                   {user?.name ?? "User"}
                 </p>
-                <p className="text-xs text-[#63716E] truncate">
+                <p className="text-xs text-gray truncate">
                   {user?.email ?? ""}
                 </p>
               </div>
@@ -212,7 +209,7 @@ export default function Topbar({ onToggleSidebar }) {
                     ${
                       danger
                         ? "text-red-500 hover:bg-red-50"
-                        : "text-[#203430] hover:bg-gray-50"
+                        : "text-black hover:bg-primary/5"
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}

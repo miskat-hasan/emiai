@@ -30,7 +30,7 @@ export default function AuthInput({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-sm font-medium text-[#203430]">{label}</label>
+        <label className="text-sm font-medium text-black">{label}</label>
       )}
       <div className="relative">
         <input
@@ -39,8 +39,8 @@ export default function AuthInput({
           {...registration}
           {...rest}
           className={`
-            w-full rounded-xl bg-gray-100 px-4 py-3 text-sm text-[#203430]
-            placeholder:text-[#63716E]/60 outline-none border border-transparent
+            w-full rounded-xl bg-gray-100 px-4 py-3 text-sm text-black
+            placeholder:text-gray/60 outline-none border border-transparent
             transition-all duration-200
             focus:bg-white focus:border-primary/40 focus:shadow-[0_0_0_3px_rgba(245,120,2,0.08)]
             ${isPassword ? "pr-11" : ""}
@@ -51,7 +51,7 @@ export default function AuthInput({
           <button
             type="button"
             onClick={() => setShowPassword(v => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#63716E] hover:text-[#203430] transition-colors"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray hover:text-black transition-colors cursor-pointer"
             tabIndex={-1}
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}

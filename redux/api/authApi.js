@@ -1,3 +1,4 @@
+// redux/api/authApi.js
 import { apiSlice } from "./apiSlice";
 
 export const authApi = apiSlice.injectEndpoints({
@@ -13,7 +14,23 @@ export const authApi = apiSlice.injectEndpoints({
 
     registerUser: builder.mutation({
       query: body => ({
-        url: "/api/register",
+        url: "/api/users/register",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    verifyRegistrationOtp: builder.mutation({
+      query: body => ({
+        url: "/api/users/register/otp-verify",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    resendRegistrationOtp: builder.mutation({
+      query: body => ({
+        url: "/api/users/register/otp-resend",
         method: "POST",
         body,
       }),
@@ -72,6 +89,8 @@ export const authApi = apiSlice.injectEndpoints({
 export const {
   useLoginUserMutation,
   useRegisterUserMutation,
+  useVerifyRegistrationOtpMutation,
+  useResendRegistrationOtpMutation,
   useGetMeQuery,
   useLogoutUserMutation,
   useForgotPasswordMutation,

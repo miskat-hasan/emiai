@@ -54,8 +54,8 @@ export default function ResetPasswordPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-[#203430]">Reset Password</h1>
-        <p className="text-sm text-[#63716E] mt-1">
+        <h1 className="text-xl font-bold text-black">Reset Password</h1>
+        <p className="text-sm text-gray mt-1">
           Choose a strong new password for your account.
         </p>
       </div>

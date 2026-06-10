@@ -21,6 +21,7 @@ import {
   Building2,
   SlidersHorizontal,
 } from "lucide-react";
+import { AdsSVG } from "../common/Svg";
 
 export const NAV_ITEMS = {
   influencer: [
@@ -69,6 +70,7 @@ export const NAV_ITEMS = {
       href: "/dashboard/influencer/events",
     },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/influencer/vouchers" },
+    { label: "Ads", icon: AdsSVG, href: "/dashboard/influencer/ads" },
     { label: "Block Person", icon: UserX, href: "/dashboard/influencer/block" },
     {
       label: "Contact Support",
@@ -172,28 +174,52 @@ export const NAV_ITEMS = {
     },
   ],
   business_manager: [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/business" },
-    { label: "Inbox", icon: Inbox, href: "/dashboard/business/inbox" },
-    { label: "Deals", icon: Briefcase, href: "/dashboard/business/deals" },
-    { label: "Wallet", icon: Wallet, href: "/dashboard/business/wallet" },
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      href: "/dashboard/business_manager",
+    },
+    { label: "Inbox", icon: Inbox, href: "/dashboard/business_manager/inbox" },
+    {
+      label: "Deals",
+      icon: Briefcase,
+      href: "/dashboard/business_manager/deals",
+    },
+    {
+      label: "Wallet",
+      icon: Wallet,
+      href: "/dashboard/business_manager/wallet",
+    },
     {
       label: "Influencers",
       icon: Users,
-      href: "/dashboard/business/influencers",
+      href: "/dashboard/business_manager/influencers",
     },
     {
       label: "Image Generation",
       icon: Wand2,
-      href: "/dashboard/business/image-generation",
+      href: "/dashboard/business_manager/image-generation",
     },
-    { label: "Ads", icon: Megaphone, href: "/dashboard/business/ads" },
-    { label: "Tickets", icon: Ticket, href: "/dashboard/business/tickets" },
-    { label: "Share app", icon: Share2, href: "/dashboard/business/share" },
-    { label: "Block Person", icon: UserX, href: "/dashboard/business/block" },
+    { label: "Ads", icon: Megaphone, href: "/dashboard/business_manager/ads" },
+    {
+      label: "Tickets",
+      icon: Ticket,
+      href: "/dashboard/business_manager/tickets",
+    },
+    {
+      label: "Share app",
+      icon: Share2,
+      href: "/dashboard/business_manager/share",
+    },
+    {
+      label: "Block Person",
+      icon: UserX,
+      href: "/dashboard/business_manager/block",
+    },
     {
       label: "Contact Support",
       icon: HeadphonesIcon,
-      href: "/dashboard/business/support",
+      href: "/dashboard/business_manager/support",
     },
   ],
   guest: [

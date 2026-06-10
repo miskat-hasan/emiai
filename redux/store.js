@@ -3,6 +3,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/redux/slices/authSlice";
 import { apiSlice } from "@/redux/api/apiSlice";
+import registrationReducer from "@/redux/slices/registrationSlice";
 import {
   persistStore,
   FLUSH,
@@ -16,6 +17,7 @@ import {
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    registration: registrationReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
 

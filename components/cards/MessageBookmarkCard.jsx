@@ -39,23 +39,23 @@ export default function MessageBookmarkCard({
       {/* Content */}
       <div className="flex-1 min-w-0">
         {threadLabel && (
-          <p className="text-xs font-semibold text-[#203430] leading-none mb-0.5">
+          <p className="text-xs font-semibold text-black leading-none mb-0.5">
             {threadLabel}
           </p>
         )}
         <p
-          className={`text-sm font-semibold text-[#203430] leading-tight ${threadLabel ? "" : "mb-0.5"}`}
+          className={`text-sm font-semibold text-black leading-tight ${threadLabel ? "" : "mb-0.5"}`}
         >
           {senderName}
         </p>
-        <p className="text-xs text-[#63716E] line-clamp-2 mt-1 leading-relaxed">
+        <p className="text-xs text-gray line-clamp-2 mt-1 leading-relaxed">
           {preview}
         </p>
       </div>
 
       {/* Right: time + bookmark */}
       <div className="flex flex-col items-end gap-2 shrink-0">
-        <span className="text-xs text-[#63716E]">{time}</span>
+        <span className="text-xs text-gray">{time}</span>
         <button onClick={onBookmark} aria-label="Bookmark">
           <Bookmark
             size={13}

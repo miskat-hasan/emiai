@@ -16,7 +16,7 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
         transition-all duration-300 ease-in-out shrink-0
         ${collapsed ? "w-[72px]" : "w-[245px]"}
         sticky top-0 overflow-y-auto overflow-x-hidden
-        scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent
+        scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent
       `}
     >
       {/* Logo */}
