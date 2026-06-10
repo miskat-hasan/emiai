@@ -25,13 +25,13 @@ export default function Pagination({
   return (
     <div className="flex items-center justify-between pt-4 mt-2 border-t border-gray-100">
       {/* Per-page selector */}
-      <div className="flex items-center gap-2 text-sm text-[#63716E]">
+      <div className="flex items-center gap-2 text-sm text-gray">
         <span>Show</span>
         <div className="relative">
           <select
             value={perPage}
             onChange={e => onPerPageChange?.(Number(e.target.value))}
-            className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-7 py-1.5 text-sm text-[#203430] font-medium focus:outline-none focus:border-primary/40 cursor-pointer"
+            className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-7 py-1.5 text-sm text-black font-medium focus:outline-none focus:border-primary/40 cursor-pointer"
           >
             {[10, 20, 50].map(n => (
               <option key={n} value={n}>
@@ -39,7 +39,7 @@ export default function Pagination({
               </option>
             ))}
           </select>
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[#63716E] text-xs">
+          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray text-xs">
             ▾
           </span>
         </div>
@@ -59,7 +59,7 @@ export default function Pagination({
           p === "..." ? (
             <span
               key={`ellipsis-${i}`}
-              className="w-8 text-center text-sm text-[#63716E]"
+              className="w-8 text-center text-sm text-gray"
             >
               …
             </span>
@@ -93,7 +93,7 @@ function PageBtn({ children, active, disabled, onClick }) {
       className={`
         w-8 h-8 rounded-lg text-sm font-medium flex items-center justify-center transition-colors
         ${active ? "bg-primary text-white shadow-sm shadow-primary/30" : ""}
-        ${!active && !disabled ? "text-[#63716E] hover:bg-gray-100" : ""}
+        ${!active && !disabled ? "text-gray hover:bg-gray-100" : ""}
         ${disabled ? "text-gray-300 cursor-not-allowed" : ""}
       `}
     >

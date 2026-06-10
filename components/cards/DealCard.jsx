@@ -19,7 +19,7 @@ export default function DealCard({
       <div className="bg-white rounded-2xl p-5 border border-gray-100 flex flex-col gap-4 h-full hover:border-primary/30 hover:shadow-md transition-all duration-200">
         {/* ── Status row ── */}
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold text-[#203430]">Statas</span>
+          <span className="text-sm font-semibold text-black">Statas</span>
           <StatusBadge status={status} />
         </div>
 
@@ -42,29 +42,25 @@ export default function DealCard({
                 </span>
               )}
             </div>
-            <span className="text-sm font-semibold text-[#203430]">
-              {person}
-            </span>
+            <span className="text-sm font-semibold text-black">{person}</span>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xs text-[#63716E]">Date</p>
-            <p className="text-xs font-medium text-[#203430]">{date}</p>
+            <p className="text-xs text-gray">Date</p>
+            <p className="text-xs font-medium text-black">{date}</p>
           </div>
         </div>
 
         {/* ── Description + payout ── */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-[#203430] mb-1">
+            <p className="text-xs font-semibold text-black mb-1">
               Offer Description
             </p>
-            <p className="text-xs text-[#63716E] line-clamp-2">{description}</p>
+            <p className="text-xs text-gray line-clamp-2">{description}</p>
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xs font-semibold text-[#203430]">Net Payout</p>
-            <p className="text-xs font-bold text-[#203430] mt-0.5">
-              {netPayout}
-            </p>
+            <p className="text-xs font-semibold text-black">Net Payout</p>
+            <p className="text-xs font-bold text-black mt-0.5">{netPayout}</p>
           </div>
         </div>
       </div>

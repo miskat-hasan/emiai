@@ -23,10 +23,8 @@ export default function ProfilePage() {
   // Sidebar link schema matching your layout perfectly
   const sidebarTabs = [
     { id: "about-me", label: "About Me" },
-    { id: "business_manager", label: "Business Manager" },
-    { id: "agency", label: "Agency" },
-    { id: "portfolio", label: "My Portfolio" },
-    { id: "social-connect", label: "Social media connect" },
+    { id: "Change Password", label: "Change Password" },
+    { id: "business-manager", label: "Business Manager" },
   ];
 
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
@@ -94,7 +92,7 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
         {/* Left Side Sidebar Rail Links */}
         <nav className="flex flex-col gap-1 lg:col-span-1 bg-white border border-gray-100 rounded-2xl p-4">
-          {sidebarTabs.map(tab => {
+          {sidebarTabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
@@ -124,7 +122,7 @@ export default function ProfilePage() {
         {/* Right Panel Main Canvas Window Workspace */}
         <div className="lg:col-span-3 bg-white border border-gray-100 rounded-2xl p-6 min-h-[450px]">
           {activeTab === "about-me" && <ProfileForm />}
-          {activeTab === "business_manager" && <BusinessManagerView />}
+          {activeTab === "business-manager" && <BusinessManagerView />}
           {activeTab === "agency" && <AgencyView />}
           {activeTab === "portfolio" && <PortfolioView />}
           {activeTab === "social-connect" && <SocialMediaConnect />}

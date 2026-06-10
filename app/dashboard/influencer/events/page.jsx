@@ -9,7 +9,7 @@ import MyEventCard from "./components/MyEventCard";
 import CreateEventModal from "./components/CreateEventModal";
 import { Ticket } from "@/components/common/Ticket";
 
-//  Tabs 
+//  Tabs
 
 const TABS = [
   { key: "upcoming", label: "Upcoming Event" },
@@ -17,7 +17,7 @@ const TABS = [
   { key: "my-ticket", label: "My Ticket" },
 ];
 
-//  Mock data 
+//  Mock data
 
 const UPCOMING_EVENTS = Array.from({ length: 12 }, (_, i) => ({
   id: i + 1,
@@ -51,7 +51,7 @@ const MY_TICKETS = Array.from({ length: 12 }, (_, i) => ({
 function UpcomingPanel({ events, onCardClick }) {
   if (events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-20 text-gray">
         <p className="text-base font-medium">No upcoming events found</p>
       </div>
     );
@@ -78,7 +78,7 @@ function UpcomingPanel({ events, onCardClick }) {
 function MyEventPanel({ events, onCardClick }) {
   if (events.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-20 text-gray">
         <p className="text-base font-medium">No events found</p>
       </div>
     );
@@ -127,7 +127,7 @@ function MyTicketPanel({ tickets }) {
   );
 }
 
-//  Page 
+//  Page
 
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
@@ -152,11 +152,17 @@ export default function EventsPage() {
       <div className="space-y-4">
         {/* Page heading */}
         <div>
-          <h1 className="text-2xl font-bold text-[#203430]">Events</h1>
-          <p className="text-sm text-[#63716E] mt-0.5">
+          <h1 className="text-2xl font-bold text-black">Events</h1>
+          <p className="text-sm text-gray mt-0.5">
             <span className="text-primary font-medium">Dashboard</span>
             {" / "}
-            <span>{activeTab === "upcoming" ? "Upcoming Event" : activeTab === "my-event" ? "My Event" : "My Ticket"}</span>
+            <span>
+              {activeTab === "upcoming"
+                ? "Upcoming Event"
+                : activeTab === "my-event"
+                  ? "My Event"
+                  : "My Ticket"}
+            </span>
           </p>
         </div>
 
@@ -183,7 +189,7 @@ export default function EventsPage() {
       <CreateEventModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSuccess={() => { }}
+        onSuccess={() => {}}
       />
     </>
   );

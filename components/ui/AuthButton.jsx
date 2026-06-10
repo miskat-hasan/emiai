@@ -27,7 +27,7 @@ export default function AuthButton({
         onClick={onClick}
         className={`
           flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl
-          border border-gray-200 bg-white text-sm font-medium text-[#203430]
+          border border-gray-200 bg-white text-sm font-medium text-black
           hover:bg-gray-50 hover:border-gray-300 hover:shadow-sm
           active:scale-[0.98] transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100
           ${className}

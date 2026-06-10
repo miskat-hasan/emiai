@@ -12,7 +12,7 @@ function Field({ label, error, children }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label className="text-sm font-medium text-[#203430]">{label}</label>
+        <label className="text-sm font-medium text-black">{label}</label>
       )}
       {children}
       {error && <p className="text-xs text-red-500">{error}</p>}
@@ -24,7 +24,7 @@ function Input({ className = "", ...props }) {
   return (
     <input
       {...props}
-      className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-[#203430] placeholder:text-[#63716E]/60 outline-none focus:border-primary/40 focus:bg-white transition-all ${className}`}
+      className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all ${className}`}
     />
   );
 }
@@ -40,16 +40,16 @@ function UploadBox({ label, accept, hint, onChange, fileName }) {
         <Upload size={18} className="text-primary shrink-0" />
         <div className="text-sm">
           {fileName ? (
-            <span className="font-medium text-[#203430]">{fileName}</span>
+            <span className="font-medium text-black">{fileName}</span>
           ) : (
             <>
               <span className="font-semibold text-primary underline underline-offset-2">
                 Click to Upload
               </span>
-              <span className="text-[#63716E]"> or drag & drop</span>
+              <span className="text-gray"> or drag & drop</span>
             </>
           )}
-          {!fileName && <p className="text-xs text-[#63716E] mt-0.5">{hint}</p>}
+          {!fileName && <p className="text-xs text-gray mt-0.5">{hint}</p>}
         </div>
       </div>
       <input
@@ -147,12 +147,10 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-[#203430]">
-            Create New Contest
-          </h2>
+          <h2 className="text-base font-bold text-black">Create New Contest</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-[#63716E] transition-colors"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray transition-colors"
           >
             <X size={18} />
           </button>
@@ -178,7 +176,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
                 required: "Description is required",
               })}
               rows={3}
-              className="w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-[#203430] placeholder:text-[#63716E]/60 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none"
+              className="w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none"
             />
           </Field>
 
@@ -186,9 +184,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
           <div className="flex items-start gap-3">
             {/* Rules rows */}
             <div className="flex-1 flex flex-col gap-2">
-              <label className="text-sm font-medium text-[#203430]">
-                Rules
-              </label>
+              <label className="text-sm font-medium text-black">Rules</label>
               {rules.map((r, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <Input
@@ -215,9 +211,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
 
             {/* Prize rows */}
             <div className="flex-1 flex flex-col gap-2">
-              <label className="text-sm font-medium text-[#203430]">
-                Prize
-              </label>
+              <label className="text-sm font-medium text-black">Prize</label>
               {prizes.map((p, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <Input
@@ -244,9 +238,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
 
             {/* End Date */}
             <div className="flex flex-col gap-2 shrink-0">
-              <label className="text-sm font-medium text-[#203430]">
-                End Date
-              </label>
+              <label className="text-sm font-medium text-black">End Date</label>
               <div className="relative">
                 <Input
                   type="date"
@@ -257,7 +249,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
                 />
                 <Calendar
                   size={15}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#63716E] pointer-events-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray pointer-events-none"
                 />
               </div>
             </div>
@@ -317,7 +309,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
 
           {/* Publish toggle */}
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-[#203430]">
+            <span className="text-sm font-medium text-black">
               Publish Contest
             </span>
             <button
@@ -342,7 +334,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
             <button
               type="button"
               onClick={onClose}
-              className="text-sm font-semibold text-[#63716E] hover:text-[#203430] transition-colors cursor-pointer"
+              className="text-sm font-semibold text-gray hover:text-black transition-colors cursor-pointer"
             >
               Cancel
             </button>

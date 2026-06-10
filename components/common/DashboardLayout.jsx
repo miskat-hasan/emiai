@@ -36,7 +36,7 @@ export default function DashboardLayout({ children }) {
   }, [isError, dispatch, router]);
 
   const user = reduxUser;
-  const role = user?.role ?? "guest";
+  const role = user?.role;
 
   const themeClass = `theme-${role}`;
 
@@ -47,7 +47,7 @@ export default function DashboardLayout({ children }) {
       >
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-[#63716E]">Loading...</p>
+          <p className="text-sm text-gray">Loading...</p>
         </div>
       </div>
     );

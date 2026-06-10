@@ -26,6 +26,11 @@ export const contestApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Contest"],
     }),
+
+    getSingleContest: builder.query({
+      query: id => `/api/contest/show?id=${id}`,
+      providesTags: ["Contest"],
+    }),
   }),
 });
 
@@ -34,4 +39,5 @@ export const {
   useGetAllContestsQuery,
   useGetParticipatedContestsQuery,
   useCreateContestMutation,
+  useGetSingleContestQuery,
 } = contestApi;
