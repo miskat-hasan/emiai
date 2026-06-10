@@ -13,7 +13,15 @@ export const contestApi = apiSlice.injectEndpoints({
     }),
 
     getParticipatedContests: builder.query({
-      query: () => ({ url: "/api/contest/participated", method: "GET" }),
+      query: () => ({
+        url: "/api/contest/participated-contests",
+        method: "GET",
+      }),
+      providesTags: ["Contest"],
+    }),
+
+    getSingleContest: builder.query({
+      query: id => ({ url: `/api/contest/show?id=${id}`, method: "GET" }),
       providesTags: ["Contest"],
     }),
 
@@ -27,9 +35,22 @@ export const contestApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Contest"],
     }),
 
-    getSingleContest: builder.query({
-      query: id => `/api/contest/show?id=${id}`,
-      providesTags: ["Contest"],
+    announceWinner: builder.mutation({
+      query: body => ({
+        url: "/api/contest/announce-winner",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Contest"],
+    }),
+
+    joinContest: builder.mutation({
+      query: body => ({
+        url: `/api/contest/join-contest?contest_id=${id}`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Contest"],
     }),
   }),
 });
@@ -38,6 +59,8 @@ export const {
   useGetMyContestsQuery,
   useGetAllContestsQuery,
   useGetParticipatedContestsQuery,
-  useCreateContestMutation,
   useGetSingleContestQuery,
+  useCreateContestMutation,
+  useAnnounceWinnerMutation,
+  useJoinContestMutation,
 } = contestApi;
