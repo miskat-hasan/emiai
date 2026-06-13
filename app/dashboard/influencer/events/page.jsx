@@ -46,7 +46,7 @@ const MY_TICKETS = Array.from({ length: 12 }, (_, i) => ({
   qrCode: "/images/demo-qrcode.png",
 }));
 
-//  Tab panel 
+//  Tab panel
 
 function UpcomingPanel({ events, onCardClick }) {
   if (events.length === 0) {
@@ -104,9 +104,9 @@ function MyEventPanel({ events, onCardClick }) {
 function MyTicketPanel({ tickets }) {
   if (!tickets || tickets.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-20 text-gray">
         <p className="text-base font-medium">No tickets found</p>
-        <p className="text-sm mt-1 text-[#63716E]/70">
+        <p className="text-sm mt-1 text-gray/70">
           Tickets for events you join will appear here
         </p>
       </div>
@@ -180,8 +180,18 @@ export default function EventsPage() {
         </div>
 
         {/* Content */}
-        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} />}
-        {activeTab === "my-event" && <MyEventPanel events={MY_EVENTS} onCardClick={handleMyEventCardClick} />}
+        {activeTab === "upcoming" && (
+          <UpcomingPanel
+            events={UPCOMING_EVENTS}
+            onCardClick={handleCardClick}
+          />
+        )}
+        {activeTab === "my-event" && (
+          <MyEventPanel
+            events={MY_EVENTS}
+            onCardClick={handleMyEventCardClick}
+          />
+        )}
         {activeTab === "my-ticket" && <MyTicketPanel tickets={MY_TICKETS} />}
       </div>
 
