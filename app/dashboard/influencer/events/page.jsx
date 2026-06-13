@@ -7,6 +7,7 @@ import TabSwitcher from "@/components/common/TabSwitcher";
 import EventCard from "./components/EventCard";
 import MyEventCard from "./components/MyEventCard";
 import CreateEventModal from "./components/CreateEventModal";
+import SendInvitationFlow from "./components/SendInvitationFlow";
 import { Ticket } from "@/components/common/Ticket";
 
 //  Tabs
@@ -48,7 +49,7 @@ const MY_TICKETS = Array.from({ length: 12 }, (_, i) => ({
 
 //  Tab panel 
 
-function UpcomingPanel({ events, onCardClick }) {
+function UpcomingPanel({ events, onCardClick, onButtonClick }) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -69,6 +70,7 @@ function UpcomingPanel({ events, onCardClick }) {
           date={event.date}
           buttonText="Create Invite"
           onCardClick={() => onCardClick(event.id)}
+          onButtonClick={() => onButtonClick && onButtonClick(event.id)}
         />
       ))}
     </div>
@@ -132,6 +134,7 @@ function MyTicketPanel({ tickets }) {
 export default function EventsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [modalOpen, setModalOpen] = useState(false);
+  const [sendInviteModalOpen, setSendInviteModalOpen] = useState(false);
   const router = useRouter();
 
   const handleCardClick = id => {
@@ -140,6 +143,10 @@ export default function EventsPage() {
 
   const handleMyEventCardClick = id => {
     router.push(`/dashboard/influencer/events/my-events/${id}`);
+  };
+
+  const handleCreateInviteClick = id => {
+    setSendInviteModalOpen(true);
   };
 
   // when backend is ready we will use these hooks to fetch data
@@ -180,7 +187,7 @@ export default function EventsPage() {
         </div>
 
         {/* Content */}
-        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} />}
+        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} onButtonClick={handleCreateInviteClick} />}
         {activeTab === "my-event" && <MyEventPanel events={MY_EVENTS} onCardClick={handleMyEventCardClick} />}
         {activeTab === "my-ticket" && <MyTicketPanel tickets={MY_TICKETS} />}
       </div>
@@ -190,6 +197,11 @@ export default function EventsPage() {
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSuccess={() => {}}
+      />
+
+      <SendInvitationFlow
+        open={sendInviteModalOpen}
+        onClose={() => setSendInviteModalOpen(false)}
       />
     </>
   );
