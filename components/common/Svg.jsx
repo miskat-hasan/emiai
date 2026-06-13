@@ -876,3 +876,4 @@ export const SnapchatIconSVG = ({ className, ...props }) => {
 </svg>
   );
 };
+
