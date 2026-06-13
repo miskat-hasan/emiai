@@ -223,7 +223,7 @@ function ActionIcon({ icon: Icon, onClick, title }) {
     <button
       onClick={onClick}
       title={title}
-      className="w-9 h-9 rounded-full bg-white/80 border border-gray-200 flex items-center justify-center text-[#63716E] hover:text-primary hover:border-primary/40 transition-colors shadow-sm"
+      className="w-9 h-9 rounded-full bg-white/80 border border-gray-200 flex items-center justify-center text-gray hover:text-primary hover:border-primary/40 transition-colors shadow-sm"
     >
       <Icon size={15} />
     </button>
@@ -287,7 +287,7 @@ export default function ContestDetailPage({ params }) {
 
   if (isError || !c) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-[#63716E]">
+      <div className="flex flex-col items-center justify-center py-24 text-gray">
         <p className="text-base font-medium">Failed to load contest details</p>
         <Link
           href="/dashboard/influencer/contests"
@@ -308,8 +308,8 @@ export default function ContestDetailPage({ params }) {
       {/* ── Breadcrumb + title ── */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#203430]">Contests</h1>
-          <p className="text-sm text-[#63716E] mt-0.5">
+          <h1 className="text-2xl font-bold text-black">Contests</h1>
+          <p className="text-sm text-gray mt-0.5">
             <span className="text-primary font-medium">Dashboard</span>
             {" / "}
             <Link
@@ -319,9 +319,9 @@ export default function ContestDetailPage({ params }) {
               Contests
             </Link>
             {" / "}
-            <span className="text-[#203430]">Contest Details</span>
+            <span className="text-black">Contest Details</span>
           </p>
-          <p className="text-lg font-semibold text-[#203430] mt-2">{c.title}</p>
+          <p className="text-lg font-semibold text-black mt-2">{c.title}</p>
         </div>
 
         {/* Action icons */}
@@ -373,7 +373,7 @@ export default function ContestDetailPage({ params }) {
 
       {isContestView && (
         <div className="flex items-center justify-end gap-4">
-          <span className="text-xl font-bold text-[#203430]">
+          <span className="text-xl font-bold text-black">
             {c.entry_fee && Number(c.entry_fee) > 0
               ? `$${Number(c.entry_fee).toLocaleString()}`
               : "Free"}
@@ -392,25 +392,23 @@ export default function ContestDetailPage({ params }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Col 1 — Description */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/60">
-          <h2 className="text-sm font-semibold text-[#203430] border-b border-gray-100 pb-3 mb-3">
+          <h2 className="text-sm font-semibold text-black border-b border-gray-100 pb-3 mb-3">
             Contest Title : <span className="font-bold">{c.title}</span>
           </h2>
-          <p className="text-sm text-[#63716E] leading-relaxed whitespace-pre-line">
+          <p className="text-sm text-gray leading-relaxed whitespace-pre-line">
             {c.description ?? "No description provided."}
           </p>
           {c.rules && (
             <div className="mt-4">
-              <p className="text-xs font-semibold text-[#203430] mb-1">Rules</p>
-              <p className="text-xs text-[#63716E] leading-relaxed">
-                {c.rules}
-              </p>
+              <p className="text-xs font-semibold text-black mb-1">Rules</p>
+              <p className="text-xs text-gray leading-relaxed">{c.rules}</p>
             </div>
           )}
         </div>
 
         {/* Col 2 — Contest details */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/60">
-          <h2 className="text-sm font-semibold text-[#203430] border-b border-gray-100 pb-3 mb-4">
+          <h2 className="text-sm font-semibold text-black border-b border-gray-100 pb-3 mb-4">
             Contest details
           </h2>
           <div className="space-y-3 text-sm">
@@ -438,8 +436,8 @@ export default function ContestDetailPage({ params }) {
                 key={label}
                 className="flex items-center justify-between gap-4"
               >
-                <span className="text-[#63716E] shrink-0">{label}</span>
-                <span className="font-semibold text-[#203430] text-right">
+                <span className="text-gray shrink-0">{label}</span>
+                <span className="font-semibold text-black text-right">
                   {value}
                 </span>
               </div>
@@ -449,7 +447,7 @@ export default function ContestDetailPage({ params }) {
 
         {/* Col 3 — Participants */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-5 border border-white/60">
-          <h2 className="text-sm font-semibold text-[#203430] border-b border-gray-100 pb-3 mb-4">
+          <h2 className="text-sm font-semibold text-black border-b border-gray-100 pb-3 mb-4">
             Participants
           </h2>
 
@@ -459,7 +457,7 @@ export default function ContestDetailPage({ params }) {
                 <div key={i} className="flex items-center gap-3">
                   <UserAvatar avatar={p.avatar} name={p.name} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#203430] leading-tight">
+                    <p className="text-sm font-semibold text-black leading-tight">
                       {p.name}{" "}
                       <span
                         className={`text-xs font-medium capitalize ${ROLE_COLORS[p.role] ?? "text-gray-400"}`}
@@ -467,7 +465,7 @@ export default function ContestDetailPage({ params }) {
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-[#63716E] mt-0.5">2 hours ago</p>
+                    <p className="text-xs text-gray mt-0.5">2 hours ago</p>
                   </div>
                 </div>
               ))}
@@ -479,7 +477,7 @@ export default function ContestDetailPage({ params }) {
                 <div key={p.id} className="flex items-center gap-3">
                   <UserAvatar avatar={p.avatar} name={p.name} />
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#203430] leading-tight">
+                    <p className="text-sm font-semibold text-black leading-tight">
                       {p.name}{" "}
                       <span
                         className={`text-xs font-medium capitalize ${ROLE_COLORS[p.role] ?? "text-gray-400"}`}
@@ -487,7 +485,7 @@ export default function ContestDetailPage({ params }) {
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-[#63716E] mt-0.5">
+                    <p className="text-xs text-gray mt-0.5">
                       {p.pivot?.status ?? "invited"}
                     </p>
                   </div>
@@ -495,7 +493,7 @@ export default function ContestDetailPage({ params }) {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[#63716E]">No participants yet.</p>
+            <p className="text-sm text-gray">No participants yet.</p>
           )}
         </div>
       </div>
