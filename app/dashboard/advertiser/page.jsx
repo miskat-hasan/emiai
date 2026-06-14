@@ -1,9 +1,12 @@
+import DashboardPage from '@/components/dashboard/Dashboard'
 import React from 'react'
 
-const page = () => {
+const AdvertiserDashboardPage = () => {
   return (
-    <div>page</div>
+    <div>
+      <DashboardPage />
+    </div>
   )
 }
 
-export default page
+export default AdvertiserDashboardPage
