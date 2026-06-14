@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
+import Link from "next/link";
 
 export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
@@ -115,17 +116,19 @@ export default function Topbar({ onToggleSidebar }) {
 
         {/* Notification bell */}
         <div ref={notifRef} className="relative">
+          <Link href={`/dashboard/${user?.role}/notifications`}>
           <button
-            onClick={() => {
-              setNotifOpen(v => !v);
-              setProfileOpen(false);
-            }}
-            className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+            // onClick={() => {
+            //   setNotifOpen(v => !v);
+            //   setProfileOpen(false);
+            // }}
+            className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
             aria-label="Notifications"
-          >
+            >
             <Bell size={19} />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary border-2 border-white" />
           </button>
+            </Link>
 
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50">
