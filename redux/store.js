@@ -4,6 +4,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "@/redux/slices/authSlice";
 import { apiSlice } from "@/redux/api/apiSlice";
 import registrationReducer from "@/redux/slices/registrationSlice";
+import adCreationReducer from "@/redux/slices/adCreationSlice";
 import {
   persistStore,
   FLUSH,
@@ -18,6 +19,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
     registration: registrationReducer,
+    adCreation: adCreationReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
 
@@ -25,7 +27,8 @@ export const store = configureStore({
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER, "adCreation/setDraftData"],
+        ignoredPaths: ["adCreation.draft.mediaFile"],
       },
     }).concat(apiSlice.middleware),
 });

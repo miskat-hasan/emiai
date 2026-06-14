@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import AdsToolbar from "./components/AdsToolbar";
 import AdsGrid from "./components/AdsGrid";
+import CreateAdFlow from "./components/CreateAdFlow";
+import PostPreview from "./components/PostPreview";
+import { useDispatch, useSelector } from "react-redux";
+import { setStep, clearDraft } from "@/redux/slices/adCreationSlice";
 // import { useGetPublishedAdsQuery } from "@/redux/api/services/adApi";
 
 // Mock data
@@ -129,6 +133,9 @@ export default function AdsPage() {
   const [adsList, setAdsList] = useState(PUBLISHED_ADS);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
+  
+  const dispatch = useDispatch();
+  const step = useSelector((state) => state.adCreation.step);
 
   // When backend is ready
   // const { data: adsData, isLoading } = useGetPublishedAdsQuery();
@@ -153,9 +160,12 @@ export default function AdsPage() {
   };
 
   const handlePost = () => {
-    //open create ad modal
-    console.log("Post new ad");
+    dispatch(setStep("create_ad"));
   };
+
+  if (step === "preview") {
+    return <PostPreview />;
+  }
 
   return (
     <div className="space-y-5">
@@ -182,6 +192,9 @@ export default function AdsPage() {
         onAdClick={handleAdClick}
         onBookmarkToggle={handleBookmarkToggle}
       />
+
+      {/* Create Ad Flow Modals */}
+      <CreateAdFlow />
     </div>
   );
 }
