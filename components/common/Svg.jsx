@@ -877,3 +877,27 @@ export const SnapchatIconSVG = ({ className, ...props }) => {
   );
 };
 
+
+
+export const VoucherBackgroundSVG = ({ className, ...props }) => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 350 450"
+      fill="none"
+      className={cn("w-full h-auto", className)}
+      {...props}
+    >
+      <defs>
+        <linearGradient id="voucherGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="var(--color-primary, #f57802)" />
+          <stop offset="100%" stopColor="var(--color-secondary, #eb4a35)" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M16 0 H 334 A 16 16 0 0 1 350 16 V 340 A 20 20 0 0 0 350 380 V 434 A 16 16 0 0 1 334 450 H 16 A 16 16 0 0 1 0 434 V 380 A 20 20 0 0 0 0 340 V 16 A 16 16 0 0 1 16 0 Z"
+        fill="url(#voucherGradient)"
+      />
+    </svg>
+  );
+};
