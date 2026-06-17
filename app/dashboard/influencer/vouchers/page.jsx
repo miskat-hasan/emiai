@@ -46,7 +46,7 @@ export default function VouchersPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold text-black">Vouchers</h2>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => setIsFilterModalOpen(true)}
             className="flex items-center gap-2 border border-gray/30 rounded-full px-5 py-2 text-sm font-medium hover:bg-gray/5 transition-colors text-black"
           >
@@ -58,7 +58,7 @@ export default function VouchersPage() {
               <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
-          <button 
+          <button
             onClick={() => setIsCreateModalOpen(true)}
             className="bg-primary text-white rounded-full px-5 py-2 text-sm font-medium hover:opacity-90 transition-opacity"
           >
@@ -68,24 +68,53 @@ export default function VouchersPage() {
       </div>
 
       {/* Vouchers Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {vouchers.map(voucher => (
-          <VoucherCard
-            key={voucher.id}
-            role="influencer"
-            title={`${voucher.discount}${voucher.discount_type === 'percentage' ? '%' : ''} off`}
-            description={voucher.description}
-            label="Voucher"
-            code={voucher.promo_code}
-            expiryDate={formatDate(voucher.end_date)}
-            onCopy={() => handleCopy(voucher.promo_code)}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse w-full max-w-[350px] mx-auto h-[450px]"
+            >
+              <div className="p-6 flex flex-col items-center h-full pt-10">
+                {/* Title */}
+                <div className="h-8 bg-gray-200 rounded-full w-2/3 mb-4" />
+                {/* Description */}
+                <div className="h-4 bg-gray-200 rounded-full w-full mb-2" />
+                <div className="h-4 bg-gray-200 rounded-full w-4/5 mb-6" />
+                {/* Code box */}
+                <div className="h-10 bg-gray-200 rounded-lg w-1/2 mb-6" />
+                {/* Image */}
+                <div className="h-[80px] w-[80px] bg-gray-200 rounded-[16px] mb-8" />
+                {/* Copy Button */}
+                <div className="h-10 bg-gray-200 rounded-full w-3/4 mt-auto mb-4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : vouchers.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-gray col-span-full">
+          <p className="text-base font-medium">No vouchers found</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {vouchers.map((voucher) => (
+            <VoucherCard
+              key={voucher.id}
+              role="influencer"
+              title={`${voucher.discount}${voucher.discount_type === 'percentage' ? '%' : ''} off`}
+              description={voucher.description}
+              label="Voucher"
+              code={voucher.promo_code}
+              expiryDate={formatDate(voucher.end_date)}
+              onCopy={() => handleCopy(voucher.promo_code)}
+            />
+          ))}
+        </div>
+      )}
 
-      <CreateVoucherModal 
-        open={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+      <CreateVoucherModal
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
         role="influencer"
       />
 
