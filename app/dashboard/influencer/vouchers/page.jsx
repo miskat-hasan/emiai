@@ -24,7 +24,7 @@ export default function VouchersPage() {
   // Fetch vouchers from backend
   const { data: response, isLoading } = useGetVouchersQuery();
 
-  const vouchers = response?.data || [];
+  const vouchers = response?.data?.data || [];
 
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
