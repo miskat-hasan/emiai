@@ -3,13 +3,16 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import {
-  ArrowLeft, Bookmark, MinusCircle, AlertCircle, Share2, Video,
-  Calendar, ChevronDown
+  ArrowLeft, Bookmark, Share2, Video,
+  Calendar, ChevronDown, UserPlus, LogOut, MoreVertical
 } from "lucide-react";
+import { MinusCircleSVG, ExclamationCircleSVG } from "@/components/common/Svg";
 import BlockModal from "./modals/BlockModal";
 import ReportModal from "./modals/ReportModal";
 import DeliveryModal from "./modals/DeliveryModal";
 import ExtensionDeliveryModal from "./modals/ExtensionDeliveryModal";
+import LeaveGroupModal from "./modals/LeaveGroupModal";
+import AddMemberModal from "./modals/AddMemberModal";
 
 export default function ChatInfoView({ chat, onBack }) {
   const { user, deliveryDate, gallery } = chat;
@@ -20,11 +23,124 @@ export default function ChatInfoView({ chat, onBack }) {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   const tabs = ["Gallery", "Message", "Documents", "Links"];
 
+  // Render Group Chat View
+  if (user.role === "Group") {
+    return (
+      <div className="flex flex-col h-full bg-white rounded-[24px] overflow-hidden border border-gray-100/80 m-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative animate-in slide-in-from-right-8 duration-300">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 lg:p-6 shrink-0 z-10 bg-transparent">
+          <button
+            onClick={onBack}
+            className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black rounded-full transition-colors cursor-pointer"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto pb-8 scrollbar-hide">
+          <div className="flex flex-col items-center px-6 lg:px-10 mt-2">
+
+            <div className="relative w-full flex justify-end">
+              <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer">
+                <Bookmark size={22} className="fill-gray-500 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Collage Avatar (mocked with an image) */}
+            <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-[24px] overflow-hidden mb-6 mt-[-10px] shadow-sm">
+              <Image
+                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop"
+                alt="Group Chat"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
+            <h2 className="text-[22px] font-bold text-gray-900 mb-3">{user.name}</h2>
+            <p className="text-sm text-gray-500 text-center max-w-[280px] mb-8 leading-relaxed font-medium">
+              You can check the offer. You can check the offer. You can check the offer.
+            </p>
+
+            <div className="flex items-center gap-7 mb-10">
+              <button
+                onClick={() => setIsLeaveModalOpen(true)}
+                className="text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+              >
+                <LogOut size={24} strokeWidth={2} className="rotate-180" />
+              </button>
+              <button
+                onClick={() => setIsAddMemberModalOpen(true)}
+                className="text-gray-800 hover:text-black transition-colors cursor-pointer"
+              >
+                <UserPlus size={24} strokeWidth={2.5} />
+              </button>
+              <button className="text-gray-800 hover:text-black transition-colors cursor-pointer">
+                <Share2 size={24} strokeWidth={2.5} />
+              </button>
+              <button className="w-[42px] h-[42px] rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm shadow-red-500/30 cursor-pointer">
+                <Video size={20} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            <hr className="w-full border-gray-200 mb-8" />
+
+            {/* Members List */}
+            <div className="w-full flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold text-gray-900 text-[15px]">All Member ({chat.members?.length || 0})</h3>
+                <ChevronDown size={20} className="text-gray-500 cursor-pointer hover:text-gray-800 transition-colors" />
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {chat.members?.map((member) => (
+                  <div key={member.id} className="flex items-center justify-between group">
+                    <div className="flex items-center gap-3">
+                      <div className="relative w-11 h-11 rounded-full overflow-hidden border border-gray-100 shadow-sm">
+                        <Image
+                          src={member.avatar}
+                          alt={member.name}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                      <div className="flex flex-row items-center gap-1.5 mt-0.5">
+                        <span className="font-semibold text-[15px] text-gray-800">{member.name}</span>
+                        <span className={`text-[13px] font-medium ${member.roleColor}`}>({member.role})</span>
+                      </div>
+                    </div>
+                    <button className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer p-1">
+                      <MoreVertical size={20} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Modals for Group Chat */}
+        <LeaveGroupModal
+          isOpen={isLeaveModalOpen}
+          onClose={() => setIsLeaveModalOpen(false)}
+        />
+
+        <AddMemberModal
+          isOpen={isAddMemberModalOpen}
+          onClose={() => setIsAddMemberModalOpen(false)}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col h-full bg-white relative animate-in slide-in-from-right-8 duration-300">
+    <div className="flex flex-col h-full bg-white rounded-[24px] overflow-hidden border border-gray-100/80 m-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative animate-in slide-in-from-right-8 duration-300">
       {/* Header */}
       <div className="flex items-center justify-between p-4 lg:p-6 shrink-0 z-10">
         <button
@@ -64,13 +180,13 @@ export default function ChatInfoView({ chat, onBack }) {
               onClick={() => setIsBlockModalOpen(true)}
               className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-black transition-colors shadow-sm cursor-pointer"
             >
-              <MinusCircle size={18} />
+              <MinusCircleSVG className="w-[18px] h-[18px]" />
             </button>
             <button
               onClick={() => setIsReportModalOpen(true)}
               className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-black transition-colors shadow-sm cursor-pointer"
             >
-              <AlertCircle size={18} />
+              <ExclamationCircleSVG className="w-[18px] h-[18px]" />
             </button>
             <button className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-black transition-colors shadow-sm cursor-pointer">
               <Share2 size={18} />
@@ -186,6 +302,16 @@ export default function ChatInfoView({ chat, onBack }) {
       <ExtensionDeliveryModal
         isOpen={isExtensionModalOpen}
         onClose={() => setIsExtensionModalOpen(false)}
+      />
+
+      <LeaveGroupModal
+        isOpen={isLeaveModalOpen}
+        onClose={() => setIsLeaveModalOpen(false)}
+      />
+
+      <AddMemberModal
+        isOpen={isAddMemberModalOpen}
+        onClose={() => setIsAddMemberModalOpen(false)}
       />
     </div>
   );
