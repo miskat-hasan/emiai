@@ -6,9 +6,9 @@ import ChatItem from "./ChatItem";
 
 const ChatList = memo(({ chats, selectedChatId, onSelectChat, searchQuery, setSearchQuery }) => {
   return (
-    <div className="flex flex-col h-full bg-white/50">
+    <div className="flex flex-col h-full">
       {/* Header / Search Area */}
-      <div className="p-4 border-b border-gray-100 flex items-center gap-3 shrink-0">
+      <div className="p-4 flex items-center gap-3 shrink-0">
         <div className="relative flex-1">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
