@@ -3,14 +3,18 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { NAV_ITEMS } from "../Data/Data";
+import ContactSupportModal from "./ContactSupportModal";
 
 export default function Sidebar({ role = "advertiser", collapsed = false }) {
   const pathname = usePathname();
   const navItems = NAV_ITEMS[role] ?? NAV_ITEMS.advertiser ?? [];
+  const [supportModalOpen, setSupportModalOpen] = useState(false);
 
   return (
-    <aside
+    <>
+      <aside
       className={`
         flex flex-col h-screen border-r max-lg:bg-white border-primary/10 mask-clip-border
         transition-all duration-300 ease-in-out shrink-0
@@ -51,15 +55,41 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
       <nav className="flex-1 px-4 pb-6 mt-1">
         <ul className="space-y-0.5 lg:space-y-2">
           {navItems.map(item => {
-            const isActive = pathname === item.href;
+            const isActive = !supportModalOpen && pathname === item.href;
             const Icon = item.icon;
 
             return (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  title={collapsed ? item.label : undefined}
-                  className={`
+                {item?.label === "Contact Support" ? (
+                  <button
+                    type="button"
+                    onClick={() => setSupportModalOpen(true)}
+                    title={collapsed ? item.label : undefined}
+                    className={`
+                    group flex items-center gap-3 rounded-xl px-3 py-2.5
+                    text-sm font-medium transition-all duration-150 cursor-pointer
+                    ${
+                      supportModalOpen
+                        ? "bg-gradient-to-br from-primary to-secondary text-white shadow-sm shadow-primary/30"
+                        : "text-gray-500 hover:bg-primary/10 hover:text-gray-800"
+                    }
+                    ${collapsed ? "justify-center" : ""}
+                  `}
+                  >
+                    <Icon
+                      size={18}
+                      className={`shrink-0 transition-colors ${supportModalOpen ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
+                    />
+                    {!collapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    onClick={() => setSupportModalOpen(false)}
+                    title={collapsed ? item.label : undefined}
+                    className={`
                     group flex items-center gap-3 rounded-xl px-3 py-2.5
                     text-sm font-medium transition-all duration-150
                     ${
@@ -69,18 +99,29 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
                     }
                     ${collapsed ? "justify-center" : ""}
                   `}
-                >
-                  <Icon
-                    size={18}
-                    className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
-                  />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
+                  >
+                    <Icon
+                      size={18}
+                      className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
+                    />
+                    {!collapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </Link>
+                )}
               </li>
             );
           })}
         </ul>
       </nav>
     </aside>
+      
+      <ContactSupportModal 
+        open={supportModalOpen} 
+        onClose={() => setSupportModalOpen(false)} 
+        collapsed={collapsed}
+        role={role}
+      />
+    </>
   );
 }

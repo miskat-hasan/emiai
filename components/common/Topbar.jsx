@@ -8,18 +8,23 @@ import {
   LogOut,
   Settings,
   User,
+  Coins,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
+import Link from "next/link";
 
 export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
+
+  const isShareAppPage = pathname?.includes('/share-app');
 
   const user = useSelector(state => state.auth?.user);
 
@@ -113,19 +118,32 @@ export default function Topbar({ onToggleSidebar }) {
           />
         </div> */}
 
+        {/* Share App page only*/}
+        {isShareAppPage && (
+          <div 
+            onClick={() => router.push("?showCoins=true", { scroll: false })}
+            className="flex items-center gap-1.5 px-3 py-1.5 mr-1 rounded-full border border-orange-100 bg-orange-50 text-primary hover:cursor-pointer transition-colors"
+          >
+            <Coins size={15} className="text-primary" />
+            <span className="text-sm font-semibold">0</span>
+          </div>
+        )}
+
         {/* Notification bell */}
         <div ref={notifRef} className="relative">
-          <button
-            onClick={() => {
-              setNotifOpen(v => !v);
-              setProfileOpen(false);
-            }}
-            className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell size={19} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary border-2 border-white" />
-          </button>
+          <Link href={`/dashboard/${user?.role}/notifications`}>
+            <button
+              // onClick={() => {
+              //   setNotifOpen(v => !v);
+              //   setProfileOpen(false);
+              // }}
+              className="relative p-2 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
+              aria-label="Notifications"
+            >
+              <Bell size={19} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary border-2 border-white" />
+            </button>
+          </Link>
 
           {notifOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-gray-100 py-3 z-50">
@@ -206,10 +224,9 @@ export default function Topbar({ onToggleSidebar }) {
                   disabled={isLoggingOut && danger}
                   className={`
                     w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer
-                    ${
-                      danger
-                        ? "text-red-500 hover:bg-red-50"
-                        : "text-black hover:bg-primary/5"
+                    ${danger
+                      ? "text-red-500 hover:bg-red-50"
+                      : "text-black hover:bg-primary/5"
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}
