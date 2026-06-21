@@ -1,14 +1,22 @@
 "use client";
 
 import React, { memo } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronLeft } from "lucide-react";
 import ChatItem from "./ChatItem";
 
-const ChatList = memo(({ chats, selectedChatId, onSelectChat, searchQuery, setSearchQuery }) => {
+const ChatList = memo(({ chats, selectedChatId, onSelectChat, searchQuery, setSearchQuery, onBack }) => {
   return (
     <div className="flex flex-col h-full">
       {/* Header / Search Area */}
       <div className="p-4 flex items-center gap-3 shrink-0">
+        {onBack && (
+          <button 
+            onClick={onBack}
+            className="lg:hidden w-10 h-10 shrink-0 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+          >
+            <ChevronLeft size={20} strokeWidth={2} />
+          </button>
+        )}
         <div className="relative flex-1">
           <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
