@@ -14,6 +14,7 @@ export default function InboxPage() {
   const [selectedChatId, setSelectedChatId] = useState(null);
 
   // Responsive state for mobile view
+  const [showChatListOnMobile, setShowChatListOnMobile] = useState(false);
   const [showChatViewOnMobile, setShowChatViewOnMobile] = useState(false);
   const [showInfoView, setShowInfoView] = useState(false);
 
@@ -121,22 +122,25 @@ export default function InboxPage() {
       {/* Main 3-pane layout */}
       <div className="flex-1 flex overflow-hidden relative lg:p-0">
 
-        {/* Panel 1: Sidebar (Hidden on mobile if chat view is active) */}
+        {/* Panel 1: Sidebar (Hidden on mobile if chat list or chat view is active) */}
         <div className={`
-          ${showChatViewOnMobile ? 'hidden lg:flex' : 'flex'}
+          ${(showChatListOnMobile || showChatViewOnMobile) ? 'hidden lg:flex' : 'flex'}
           w-full lg:w-auto shrink-0 flex-col overflow-y-auto scrollbar-hide
         `}>
           <InboxSidebar
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={(tab) => {
+              setActiveTab(tab);
+              setShowChatListOnMobile(true);
+            }}
             counts={counts}
           />
         </div>
 
-        {/* Panel 2: Chat List (Hidden on mobile if chat view is active) */}
+        {/* Panel 2: Chat List (Hidden on mobile if chat view is active or if viewing sidebar) */}
         <div 
           className={`
-            ${showChatViewOnMobile ? 'hidden lg:flex' : 'flex'}
+            ${(showChatViewOnMobile || !showChatListOnMobile) ? 'hidden lg:flex' : 'flex'}
             w-full lg:w-[var(--chat-list-width)] shrink-0 flex-col overflow-hidden
           `}
           style={{ '--chat-list-width': `${chatListWidth}px` }}
@@ -147,6 +151,7 @@ export default function InboxPage() {
             onSelectChat={handleSelectChat}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            onBack={() => setShowChatListOnMobile(false)}
           />
         </div>
 
