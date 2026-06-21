@@ -75,7 +75,7 @@ export const NAV_ITEMS = {
     {
       label: "Contact Support",
       icon: HeadphonesIcon,
-      href: "/dashboard/influencer/support",
+      href: "#",
     },
     {
       label: "Share app",

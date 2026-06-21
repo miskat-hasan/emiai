@@ -56,25 +56,54 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
 
             return (
               <li key={item.href}>
-                <Link
-                  href={item.href}
-                  title={collapsed ? item.label : undefined}
-                  className={`
+                {item?.label === "Contact Support" ? (
+                  <button
+                    type="button"
+                    onClick={() => console.log("clicked")}
+                    title={collapsed ? item.label : undefined}
+                    className={`
                     group flex items-center gap-3 rounded-xl px-3 py-2.5
-                    text-sm font-medium transition-all duration-150
-                    ${isActive
-                      ? "bg-gradient-to-br from-primary to-secondary text-white shadow-sm shadow-primary/30"
-                      : "text-gray-500 hover:bg-primary/10 hover:text-gray-800"
+                    text-sm font-medium transition-all duration-150 cursor-pointer
+                    ${
+                      isActive
+                        ? "bg-gradient-to-br from-primary to-secondary text-white shadow-sm shadow-primary/30"
+                        : "text-gray-500 hover:bg-primary/10 hover:text-gray-800"
                     }
                     ${collapsed ? "justify-center" : ""}
                   `}
-                >
-                  <Icon
-                    size={18}
-                    className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
-                  />
-                  {!collapsed && <span className="truncate">{item.label}</span>}
-                </Link>
+                  >
+                    <Icon
+                      size={18}
+                      className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
+                    />
+                    {!collapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </button>
+                ) : (
+                  <Link
+                    href={item.href}
+                    title={collapsed ? item.label : undefined}
+                    className={`
+                    group flex items-center gap-3 rounded-xl px-3 py-2.5
+                    text-sm font-medium transition-all duration-150
+                    ${
+                      isActive
+                        ? "bg-gradient-to-br from-primary to-secondary text-white shadow-sm shadow-primary/30"
+                        : "text-gray-500 hover:bg-primary/10 hover:text-gray-800"
+                    }
+                    ${collapsed ? "justify-center" : ""}
+                  `}
+                  >
+                    <Icon
+                      size={18}
+                      className={`shrink-0 transition-colors ${isActive ? "text-white" : "text-gray-400 group-hover:text-gray-600"}`}
+                    />
+                    {!collapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
+                  </Link>
+                )}
               </li>
             );
           })}
