@@ -31,7 +31,7 @@ export default function VouchersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-dm-sans">
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold text-black">Vouchers</h1>

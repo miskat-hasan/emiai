@@ -20,9 +20,9 @@ export default function EventParticipants({
   participants = DEFAULT_PARTICIPANTS,
 }) {
   return (
-    <div className="bg-gray-50 rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 h-full">
+    <div className="bg-gray/5 rounded-3xl p-6 md:p-8 shadow-sm border border-gray/10 h-full">
       <h2 className="text-lg font-bold text-black mb-4">Participants</h2>
-      <hr className="border-gray-200 mb-4" />
+      <hr className="border-gray/20 mb-4" />
 
       {/* Scrollable Container */}
       <div className="max-h-80 overflow-y-auto no-scrollbar pr-1">
@@ -30,7 +30,7 @@ export default function EventParticipants({
           {participants.map(participant => (
             <div key={participant.id} className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gray-200">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gray/20">
                 {participant.avatar ? (
                   <Image
                     src={participant.avatar}
@@ -39,7 +39,7 @@ export default function EventParticipants({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray bg-gray-200">
+                  <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray bg-gray/20">
                     {participant.name
                       .split(" ")
                       .map(n => n[0])

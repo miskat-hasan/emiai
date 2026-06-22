@@ -9,6 +9,7 @@ import {
   Settings,
   User,
   Coins,
+  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
@@ -120,12 +121,12 @@ export default function Topbar({ onToggleSidebar }) {
 
         {/* Share App page only*/}
         {isShareAppPage && (
-          <div 
+          <div
             onClick={() => router.push("?showCoins=true", { scroll: false })}
-            className="flex items-center gap-1.5 px-3 py-1.5 mr-1 rounded-full border border-orange-100 bg-orange-50 text-primary hover:cursor-pointer transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 mr-1 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 rounded-2xl bg-white bg-gradient-to-b from-white/50 from-[56.57%] to-primary/50 to-[206.38%] backdrop-blur-[5.7px]"
           >
-            <Coins size={15} className="text-primary" />
-            <span className="text-sm font-semibold">0</span>
+            <Zap size={18} className="text-primary fill-primary" />
+            <span className="text-base font-medium text-primary leading-none">0</span>
           </div>
         )}
 
