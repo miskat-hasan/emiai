@@ -17,7 +17,7 @@ export default function SelectUsersModal({
 
   return (
     <div className="p-6 flex flex-col items-center">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Send Invitation</h2>
+      <h2 className="text-xl font-bold text-black mb-6">Send Invitation</h2>
       
       {/* Search & Filter */}
       <div className="flex items-center gap-3 w-full mb-6">
@@ -27,14 +27,14 @@ export default function SelectUsersModal({
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-900 outline-none border border-transparent focus:border-primary/20"
+            className="w-full bg-gray/5 rounded-xl px-4 py-3 text-sm text-black outline-none border border-transparent focus:border-primary/20"
           />
         </div>
         <button
           onClick={onOpenFilter}
-          className="p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+          className="p-3 bg-gray/5 rounded-xl hover:bg-gray/10 transition-colors"
         >
-          <SlidersHorizontal size={20} className="text-gray-600" />
+          <SlidersHorizontal size={20} className="text-gray" />
         </button>
       </div>
 
@@ -53,14 +53,14 @@ export default function SelectUsersModal({
                     className="object-cover"
                   />
                 </div>
-                <span className="font-medium text-gray-900">{user.name}</span>
+                <span className="font-medium text-black">{user.name}</span>
               </div>
               <button
                 onClick={() => onToggleUser(user.id)}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full border text-sm font-medium transition-colors ${
                   isSelected
                     ? "bg-primary/10 border-primary text-primary"
-                    : "border-gray-200 text-gray-700 hover:border-gray-300"
+                    : "border-gray/20 text-gray-700 hover:border-gray-300"
                 }`}
               >
                 <Plus size={16} />
@@ -73,7 +73,7 @@ export default function SelectUsersModal({
 
       <button
         onClick={onSendInvitation}
-        className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-white py-3.5 rounded-2xl font-medium text-[16px] transition-all duration-200"
+        className="w-full bg-gradient-to-b from-primary to-secondary hover:opacity-90 text-white py-3.5 rounded-2xl font-medium text-[16px] transition-all duration-200"
       >
         Sent Invitation
       </button>

@@ -2,11 +2,11 @@ import React from "react";
 
 export default function EventDescription({ title, description }) {
   return (
-    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 h-full">
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray/10 h-full">
       <h2 className="text-lg font-bold text-black mb-4">
         Event Title : {title}
       </h2>
-      <hr className="border-gray-200 mb-4" />
+      <hr className="border-gray/20 mb-4" />
       <div className="text-sm text-gray space-y-4 leading-relaxed">
         {description ? (
           <p>{description}</p>

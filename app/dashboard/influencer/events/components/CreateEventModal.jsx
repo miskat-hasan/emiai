@@ -24,7 +24,7 @@ function Input({ className = "", ...props }) {
   return (
     <input
       {...props}
-      className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all ${className}`}
+      className={`w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all ${className}`}
     />
   );
 }
@@ -33,7 +33,7 @@ function Textarea({ className = "", ...props }) {
   return (
     <textarea
       {...props}
-      className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none ${className}`}
+      className={`w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black placeholder:text-gray/60 outline-none focus:border-primary/40 focus:bg-white transition-all resize-none ${className}`}
     />
   );
 }
@@ -44,7 +44,7 @@ function UploadBox({ label, accept, hint, onChange, fileName }) {
     <Field label={label}>
       <div
         onClick={() => ref.current?.click()}
-        className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
+        className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray/20 bg-gray/5 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
       >
         <Upload size={18} className="text-primary shrink-0" />
         <div className="text-sm">
@@ -168,13 +168,19 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       {/* Modal panel */}
-      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+      <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/*Gradient Overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.15) 100%)" }}
+        />
+        <div className="relative z-10 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent flex flex-col w-full h-full">
+          {/* Header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray/10">
           <h2 className="text-base font-bold text-black">Create New Event</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg hover:bg-gray/10 text-gray transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -301,7 +307,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
               <select
                 value={visibility}
                 onChange={e => setVisibility(e.target.value)}
-                className="w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
+                className="w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
               >
                 {VISIBILITY_OPTIONS.map(opt => (
                   <option key={opt} value={opt}>
@@ -325,7 +331,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
               onClick={() => setIsPublished(v => !v)}
               className={`
                 relative w-12 h-6 rounded-full transition-colors duration-200 cursor-pointer
-                ${isPublished ? "bg-primary" : "bg-gray-200"}
+                ${isPublished ? "bg-primary" : "bg-gray/20"}
               `}
             >
               <span
@@ -353,7 +359,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
               type="button"
               onClick={handleGenerateAI}
               disabled={generatingAI}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-xs font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-xs font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
             >
               <Sparkles size={13} />
               {generatingAI ? "Generating..." : "Generate message with AI"}
@@ -361,7 +367,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
           </div>
 
           {/* Footer: Cancel | Send Invitations | Create Event */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-2 border-t border-gray/10">
             <button
               type="button"
               onClick={onClose}
@@ -381,13 +387,14 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
               >
                 {isLoading ? "Creating..." : "Create Event"}
               </button>
             </div>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

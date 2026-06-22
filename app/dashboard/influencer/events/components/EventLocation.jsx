@@ -2,12 +2,12 @@ import React from "react";
 
 export default function EventLocation({ mapUrl }) {
   return (
-    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 h-full">
+    <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray/10 h-full">
       <h2 className="text-lg font-bold text-black mb-4">
         Event Live location
       </h2>
-      <hr className="border-gray-200 mb-4" />
-      <div className="relative w-full h-[300px] rounded-2xl overflow-hidden bg-gray-100">
+      <hr className="border-gray/20 mb-4" />
+      <div className="relative w-full h-[300px] rounded-2xl overflow-hidden bg-gray/10">
         {mapUrl ? (
           <iframe
             src={mapUrl}

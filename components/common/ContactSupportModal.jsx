@@ -32,7 +32,7 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
 
   return createPortal(
     <div
-      className={`theme-${role} fixed inset-y-0 right-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all duration-200
+      className={`theme-${role} font-dm-sans fixed inset-y-0 right-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all duration-200
         ${collapsed ? "max-lg:left-0 lg:left-[72px]" : "max-lg:left-0 lg:left-[245px]"}
         ${isAnimating ? "opacity-100" : "opacity-0"}
       `}
