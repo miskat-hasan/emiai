@@ -156,7 +156,7 @@ export default function EventsPage() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 font-dm-sans">
         {/* Page heading */}
         <div>
           <h1 className="text-2xl font-bold text-black">Events</h1>
@@ -179,7 +179,7 @@ export default function EventsPage() {
 
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
           >
             <Plus size={15} />
             Create New Event

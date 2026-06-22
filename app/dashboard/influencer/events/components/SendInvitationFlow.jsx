@@ -79,8 +79,14 @@ export default function SendInvitationFlow({ open, onClose }) {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-[400px] bg-white rounded-3xl shadow-2xl overflow-hidden">
-        {step === "select_users" && (
+      <div className="relative w-full max-w-[400px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+        {/*Gradient Overlay */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0"
+          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.15) 100%)" }}
+        />
+        <div className="relative z-10 flex flex-col w-full h-full">
+          {step === "select_users" && (
           <SelectUsersModal
             users={MOCK_USERS}
             searchQuery={searchQuery}
@@ -116,6 +122,7 @@ export default function SendInvitationFlow({ open, onClose }) {
             onYes={handlePaymentAmountYes}
           />
         )}
+        </div>
       </div>
     </div>
   );
