@@ -58,10 +58,44 @@ body {
   @apply font-dm-sans;
 }
 
-/* ── Scrollbar (sidebar) ──────────────────────────────────────────────────── */
+/* ── Global Utilities ───────────────────────────────────────────────────────── */
+
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar,
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Global Scrollbar ─────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--color-primary-rgb), 0.4);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* ── Scrollbar Thin (Modifier) ────────────────────────────────────────────── */
 
 .scrollbar-thin::-webkit-scrollbar {
   width: 4px;
+  height: 4px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -69,12 +103,12 @@ body {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: rgba(var(--color-primary-rgb), 0.4);
   border-radius: 999px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+  background: var(--color-primary);
 }
 
 .theme-influencer {

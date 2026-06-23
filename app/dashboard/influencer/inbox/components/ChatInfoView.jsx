@@ -42,7 +42,7 @@ export default function ChatInfoView({ chat, onBack }) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto pb-8 scrollbar-hide">
+        <div className="flex-1 overflow-y-auto pb-8">
           <div className="flex flex-col items-center px-6 lg:px-10 mt-2">
 
             <div className="relative w-full flex justify-end">
@@ -124,7 +124,7 @@ export default function ChatInfoView({ chat, onBack }) {
             </div>
           </div>
         </div>
-        
+
         {/* Modals for Group Chat */}
         <LeaveGroupModal
           isOpen={isLeaveModalOpen}
@@ -154,7 +154,7 @@ export default function ChatInfoView({ chat, onBack }) {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-8 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-8">
 
         {/* Profile Section */}
         <div className="flex flex-col items-center mt-2 mb-8">

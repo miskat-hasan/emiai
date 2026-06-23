@@ -71,7 +71,7 @@ export default async function MyEventDetailsPage({ params }) {
         <h2 className="text-xl md:text-2xl font-bold text-black">
           {event.title}
         </h2>
-        {/* MyEventActionButtons is "use client" — fine inside a Server Component */}
+        {/* EventActionButtons is "use client" — fine inside a Server Component */}
         <EventActionButtons />
       </div>
 
