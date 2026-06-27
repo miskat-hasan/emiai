@@ -1,12 +1,5 @@
-import InfluencerPage from '@/components/dashboard/influencers/InfluencerPage'
-import React from 'react'
+import InfluencerPage from "@/components/dashboard/influencers/InfluencerPage";
 
-const AdvertiserInfluencerPage = () => {
-  return (
-    <div>
-      <InfluencerPage />
-    </div>
-  )
+export default function Page() {
+  return <InfluencerPage role="advertiser" />;
 }
-
-export default AdvertiserInfluencerPage

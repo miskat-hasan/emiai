@@ -1,12 +1,5 @@
-import DealDetailPage from '@/components/dashboard/deals/DealDetailPage'
-import React from 'react'
+import DealDetailPage from "@/components/dashboard/deals/DealDetailPage";
 
-const InfluencerDealDetailPage = () => {
-  return (
-    <div>
-      <DealDetailPage />
-    </div>
-  )
+export default function Page({ params }) {
+  return <DealDetailPage params={params} role="influencer" />;
 }
-
-export default InfluencerDealDetailPage

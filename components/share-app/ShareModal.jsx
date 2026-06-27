@@ -47,7 +47,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
 
               <button 
                 onClick={onClose}
-                className="w-[85%] py-3.5 rounded-full bg-primary text-white text-[18px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)]"
+                className="w-[85%] py-3.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-[18px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
               >
                 Ok
               </button>
@@ -81,7 +81,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
                   // Simulate successful share backend call
                   setMode("success");
                 }}
-                className="w-full py-3.5 rounded-xl bg-primary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)] mb-4"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 mb-4"
               >
                 Share Link
               </button>
@@ -117,7 +117,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
                   // Simulate successful share backend call
                   setMode("success");
                 }}
-                className="w-full py-3.5 rounded-xl bg-primary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)]"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
               >
                 Share QR Code
               </button>

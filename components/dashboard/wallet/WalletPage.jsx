@@ -162,7 +162,7 @@ function DonutChart({ data, total }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function WalletPage() {
+export default function WalletPage({ role }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
 
@@ -365,9 +365,8 @@ export default function WalletPage() {
 
             {/* Credit card */}
             <div
-              className="relative rounded-2xl overflow-hidden p-5 text-white shadow-lg"
+              className="relative rounded-2xl overflow-hidden p-5 text-white shadow-lg bg-gradient-to-br from-primary to-secondary"
               style={{
-                background: "linear-gradient(135deg, #F57802 0%, #E54500 100%)",
                 minHeight: 160,
               }}
             >
