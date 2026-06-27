@@ -141,7 +141,7 @@ function FilterDropdown({ value, onChange }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DealsPage() {
+export default function DealsPage({ role }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
@@ -189,7 +189,7 @@ export default function DealsPage() {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map(deal => (
-            <DealCard key={deal.id} {...deal} />
+            <DealCard key={deal.id} {...deal} role={role} />
           ))}
         </div>
       ) : (

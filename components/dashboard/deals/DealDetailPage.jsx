@@ -24,7 +24,7 @@ const MOCK_DEAL = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DealDetailPage({ params }) {
+export default function DealDetailPage({ params, role }) {
   const router = useRouter();
 
   // In real usage: fetch deal by params.id
@@ -38,14 +38,14 @@ export default function DealDetailPage({ params }) {
         <p className="text-sm text-gray mt-0.5">
           <span
             className="text-primary font-medium cursor-pointer hover:underline"
-            onClick={() => router.push("/dashboard/influencer")}
+            onClick={() => router.push(`/dashboard/${role}`)}
           >
             Dashboard
           </span>
           {" / "}
           <span
             className="text-primary font-medium cursor-pointer hover:underline"
-            onClick={() => router.push("/dashboard/influencer/deals")}
+            onClick={() => router.push(`/dashboard/${role}/deals`)}
           >
             Deals
           </span>

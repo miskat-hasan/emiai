@@ -1,12 +1,5 @@
-import DealsPage from '@/components/dashboard/deals/DealsPage'
-import React from 'react'
+import DealsPage from "@/components/dashboard/deals/DealsPage";
 
-const InfluencerDealsPage = () => {
-  return (
-    <div>
-      <DealsPage />
-    </div>
-  )
+export default function Page() {
+  return <DealsPage role="influencer" />;
 }
-
-export default InfluencerDealsPage

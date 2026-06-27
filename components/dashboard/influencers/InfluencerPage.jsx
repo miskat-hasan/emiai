@@ -49,7 +49,7 @@ const MOCK = [
   },
 ];
 
-export default function InfluencerPage() {
+export default function InfluencerPage({ role }) {
   const [search, setSearch] = useState("");
   const [bookmarks, setBookmarks] = useState({});
 
