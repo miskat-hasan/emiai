@@ -69,7 +69,7 @@ const MOCK = [
   },
 ];
 
-export default function SmartMatchingPage() {
+export default function SmartMatchingPage({ role }) {
   const [search, setSearch] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
   const [predOpen, setPredOpen] = useState(false);

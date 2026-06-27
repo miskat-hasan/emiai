@@ -141,7 +141,7 @@ export const NAV_ITEMS = {
       icon: HeadphonesIcon,
       href: "/dashboard/advertiser/support",
     },
-    { label: "Share app", icon: Share2, href: "/dashboard/advertiser/share" },
+    { label: "Share app", icon: ShareAppSVG, href: "/dashboard/advertiser/share" },
   ],
   agency: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/agency" },
@@ -172,6 +172,7 @@ export const NAV_ITEMS = {
     { label: "Events", icon: CalendarDays, href: "/dashboard/agency/events" },
     { label: "Ads", icon: Megaphone, href: "/dashboard/agency/ads" },
     { label: "Block Person", icon: UserX, href: "/dashboard/agency/block" },
+    { label: "Share app", icon: ShareAppSVG, href: "/dashboard/agency/share" },
     {
       label: "Contact Support",
       icon: HeadphonesIcon,
@@ -213,7 +214,7 @@ export const NAV_ITEMS = {
     },
     {
       label: "Share app",
-      icon: Share2,
+      icon: ShareAppSVG,
       href: "/dashboard/business_manager/share",
     },
     {
@@ -242,7 +243,7 @@ export const NAV_ITEMS = {
     { label: "Vouchers", icon: Ticket, href: "/dashboard/guest/vouchers" },
     { label: "Ads", icon: Megaphone, href: "/dashboard/guest/ads" },
     { label: "Tickets", icon: Ticket, href: "/dashboard/guest/tickets" },
-    { label: "Share app", icon: Share2, href: "/dashboard/guest/share" },
+    { label: "Share app", icon: ShareAppSVG, href: "/dashboard/guest/share" },
     {
       label: "Contact Support",
       icon: HeadphonesIcon,

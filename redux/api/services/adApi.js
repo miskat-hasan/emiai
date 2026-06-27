@@ -24,4 +24,3 @@ export const {
   useGetAdByIdQuery,
   useCreateAdMutation,
 } = adApi;
-
