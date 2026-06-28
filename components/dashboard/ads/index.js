@@ -11,3 +11,5 @@ export { default as CreateAdFlow } from "./CreateAdFlow";
 export { default as CreateNewAdModal } from "./CreateNewAdModal";
 export { default as PostPreview } from "./PostPreview";
 export { default as PublishAdOptionsModal } from "./PublishAdOptionsModal";
+export { default as PublishAdsPage } from "./PublishAdsPage";
+export { default as PublishedAdDetailsPage } from "./PublishedAdDetailsPage";
