@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { Bookmark, ScanLine, Share2 } from "lucide-react";
+import { Bookmark, ScanLine, Share2, Trash2, Edit } from "lucide-react";
 
-export default function AdActionButtons() {
+export default function AdActionButtons({ onEdit, onDelete }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
 
   return (
@@ -29,6 +29,26 @@ export default function AdActionButtons() {
       <button className="p-2 bg-gray-100 text-gray rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
         <Share2 size={18} />
       </button>
+
+      {/* Delete */}
+      {onDelete && (
+        <button
+          onClick={onDelete}
+          className="p-2 bg-gray-100 text-gray rounded-full hover:bg-red-100 hover:text-red-500 transition-colors cursor-pointer"
+        >
+          <Trash2 size={18} />
+        </button>
+      )}
+
+      {/* Edit */}
+      {onEdit && (
+        <button
+          onClick={onEdit}
+          className="p-2 bg-gray-100 text-gray rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
+        >
+          <Edit size={18} />
+        </button>
+      )}
     </div>
   );
 }
