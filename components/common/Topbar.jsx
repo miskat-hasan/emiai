@@ -25,7 +25,7 @@ export default function Topbar({ onToggleSidebar }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
-  const isShareAppPage = pathname?.includes('/share-app');
+  const isShareAppPage = pathname?.includes('/share-app') || pathname?.includes('/share');
 
   const user = useSelector(state => state.auth?.user);
 
