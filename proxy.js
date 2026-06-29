@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const ROLE_HOME = {
   influencer: "/dashboard/influencer",
   advertiser: "/dashboard/advertiser",
-  agency: "/dashboard/marketing-agency",
+  agency: "/dashboard/agency",
   business_manager: "/dashboard/business_manager",
   guest: "/dashboard/guest/explore",
 };
