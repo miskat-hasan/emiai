@@ -3,7 +3,7 @@ import { apiSlice } from "../apiSlice";
 export const adApi = apiSlice.injectEndpoints({
   endpoints: builder => ({
     getPublishedAds: builder.query({
-      query: () => ({ url: "/api/ads", method: "GET" }),
+      query: () => ({ url: "/api/ads/list?type=active", method: "GET" }),
       providesTags: ["Ad"],
     }),
 

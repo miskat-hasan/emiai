@@ -3,7 +3,11 @@ import { apiSlice } from "../apiSlice";
 export const voucherApi = apiSlice.injectEndpoints({
   endpoints: builder => ({
     getVouchers: builder.query({
-      query: () => ({ url: "/api/vouchers/all", method: "GET" }),
+      query: (params) => ({ 
+        url: "/api/vouchers/all", 
+        method: "GET",
+        params 
+      }),
       providesTags: ["Voucher"],
     }),
     getVoucherCategories: builder.query({
