@@ -22,9 +22,10 @@ const formatDate = (dateString) => {
 export default function VouchersPage({ role }) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [filters, setFilters] = useState({});
 
   // Fetch vouchers from backend
-  const { data: response, isLoading } = useGetVouchersQuery();
+  const { data: response, isLoading } = useGetVouchersQuery(filters);
 
   const vouchers = response?.data?.data || [];
 
@@ -126,7 +127,18 @@ export default function VouchersPage({ role }) {
         open={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
         onFilter={(data) => {
-          console.log("Filtering vouchers with:", data);
+          const processedFilters = { ...data };
+          if (processedFilters.country_id) {
+            processedFilters.country = processedFilters.country_id;
+            delete processedFilters.country_id;
+          }
+          // Remove empty keys
+          Object.keys(processedFilters).forEach(key => {
+            if (!processedFilters[key]) {
+              delete processedFilters[key];
+            }
+          });
+          setFilters(processedFilters);
         }}
         role={role}
       />

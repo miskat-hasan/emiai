@@ -8,6 +8,7 @@ import TabSwitcher from "@/components/common/TabSwitcher";
 import EventCard from "./EventCard";
 import MyEventCard from "./MyEventCard";
 import { Ticket } from "@/components/common/Ticket";
+import { useGetUpcomingEventsQuery, useGetMyEventsQuery, useGetMyTicketsQuery } from "@/redux/api/services/eventApi";
 
 // ── Dynamic imports for heavy modals (code-split, no SSR) ──────────────────
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
@@ -25,34 +26,33 @@ const TABS = [
   { key: "my-ticket", label: "My Ticket" },
 ];
 
-// ── Mock data ───────────────────────────────────────────────────────────────
+// ── Skeletons ───────────────────────────────────────────────────────────────
 
-const UPCOMING_EVENTS = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "Digital Marketing Forum 2025",
-  location: "Hello this is about my portfolio",
-  sponsor: "Event CO.",
-  date: "Feb 17, 2026",
-  imageUrl:
-    "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60",
-}));
-
-const MY_EVENTS = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "Digital Marketing Forum 2025",
-  description: "Hello this is about my portfolio",
-  organizer: "Event CO.",
-  date: "Feb 17, 2026",
-  imageUrl:
-    "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=600&auto=format&fit=crop&q=60",
-}));
-
-const MY_TICKETS = Array.from({ length: 12 }, (_, i) => ({
-  id: i + 1,
-  title: "Digital Marketing Forum 2025",
-  ticketNumber: "1234567890",
-  qrCode: "/images/demo-qrcode.png",
-}));
+const EventCardSkeleton = memo(function EventCardSkeleton() {
+  return (
+    <div className="bg-white border border-gray/20 rounded-[2rem] p-3 w-full shadow-sm animate-pulse">
+      <div className="w-full h-[220px] rounded-[1.5rem] bg-gray-200"></div>
+      <div className="bg-gray/5 rounded-[1.5rem] p-5 mt-3 flex flex-col gap-3.5">
+        <div className="flex items-start gap-4">
+          <div className="h-4 bg-gray-200 rounded w-16 shrink-0"></div>
+          <div className="h-4 bg-gray-200 rounded flex-1"></div>
+        </div>
+        <div className="flex items-start gap-4">
+          <div className="h-4 bg-gray-200 rounded w-16 shrink-0"></div>
+          <div className="h-4 bg-gray-200 rounded flex-1"></div>
+        </div>
+        <div className="flex items-center gap-4 mt-1">
+          <div className="h-4 bg-gray-200 rounded w-16 shrink-0"></div>
+          <div className="flex-1 flex justify-between gap-4">
+             <div className="h-4 bg-gray-200 rounded w-20"></div>
+             <div className="h-4 bg-gray-200 rounded w-20"></div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-3 w-full bg-gray-200 h-[52px] rounded-2xl"></div>
+    </div>
+  );
+});
 
 // ── Tab Panels (memoized to avoid re-renders on tab switch) ─────────────────
 
@@ -166,10 +166,26 @@ export default function EventsPage({ role }) {
     setSendInviteModalOpen(true);
   }, []);
 
-  // when backend is ready we will use these hooks to fetch data
-  // const upcomingQuery = useGetUpcomingEventsQuery(undefined, { skip: activeTab !== "upcoming" });
-  // const myEventsQuery = useGetMyEventsQuery(undefined, { skip: activeTab !== "my-event" });
-  // const myTicketsQuery = useGetMyTicketsQuery(undefined, { skip: activeTab !== "my-ticket" });
+  const upcomingQuery = useGetUpcomingEventsQuery(undefined, { skip: activeTab !== "upcoming" });
+  const myEventsQuery = useGetMyEventsQuery(undefined, { skip: activeTab !== "my-event" });
+  const myTicketsQuery = useGetMyTicketsQuery(undefined, { skip: activeTab !== "my-ticket" });
+
+  const formatEvent = (event) => ({
+    id: event.id,
+    title: event.title,
+    location: event.full_location || event.location,
+    sponsor: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
+    organizer: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
+    date: new Date(event.date).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' }),
+    imageUrl: event.photo 
+      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${event.photo}` 
+      : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60",
+    description: event.description || "Hello this is about my portfolio",
+  });
+
+  const upcomingEvents = upcomingQuery.data?.data?.map(formatEvent) || [];
+  const myEvents = myEventsQuery.data?.data?.map(formatEvent) || [];
+  const myTickets = myTicketsQuery.data?.data || [];
 
   return (
     <>
@@ -205,9 +221,43 @@ export default function EventsPage({ role }) {
 
         {/* Content */}
 
-        {activeTab === "upcoming" && <UpcomingPanel events={UPCOMING_EVENTS} onCardClick={handleCardClick} onButtonClick={handleCreateInviteClick} />}
-        {activeTab === "my-event" && <MyEventPanel events={MY_EVENTS} onCardClick={handleMyEventCardClick} />}
-        {activeTab === "my-ticket" && <MyTicketPanel tickets={MY_TICKETS} />}
+        {activeTab === "upcoming" && (
+          upcomingQuery.isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
+            </div>
+          ) : (
+            <UpcomingPanel events={upcomingEvents} onCardClick={handleCardClick} onButtonClick={handleCreateInviteClick} />
+          )
+        )}
+        
+        {activeTab === "my-event" && (
+          myEventsQuery.isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
+            </div>
+          ) : (
+            <MyEventPanel events={myEvents} onCardClick={handleMyEventCardClick} />
+          )
+        )}
+        
+        {activeTab === "my-ticket" && (
+          myTicketsQuery.isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-white border border-gray/20 rounded-2xl h-[200px] w-full animate-pulse flex">
+                  <div className="w-[120px] bg-gray-200 h-full rounded-l-2xl"></div>
+                  <div className="p-4 flex-1 flex flex-col justify-center gap-4">
+                    <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <MyTicketPanel tickets={myTickets} />
+          )
+        )}
       </div>
 
       {/* Create Event Modal — dynamically imported */}

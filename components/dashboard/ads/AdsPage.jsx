@@ -11,85 +11,75 @@ import { setStep } from "@/redux/slices/adCreationSlice";
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
 const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
-// Mock data
-const PUBLISHED_ADS = [
-  {
-    id: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60",
-    userName: "Jacob Jones",
-    userAvatar: "https://i.pravatar.cc/150?u=jacob",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-    isBookmarked: true,
-  },
-  {
-    id: 2,
-    imageUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=60",
-    userName: "Kathryn Murphy",
-    userAvatar: "https://i.pravatar.cc/150?u=kathryn",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-  },
-  {
-    id: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=600&auto=format&fit=crop&q=60",
-    userName: "Marvin McKinney",
-    userAvatar: "https://i.pravatar.cc/150?u=marvin",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 day ago",
-  },
-  {
-    id: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1581044777550-4cfa60707998?w=600&auto=format&fit=crop&q=60",
-    userName: "Esther Howard",
-    userAvatar: "https://i.pravatar.cc/150?u=esther",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-    isBookmarked: true,
-  },
-  {
-    id: 5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&auto=format&fit=crop&q=60",
-    userName: "Leslie Alexander",
-    userAvatar: "https://i.pravatar.cc/150?u=leslie",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-  },
-  {
-    id: 6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&auto=format&fit=crop&q=60",
-    userName: "Michael Johnson",
-    userAvatar: "https://i.pravatar.cc/150?u=michael",
-    description: "Autumn Trends – Discover t...",
-    timeAgo: "3 days ago",
-  },
-];
+import { useGetPublishedAdsQuery } from "@/redux/api/services/adApi";
+
+const AdCardSkeleton = () => (
+  <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-200 animate-pulse">
+    <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-10 flex items-center gap-3 w-full">
+       <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 border-2 border-white/30"></div>
+       <div className="flex-1 flex flex-col gap-2">
+          <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+          <div className="h-3 bg-gray-300 rounded w-full"></div>
+       </div>
+    </div>
+  </div>
+);
+
+// Utility to calculate time ago
+function timeSince(dateString) {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + " years ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + " months ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + " days ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + " hrs ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + " mins ago";
+  return Math.floor(seconds) + " secs ago";
+}
 
 export default function AdsPage({ role }) {
-  const [adsList, setAdsList] = useState(PUBLISHED_ADS);
+  const { data: response, isLoading } = useGetPublishedAdsQuery();
+  const rawAds = response?.data?.data || [];
+  
+  const mappedAds = rawAds.map(ad => ({
+    id: ad.id,
+    imageUrl: ad.media_url 
+      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}${ad.media_url}`
+      : "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60",
+    userName: "Advertiser " + ad.advertiser_id, // Fallback if no advertiser details are in response
+    userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
+    description: ad.description,
+    timeAgo: timeSince(ad.publish_at),
+    isBookmarked: false, // Default state, might need backend implementation later
+  }));
+
+  const [bookmarkedAds, setBookmarkedAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
   
   const dispatch = useDispatch();
   const step = useSelector((state) => state.adCreation.step);
 
-  const filteredAds = adsList.filter(
+  const finalAds = mappedAds.map(ad => ({
+    ...ad,
+    isBookmarked: bookmarkedAds.includes(ad.id),
+  }));
+
+  const filteredAds = finalAds.filter(
     ad =>
       ad.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ad.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleBookmarkToggle = id => {
-    setAdsList(prev =>
-      prev.map(ad =>
-        ad.id === id ? { ...ad, isBookmarked: !ad.isBookmarked } : ad
-      )
+    setBookmarkedAds(prev => 
+      prev.includes(id) ? prev.filter(bId => bId !== id) : [...prev, id]
     );
   };
 
@@ -126,11 +116,19 @@ export default function AdsPage({ role }) {
       />
 
       {/* Ads grid */}
-      <AdsGrid
-        ads={filteredAds}
-        onAdClick={handleAdClick}
-        onBookmarkToggle={handleBookmarkToggle}
-      />
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
+           {[1, 2, 3, 4, 5, 6].map(i => <AdCardSkeleton key={i} />)}
+        </div>
+      ) : filteredAds.length > 0 ? (
+        <AdsGrid
+          ads={filteredAds}
+          onAdClick={handleAdClick}
+          onBookmarkToggle={handleBookmarkToggle}
+        />
+      ) : (
+        <div className="flex justify-center py-20 text-gray">No ads found.</div>
+      )}
 
       {/* Create Ad Flow Modals */}
       <CreateAdFlow />

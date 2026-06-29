@@ -4,9 +4,107 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, Upload, Sparkles } from "lucide-react";
-// import { useCreateEventMutation } from "@/redux/api/services/eventApi";
+import { useCreateEventMutation } from "@/redux/api/services/eventApi";
+import { useLazySearchUsersQuery } from "@/redux/api/services/commonApi";
 
 // Sub-components
+
+function AsyncUserSearch({ label, selectedUsers, onChange, placeholder, requireAmount }) {
+  const [triggerSearch, { data, isFetching }] = useLazySearchUsersQuery();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm) {
+        triggerSearch(searchTerm);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, triggerSearch]);
+
+  const handleSelectUser = (user) => {
+    if (!selectedUsers.find(u => u.id === user.id)) {
+      onChange([...selectedUsers, { ...user, amount: "" }]);
+    }
+    setSearchTerm("");
+    setShowDropdown(false);
+  };
+
+  const handleRemoveUser = (userId) => {
+    onChange(selectedUsers.filter(u => u.id !== userId));
+  };
+
+  const handleAmountChange = (userId, amount) => {
+    onChange(selectedUsers.map(u => u.id === userId ? { ...u, amount } : u));
+  };
+
+  const results = data?.data || data || [];
+
+  return (
+    <Field label={label} className="relative">
+      <div className="flex flex-col gap-2">
+        <Input 
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setShowDropdown(true);
+          }}
+          onFocus={() => setShowDropdown(true)}
+          onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+          placeholder={placeholder}
+        />
+        
+        {/* Selected Users Chips */}
+        {selectedUsers.length > 0 && (
+          <div className="flex flex-col gap-2 mt-1">
+            {selectedUsers.map(user => (
+              <div key={user.id} className="flex items-center justify-between bg-gray/10 rounded-xl px-3 py-2 text-sm">
+                <span className="font-medium text-black">{user.name || user.email}</span>
+                <div className="flex items-center gap-2">
+                  {requireAmount && (
+                    <input 
+                      type="number"
+                      placeholder="Amount"
+                      value={user.amount}
+                      onChange={(e) => handleAmountChange(user.id, e.target.value)}
+                      className="w-24 rounded-lg bg-white border border-gray/20 px-2 py-1 text-xs outline-none focus:border-primary/40"
+                    />
+                  )}
+                  <button type="button" onClick={() => handleRemoveUser(user.id)} className="text-gray hover:text-red-500 cursor-pointer">
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Dropdown */}
+        {showDropdown && searchTerm && (
+          <div className="absolute top-[70px] left-0 right-0 z-10 bg-white rounded-xl shadow-lg border border-gray/10 max-h-48 overflow-y-auto">
+            {isFetching ? (
+              <div className="p-3 text-sm text-gray text-center">Searching...</div>
+            ) : results.length > 0 ? (
+              results.map(user => (
+                <div 
+                  key={user.id} 
+                  onClick={() => handleSelectUser(user)}
+                  className="px-4 py-2 hover:bg-gray/5 cursor-pointer text-sm text-black border-b border-gray/5 last:border-0"
+                >
+                  {user.name} <span className="text-gray text-xs ml-1">({user.email})</span>
+                </div>
+              ))
+            ) : (
+              <div className="p-3 text-sm text-gray text-center">No users found</div>
+            )}
+          </div>
+        )}
+      </div>
+    </Field>
+  );
+}
 
 function Field({ label, error, children, className = "" }) {
   return (
@@ -74,13 +172,15 @@ function UploadBox({ label, accept, hint, onChange, fileName }) {
 
 //Visibility options
 
-const VISIBILITY_OPTIONS = ["Only invited", "Public", "Followers only"];
+const VISIBILITY_OPTIONS = [
+  { value: "public", label: "Public" },
+  { value: "only_invited", label: "Only Invited" }
+];
 
 // Main modal
 
 export default function CreateEventModal({ open, onClose, onSuccess }) {
-  //const [createEvent, { isLoading }] = useCreateEventMutation();
-  const isLoading = false;
+  const [createEvent, { isLoading }] = useCreateEventMutation();
 
   const {
     register,
@@ -92,9 +192,19 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
   const [eventPhoto, setEventPhoto] = useState(null);
   const [legalDoc, setLegalDoc] = useState(null);
   const [isPublished, setIsPublished] = useState(false);
-  const [visibility, setVisibility] = useState("Only invited");
+  const [visibility, setVisibility] = useState("public");
   const [generatingAI, setGeneratingAI] = useState(false);
   const [invitationMessage, setInvitationMessage] = useState("");
+
+  const [step, setStep] = useState(1);
+  const [eventData, setEventData] = useState(null);
+  const [collaborators, setCollaborators] = useState([]);
+  const [sponsors, setSponsors] = useState([]);
+  const [tickets, setTickets] = useState([
+    { type: "VIP", price: "" },
+    { type: "Normal", price: "" },
+    { type: "free", price: "" },
+  ]);
 
   // Reset on close
   useEffect(() => {
@@ -103,8 +213,17 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
       setEventPhoto(null);
       setLegalDoc(null);
       setIsPublished(false);
-      setVisibility("Only invited");
+      setVisibility("public");
       setInvitationMessage("");
+      setStep(1);
+      setEventData(null);
+      setCollaborators([]);
+      setSponsors([]);
+      setTickets([
+        { type: "VIP", price: "" },
+        { type: "Normal", price: "" },
+        { type: "free", price: "" },
+      ]);
     }
   }, [open, reset]);
 
@@ -118,39 +237,49 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
     }, 1200);
   };
 
+  const handleTicketChange = (index, field, value) => {
+    const newTickets = [...tickets];
+    newTickets[index][field] = value;
+    setTickets(newTickets);
+  };
+
   const onSubmit = async data => {
+    setEventData(data);
+    setStep(2);
+  };
+
+  const handleFinalSubmit = async () => {
     const fd = new FormData();
+    const data = eventData;
 
     fd.append("title", data.title);
-    fd.append("event_type", data.event_type);
+    fd.append("type", data.event_type);
     fd.append("entry_fee", data.entry_fee ?? "");
-    fd.append("event_date", data.event_date);
+    fd.append("date", data.event_date);
     fd.append("location", data.location);
     fd.append("full_location", data.full_location);
     fd.append("description", data.description);
-    fd.append(
-      "legal_approvals_description",
-      data.legal_approvals_description ?? "",
-    );
-    fd.append("sponsored", data.sponsored ?? "");
-    fd.append("payment_request", data.payment_request ?? "");
-    fd.append("collaborator", data.collaborator ?? "");
-    fd.append("who_can_see", visibility);
-    fd.append("is_published", isPublished ? "1" : "0");
-    fd.append("invitation_message", invitationMessage);
 
-    if (eventPhoto) fd.append("event_photo", eventPhoto);
-    if (legalDoc) fd.append("legal_document", legalDoc);
+    fd.append("event_restriction", visibility);
+    fd.append("is_published", isPublished ? "1" : "0");
+    fd.append("message", invitationMessage);
+
+    collaborators.forEach((c, i) => fd.append(`collaborators[${i}]`, c.id));
+    sponsors.forEach((s, i) => {
+      fd.append(`sponsors[${i}][user_id]`, s.id);
+      fd.append(`sponsors[${i}][amount]`, s.amount || "0");
+    });
+    tickets.forEach((t, i) => {
+      fd.append(`tickets[${i}][type]`, t.type);
+      fd.append(`tickets[${i}][price]`, t.price);
+    });
+
+
+    if (eventPhoto) fd.append("photo", eventPhoto);
 
     try {
-      // const res = await createEvent(fd).unwrap();
-      // if (res?.success) {
-      //   toast.success("Event created successfully!");
-      //   onClose();
-      //   onSuccess?.();
-      // }
-
-      // TODO: remove mock success once backend is ready
+      const res = await createEvent(fd).unwrap();
+      // Assuming res?.success is present, otherwise adapt to API format
       toast.success("Event created successfully!");
       onClose();
       onSuccess?.();
@@ -188,7 +317,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="px-6 py-5 flex flex-col gap-5"
+          className={step === 1 ? "px-6 py-5 flex flex-col gap-5" : "hidden"}
         >
           {/* Event Title */}
           <Field label="Event Title" error={errors.title?.message}>
@@ -201,12 +330,18 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
           {/* Event Type | Entry Fee | Event Date */}
           <div className="grid grid-cols-3 gap-3">
             <Field label="Event Type" error={errors.event_type?.message}>
-              <Input
-                placeholder="Offline"
-                {...register("event_type", {
-                  required: "Event type is required",
-                })}
-              />
+              <div className="relative">
+                <select
+                  {...register("event_type", { required: "Event type is required" })}
+                  className="w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
+                >
+                  <option value="online">Online</option>
+                  <option value="offline">Offline</option>
+                </select>
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray text-xs">
+                  ▾
+                </span>
+              </div>
             </Field>
 
             <Field label="Event Entry Fee">
@@ -283,23 +418,25 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
             />
           </Field>
 
-          {/* Sponsored | Payment Request */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Sponsored">
-              <Input placeholder="Here." {...register("sponsored")} />
-            </Field>
-            <Field label="Payment Request">
-              <Input placeholder="Here." {...register("payment_request")} />
-            </Field>
-          </div>
 
-          {/* Invite Collaborator */}
-          <Field label="Invite Collaborator (Optional)">
-            <Input
-              placeholder="Search for an influencer..."
-              {...register("collaborator")}
+          {/* Sponsored & Collaborators */}
+          <div className="flex flex-col gap-5">
+            <AsyncUserSearch 
+              label="Sponsored"
+              placeholder="Search for sponsors..."
+              selectedUsers={sponsors}
+              onChange={setSponsors}
+              requireAmount={true}
             />
-          </Field>
+
+            <AsyncUserSearch 
+              label="Invite Collaborator (Optional)"
+              placeholder="Search for an influencer..."
+              selectedUsers={collaborators}
+              onChange={setCollaborators}
+              requireAmount={false}
+            />
+          </div>
 
           {/* Who can see your event */}
           <Field label="Who can see your event">
@@ -310,8 +447,8 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
                 className="w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
               >
                 {VISIBILITY_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>
-                    {opt}
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </select>
@@ -386,14 +523,73 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
 
               <button
                 type="submit"
-                disabled={isLoading}
                 className="px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <div className={step === 2 ? "px-6 py-5 flex flex-col gap-6" : "hidden"}>
+            <div className="text-center pt-2">
+              <h2 className="text-xl font-bold text-black">{eventData?.title}</h2>
+              <div className="text-sm text-gray mt-2 space-y-0.5">
+                <p>Date: {eventData?.event_date && new Date(eventData.event_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                <p>Location: {eventData?.location}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-5">
+              {tickets.map((ticket, index) => (
+                <div key={index} className="flex flex-col gap-3">
+                  <Field label="Classify Ticket">
+                    <div className="relative">
+                      <select
+                        value={ticket.type}
+                        onChange={e => handleTicketChange(index, "type", e.target.value)}
+                        className="w-full rounded-xl bg-gray/10 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="VIP">VIP</option>
+                        <option value="Normal">Normal</option>
+                        <option value="free">Free</option>
+                      </select>
+                      <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray text-xs">
+                        ▾
+                      </span>
+                    </div>
+                  </Field>
+
+                  <Field label="Price">
+                    <Input
+                      placeholder="$05"
+                      value={ticket.price}
+                      onChange={e => handleTicketChange(index, "price", e.target.value)}
+                    />
+                  </Field>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center items-center gap-8 pt-4 pb-2">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="text-sm font-medium text-[#115F59] hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                No
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFinalSubmit}
+                disabled={isLoading}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
               >
                 {isLoading ? "Creating..." : "Create Event"}
               </button>
             </div>
           </div>
-        </form>
         </div>
       </div>
     </div>
