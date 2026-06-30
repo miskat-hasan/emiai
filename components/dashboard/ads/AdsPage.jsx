@@ -11,7 +11,7 @@ import { setStep } from "@/redux/slices/adCreationSlice";
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
 const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
-import { useGetPublishedAdsQuery } from "@/redux/api/services/adApi";
+import { useGetPublishedAdsQuery, useGetAllAdsQuery } from "@/redux/api/services/adApi";
 
 const AdCardSkeleton = () => (
   <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-200 animate-pulse">
@@ -44,20 +44,38 @@ function timeSince(dateString) {
 }
 
 export default function AdsPage({ role }) {
-  const { data: response, isLoading } = useGetPublishedAdsQuery();
-  const rawAds = response?.data?.data || [];
+  const { data: myAdsResponse, isLoading: isLoadingMyAds } = useGetPublishedAdsQuery(undefined, { skip: role === "guest" });
+  const { data: allAdsResponse, isLoading: isLoadingAllAds } = useGetAllAdsQuery(undefined, { skip: role !== "guest" });
+
+  const response = role === "guest" ? allAdsResponse : myAdsResponse;
+  const isLoading = role === "guest" ? isLoadingAllAds : isLoadingMyAds;
+
+  let rawAds = [];
+  if (Array.isArray(response)) rawAds = response;
+  else if (Array.isArray(response?.data)) rawAds = response.data;
+  else if (Array.isArray(response?.data?.data)) rawAds = response.data.data;
   
-  const mappedAds = rawAds.map(ad => ({
-    id: ad.id,
-    imageUrl: ad.media_url 
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}${ad.media_url}`
-      : "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60",
-    userName: "Advertiser " + ad.advertiser_id, // Fallback if no advertiser details are in response
-    userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
-    description: ad.description,
-    timeAgo: timeSince(ad.publish_at),
-    isBookmarked: false, // Default state, might need backend implementation later
-  }));
+  const mappedAds = rawAds.map(ad => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+    const origin = new URL(apiUrl).origin;
+    let imageUrl = ad.media_url;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${origin}${imageUrl}`;
+    }
+    if (!imageUrl) {
+      imageUrl = "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60";
+    }
+
+    return {
+      id: ad.id,
+      imageUrl,
+      userName: "Advertiser " + ad.advertiser_id, // Fallback if no advertiser details are in response
+      userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
+      description: ad.description,
+      timeAgo: timeSince(ad.publish_at || ad.created_at),
+      isBookmarked: false, // Default state, might need backend implementation later
+    };
+  });
 
   const [bookmarkedAds, setBookmarkedAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,8 +91,8 @@ export default function AdsPage({ role }) {
 
   const filteredAds = finalAds.filter(
     ad =>
-      ad.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ad.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      ad.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (ad.description && ad.description.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleBookmarkToggle = id => {
