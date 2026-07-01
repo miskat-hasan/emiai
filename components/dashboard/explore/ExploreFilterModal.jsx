@@ -2,18 +2,12 @@
 
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 
-const COUNTRIES = [
-  "Bangladesh",
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "India",
-];
-
-export default function ExploreFilterModal({ open, onClose }) {
-  const [selectedCountry, setSelectedCountry] = useState("Bangladesh");
+export default function ExploreFilterModal({ open, onClose, onApply }) {
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const { data: countriesResponse } = useGetCountriesQuery(undefined, { skip: !open });
+  const countries = countriesResponse?.data || [];
 
   if (!open) return null;
 
@@ -51,9 +45,10 @@ export default function ExploreFilterModal({ open, onClose }) {
                   onChange={e => setSelectedCountry(e.target.value)}
                   className="w-full appearance-none bg-gray-50 border border-transparent focus:border-primary/30 outline-none rounded-xl px-4 py-3.5 text-[15px] font-medium text-gray-800 transition-colors cursor-pointer"
                 >
-                  {COUNTRIES.map(country => (
-                    <option key={country} value={country}>
-                      {country}
+                  <option value="">All Countries</option>
+                  {countries.map(country => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
                     </option>
                   ))}
                 </select>
@@ -74,7 +69,7 @@ export default function ExploreFilterModal({ open, onClose }) {
             </button>
             <button
               onClick={() => {
-                // Apply filter logic here
+                if (onApply) onApply({ country: selectedCountry });
                 onClose();
               }}
               className="bg-gradient-to-r from-primary to-secondary text-white px-8 py-2.5 rounded-xl text-[15px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
