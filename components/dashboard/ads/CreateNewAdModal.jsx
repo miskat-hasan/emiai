@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect, forwardRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import { X, Upload, Plus, ChevronDown } from "lucide-react";
+import { X, Upload, Plus, ChevronDown, Check } from "lucide-react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
+import { useGetCategoriesQuery, useGetCountriesQuery } from "@/redux/api/services/commonApi";
 
 // Sub-components
 
@@ -103,9 +104,17 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
 
+  const { data: categoriesResponse } = useGetCategoriesQuery();
+  const categories = categoriesResponse?.data || [];
+
+  const { data: countriesResponse } = useGetCountriesQuery();
+  const countries = countriesResponse?.data || [];
+
   const [previewUrl, setPreviewUrl] = useState(draft.previewUrl || null);
   const [mediaFile, setMediaFile] = useState(draft.mediaFile || null);
   const [prizesCount, setPrizesCount] = useState(Math.max(1, draft.prizes?.length || 1));
+  const [showCountries, setShowCountries] = useState(false);
+  const countryDropdownRef = useRef(null);
   const isLoading = false;
 
   const {
@@ -113,10 +122,14 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
     handleSubmit,
     setValue,
     reset,
+    watch,
+    control,
     formState: { errors },
   } = useForm({
     defaultValues: draft,
   });
+
+  const selectedCountries = watch("countries") || [];
 
   // Reset on close
   useEffect(() => {
@@ -127,6 +140,17 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
       setPrizesCount(Math.max(1, draft.prizes?.length || 1));
     }
   }, [open, reset, draft]);
+
+  // Click outside country dropdown to close
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
+        setShowCountries(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const onSubmit = async (data) => {
     // Save draft and move to next step
@@ -175,20 +199,75 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
 
           {/* Ads Category */}
           <Field label="Ads Category *" error={errors.adsCategory?.message}>
-            <Input
-              placeholder="Write Ads Category here..."
-              {...register("adsCategory", { required: "Ads Category is required" })}
-              className={errors.adsCategory ? "border-red-500" : ""}
-            />
+            <div className="relative">
+              <select
+                defaultValue=""
+                {...register("adsCategory", { required: "Ads Category is required" })}
+                className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer ${errors.adsCategory ? "border-red-500" : ""}`}
+              >
+                <option value="" disabled hidden>
+                  Choose Category
+                </option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={16}
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray text-xs"
+              />
+            </div>
           </Field>
 
-          {/* Location */}
-          <Field label="Location *" error={errors.location?.message}>
-            <Input
-              placeholder="Write Location here..."
-              {...register("location", { required: "Location is required" })}
-              className={errors.location ? "border-red-500" : ""}
-            />
+          {/* Location / Countries */}
+          <Field label="Location *" error={errors.countries?.message}>
+            <div className="relative" ref={countryDropdownRef}>
+              <div
+                onClick={() => setShowCountries(!showCountries)}
+                className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all cursor-pointer flex justify-between items-center ${errors.countries ? "border-red-500" : ""}`}
+              >
+                <span className={selectedCountries.length ? "text-black" : "text-gray/60"}>
+                  {selectedCountries.length > 0 
+                    ? `${selectedCountries.length} countr${selectedCountries.length > 1 ? 'ies' : 'y'} selected` 
+                    : "Select Countries"}
+                </span>
+                <ChevronDown size={16} className="text-gray text-xs" />
+              </div>
+              
+              {showCountries && (
+                <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto py-2">
+                  <Controller
+                    name="countries"
+                    control={control}
+                    rules={{ required: "At least one country is required" }}
+                    render={({ field }) => (
+                      <>
+                        {countries.map((country) => {
+                          const isSelected = field.value?.includes(country.code);
+                          return (
+                            <div
+                              key={country.code}
+                              onClick={() => {
+                                const newValue = isSelected
+                                  ? field.value.filter((c) => c !== country.code)
+                                  : [...(field.value || []), country.code];
+                                field.onChange(newValue);
+                              }}
+                              className="px-4 py-2 hover:bg-gray-50 flex items-center justify-between cursor-pointer"
+                            >
+                              <span className="text-sm text-black">{country.name}</span>
+                              {isSelected && <Check size={16} className="text-primary" />}
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
+                  />
+                </div>
+              )}
+            </div>
           </Field>
 
           {/* Prize Type */}
@@ -199,11 +278,11 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
                 {...register("prizeType")}
                 className="w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
               >
-                <option value="" disabled>
+                <option value="" disabled hidden>
                   Choose Prize Type
                 </option>
-                <option value="money">Money</option>
-                <option value="gift">Gift</option>
+                <option value="cash">Cash</option>
+                <option value="coupon">Coupon</option>
               </select>
               <ChevronDown
                 size={16}
@@ -216,9 +295,10 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
           {Array.from({ length: prizesCount }).map((_, index) => (
             <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`}>
               <div className="flex gap-3 items-center">
+                <input type="hidden" value={index + 1} {...register(`prizes.${index}.rank`)} />
                 <Input
                   placeholder="Write prize value..."
-                  {...register(`prizes.${index}`)}
+                  {...register(`prizes.${index}.value`)}
                 />
                 {index === prizesCount - 1 && (
                   <button
@@ -241,30 +321,23 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
             />
           </Field>
 
-          {/* Promo Code Details */}
-          <Field label="Promo Code Details">
-            <Textarea
-              placeholder="Write promo code details here..."
-              rows={3}
-              {...register("promoCodeDetails")}
-            />
-          </Field>
-
-          {/* Publish Date & Time */}
+          {/* Promo Code Discount & Expiry */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Publish Date">
+            <Field label="Discount Percentage (%)">
               <Input
-                type="date"
-                {...register("publishDate")}
+                type="number"
+                placeholder="e.g. 10"
+                {...register("promoCodeDiscount")}
               />
             </Field>
-            <Field label="Publish Time">
+            <Field label="Expiry Date">
               <Input
-                type="time"
-                {...register("publishTime")}
+                type="date"
+                {...register("promoCodeExpiry")}
               />
             </Field>
           </div>
+
 
           {/* Photo/Video */}
           <UploadBox

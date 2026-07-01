@@ -8,21 +8,7 @@ import { setStep, clearDraft } from "@/redux/slices/adCreationSlice";
 import { useCreateAdMutation } from "@/redux/api/services/adApi";
 import { toast } from "react-toastify";
 
-const formatTime = (timeStr) => {
-  if (!timeStr) return "";
-  const [hours, minutes] = timeStr.split(":");
-  let h = parseInt(hours, 10);
-  const ampm = h >= 12 ? "PM" : "AM";
-  h = h % 12 || 12;
-  return `${h.toString().padStart(2, "0")}:${minutes} ${ampm}`;
-};
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return "";
-  const [year, month, day] = dateStr.split("-");
-  const d = new Date(year, month - 1, day);
-  return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
-};
 
 export default function PostPreview() {
   const dispatch = useDispatch();
@@ -36,25 +22,55 @@ export default function PostPreview() {
 
   const handlePublish = async () => {
     const fd = new FormData();
-    fd.append("adsDescription", draft.adsDescription);
-    fd.append("adsCategory", draft.adsCategory);
-    fd.append("location", draft.location);
-    fd.append("prizeType", draft.prizeType);
-    fd.append("prizes", JSON.stringify(draft.prizes));
-    fd.append("promoCode", draft.promoCode);
-    fd.append("promoCodeDetails", draft.promoCodeDetails);
-    fd.append("publishDate", draft.publishDate);
-    fd.append("publishTime", draft.publishTime);
-    fd.append("paymentOption", options.selectedOption);
-    if (options.code) fd.append("paymentCode", options.code);
-    if (draft.mediaFile) fd.append("media", draft.mediaFile);
+    fd.append("description", draft.adsDescription);
+    fd.append("category_id", draft.adsCategory);
+    
+    // Add countries
+    if (draft.countries && draft.countries.length > 0) {
+      draft.countries.forEach((country, index) => {
+        fd.append(`countries[${index}]`, country);
+      });
+    }
+
+    if (draft.mediaFile) {
+      fd.append("media_file", draft.mediaFile);
+      const isVideo = draft.mediaFile.type.startsWith("video/");
+      fd.append("media_type", isVideo ? "video" : "image");
+    }
+
+
+
+    fd.append("prize_type", draft.prizeType);
+    
+    if (draft.prizes && draft.prizes.length > 0) {
+      draft.prizes.forEach((prize, index) => {
+        fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
+        fd.append(`prizes[${index}][value]`, prize.value);
+      });
+    }
+
+    if (draft.promoCode) {
+      fd.append("promo_code[code]", draft.promoCode);
+      if (draft.promoCodeDiscount) {
+        fd.append("promo_code[discount_percentage]", draft.promoCodeDiscount);
+      }
+      if (draft.promoCodeExpiry) {
+        fd.append("promo_code[expiry_date]", draft.promoCodeExpiry);
+      }
+    }
+
+    if (options.selectedOption === "promo_code" && options.code) {
+      fd.append("partner_code", options.code);
+    } else if (options.selectedOption === "coin") {
+      // Handle coin payment if needed by backend, e.g., fd.append("payment_method", "coin");
+    }
 
     try {
-      // await createAd(fd).unwrap();
+      await createAd(fd).unwrap();
       toast.success("Ads published successfully!");
       dispatch(clearDraft());
     } catch (err) {
-      toast.error("Failed to publish ads.");
+      toast.error(err?.data?.message || "Failed to publish ads.");
     }
   };
 
@@ -118,22 +134,7 @@ export default function PostPreview() {
                 {String(draft.prizes?.length || 0).padStart(2, "0")}
               </span>
             </div>
-            <div className="w-full h-[1px] bg-gray-200" />
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Publish Time</span>
-              <span className="font-semibold text-black">
-                {draft.publishTime ? formatTime(draft.publishTime) : "11:59 PM"}
-              </span>
-            </div>
-            <div className="w-full h-[1px] bg-gray-200" />
-
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Publish Date</span>
-              <span className="font-semibold text-black">
-                {draft.publishDate ? formatDate(draft.publishDate) : "Feb 15, 2026"}
-              </span>
-            </div>
           </div>
         </div>
       </div>

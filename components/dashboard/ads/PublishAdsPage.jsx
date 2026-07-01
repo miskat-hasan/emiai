@@ -1,97 +1,87 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AdsGrid } from "./index";
 import dynamic from "next/dynamic";
 import { useDispatch, useSelector } from "react-redux";
 import { setStep } from "@/redux/slices/adCreationSlice";
 import { Image as ImageIcon } from "lucide-react";
+import { useGetPublishedAdsQuery } from "@/redux/api/services/adApi";
 
 // Dynamically import CreateAdFlow and PostPreview to avoid SSR issues
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
 const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
-// Mock data
-const PUBLISHED_ADS = [
-  {
-    id: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60",
-    userName: "Devon Lane",
-    userAvatar: "https://i.pravatar.cc/150?u=devon",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-    isBookmarked: true,
-  },
-  {
-    id: 2,
-    imageUrl:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=60",
-    userName: "Jacob Jones",
-    userAvatar: "https://i.pravatar.cc/150?u=jacob",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-  },
-  {
-    id: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=600&auto=format&fit=crop&q=60",
-    userName: "Albert Flores",
-    userAvatar: "https://i.pravatar.cc/150?u=albert",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 day ago",
-  },
-  {
-    id: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1581044777550-4cfa60707998?w=600&auto=format&fit=crop&q=60",
-    userName: "Jane Smith",
-    userAvatar: "https://i.pravatar.cc/150?u=jane",
-    description: "Summer Fashion Collection...",
-    timeAgo: "1 day ago",
-    isBookmarked: true,
-  },
-  {
-    id: 5,
-    imageUrl:
-      "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=600&auto=format&fit=crop&q=60",
-    userName: "Cameron Williamson",
-    userAvatar: "https://i.pravatar.cc/150?u=cameron",
-    description: "Summer Fashion Collection...",
-    timeAgo: "2 hrs ago",
-  },
-  {
-    id: 6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=600&auto=format&fit=crop&q=60",
-    userName: "Michael Johnson",
-    userAvatar: "https://i.pravatar.cc/150?u=michael",
-    description: "Autumn Trends - Discover t...",
-    timeAgo: "3 days ago",
-  },
-];
-
 export default function PublishAdsPage({ role }) {
-  const [adsList, setAdsList] = useState(PUBLISHED_ADS);
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   const dispatch = useDispatch();
   const step = useSelector((state) => state.adCreation.step);
 
-  const filteredAds = adsList.filter(
-    (ad) =>
-      ad.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ad.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const { data: adsResponse, isLoading } = useGetPublishedAdsQuery();
+  let adsData = [];
+  if (Array.isArray(adsResponse)) adsData = adsResponse;
+  else if (Array.isArray(adsResponse?.data)) adsData = adsResponse.data;
+  else if (Array.isArray(adsResponse?.data?.data)) adsData = adsResponse.data.data;
+
+  const [bookmarkedIds, setBookmarkedIds] = useState(new Set());
+
+  const mappedAds = useMemo(() => {
+    return adsData.map((ad) => {
+      // Calculate time ago
+      const pubDate = new Date(ad.publish_at || ad.created_at);
+      const diffMs = new Date() - pubDate;
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffHours / 24);
+      let timeAgo = "";
+      if (diffDays > 0) timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      else if (diffHours > 0) timeAgo = `${diffHours} hr${diffHours > 1 ? 's' : ''} ago`;
+      else timeAgo = "Just now";
+
+      // Form URL using origin to avoid /api/ in path
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://oddeven.thewarriors.team";
+      const origin = new URL(apiUrl).origin;
+      let imageUrl = ad.media_url;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${origin}${imageUrl}`;
+      }
+      
+      // Fallback if media_url is empty
+      if (!imageUrl) {
+        imageUrl = "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60";
+      }
+
+      return {
+        id: ad.id,
+        imageUrl: imageUrl,
+        userName: "Advertiser " + ad.advertiser_id, // Mocked username since API doesn't provide it
+        userAvatar: `https://i.pravatar.cc/150?u=${ad.advertiser_id}`,
+        description: ad.description,
+        timeAgo: timeAgo,
+        isBookmarked: bookmarkedIds.has(ad.id),
+      };
+    });
+  }, [adsData, bookmarkedIds]);
+
+  const filteredAds = mappedAds.filter(
+    (ad) => {
+      const nameMatch = ad.userName?.toLowerCase().includes(searchQuery.toLowerCase());
+      const descMatch = ad.description && ad.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return nameMatch || descMatch;
+    }
   );
 
+  console.log("PublishAdsPage render:", { adsResponse, adsData, mappedAds, filteredAds, searchQuery });
+
   const handleBookmarkToggle = (id) => {
-    setAdsList((prev) =>
-      prev.map((ad) =>
-        ad.id === id ? { ...ad, isBookmarked: !ad.isBookmarked } : ad
-      )
-    );
+    setBookmarkedIds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) newSet.delete(id);
+      else newSet.add(id);
+      return newSet;
+    });
   };
 
   const handleAdClick = (id) => {
@@ -146,11 +136,15 @@ export default function PublishAdsPage({ role }) {
       </div>
 
       {/* Ads grid */}
-      <AdsGrid
-        ads={filteredAds}
-        onAdClick={handleAdClick}
-        onBookmarkToggle={handleBookmarkToggle}
-      />
+      {isLoading ? (
+        <div className="py-20 text-center text-gray">Loading ads...</div>
+      ) : (
+        <AdsGrid
+          ads={filteredAds}
+          onAdClick={handleAdClick}
+          onBookmarkToggle={handleBookmarkToggle}
+        />
+      )}
 
       {/* Create Ad Flow Modals */}
       <CreateAdFlow />
