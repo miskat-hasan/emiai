@@ -30,8 +30,6 @@ export default function Topbar({ onToggleSidebar }) {
 
   const user = useSelector((state) => state.auth?.user);
 
-  console.log("topbar user", user);
-
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
