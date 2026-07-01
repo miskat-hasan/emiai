@@ -62,13 +62,20 @@ export default function AdsPage({ role }) {
     if (imageUrl && !imageUrl.startsWith('http')) {
       imageUrl = `${origin}${imageUrl}`;
     }
-    if (!imageUrl) {
-      imageUrl = "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=600&auto=format&fit=crop&q=60";
+    let mediaType = ad.media_type;
+
+    if (!mediaType && imageUrl) {
+      if (imageUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
+        mediaType = "video";
+      } else {
+        mediaType = "image";
+      }
     }
 
     return {
       id: ad.id,
       imageUrl,
+      mediaType,
       userName: "Advertiser " + ad.advertiser_id, // Fallback if no advertiser details are in response
       userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
       description: ad.description,

@@ -19,6 +19,7 @@ const AdsGrid = memo(function AdsGrid({ ads, onAdClick, onBookmarkToggle }) {
         <AdCard
           key={ad.id}
           imageUrl={ad.imageUrl}
+          mediaType={ad.mediaType}
           userName={ad.userName}
           userAvatar={ad.userAvatar}
           description={ad.description}

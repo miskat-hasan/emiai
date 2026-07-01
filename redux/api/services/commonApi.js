@@ -1,7 +1,7 @@
 import { apiSlice } from "@/redux/api/apiSlice";
 
 export const commonApi = apiSlice.injectEndpoints({
-  endpoints: builder => ({
+  endpoints: (builder) => ({
     getCountries: builder.query({
       query: () => "/api/countries",
       providesTags: ["Countries"],
@@ -24,4 +24,9 @@ export const commonApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetCountriesQuery, useGetCategoriesQuery, useLazySearchUsersQuery, useSubmitSupportTicketMutation } = commonApi;
+export const {
+  useGetCountriesQuery,
+  useGetCategoriesQuery,
+  useLazySearchUsersQuery,
+  useSubmitSupportTicketMutation,
+} = commonApi;

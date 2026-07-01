@@ -1,12 +1,21 @@
 "use client";
 
-import React, { useState } from "react";
-import { Heart, Bookmark, Share } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { Heart, Bookmark, Share, VolumeX, Volume2 } from "lucide-react";
 
 export default function ExploreReelsView({ ads }) {
+  if (!ads || ads.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-200px)] bg-primary/5 rounded-3xl border border-dashed border-primary/20">
+        <div className="text-gray-500 text-lg font-medium">No reels match your filters.</div>
+        <p className="text-gray-400 text-sm mt-2">Try adjusting your search or country filter.</p>
+      </div>
+    );
+  }
+
   // A simple vertical scrollable container for reels
   return (
-    <div className="flex flex-col items-center w-full gap-8 mt-6">
+    <div className="flex flex-col items-center w-full h-[calc(100vh-200px)] overflow-y-auto snap-y snap-mandatory scrollbar-hide bg-primary/10 rounded-3xl">
       {ads.map((ad, index) => (
         <ReelCard key={ad.id || index} ad={ad} />
       ))}
@@ -17,21 +26,87 @@ export default function ExploreReelsView({ ads }) {
 function ReelCard({ ad }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(ad.isBookmarked || false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoRef.current?.play().catch(() => {});
+        } else {
+          videoRef.current?.pause();
+        }
+      },
+      { threshold: 0.6 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const toggleMute = (e) => {
+    e.stopPropagation();
+    setIsMuted(!isMuted);
+  };
+
+  const isVideo = ad.mediaType === "video" || ad.imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i);
 
   return (
-    <div className="relative w-full max-w-4xl h-[600px] md:h-[700px] rounded-3xl overflow-hidden shadow-sm group">
-      {/* Background Image */}
-      <img
-        src={ad.imageUrl}
-        alt="Reel"
-        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-      />
+    <div 
+      ref={containerRef}
+      className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-primary/10"
+    >
+      {/* Background Media */}
+      {isVideo ? (
+        <video
+          ref={videoRef}
+          src={ad.imageUrl}
+          loop
+          muted={isMuted}
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      ) : (
+        <img
+          src={ad.imageUrl}
+          alt="Reel"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      )}
       
       {/* Gradient Overlay for Text Readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
+      {/* Sound Toggle */}
+      {isVideo && (
+        <button
+          onClick={toggleMute}
+          className="absolute top-6 right-6 z-20 w-10 h-10 bg-black/40 rounded-full flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+        >
+          {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+        </button>
+      )}
+
+      {/* Play/Pause Area */}
+      {isVideo && (
+        <div 
+          className="absolute inset-0 z-0 cursor-pointer"
+          onClick={() => {
+            if (videoRef.current?.paused) videoRef.current.play();
+            else videoRef.current?.pause();
+          }}
+        />
+      )}
+
       {/* Action Buttons (Right side) */}
-      <div className="absolute top-1/2 right-4 md:right-6 -translate-y-1/2 flex flex-col gap-4 z-10">
+      <div className="absolute top-1/2 right-4 md:right-6 -translate-y-1/2 flex flex-col gap-4 z-10 pointer-events-auto">
         {/* Like */}
         <button
           onClick={() => setIsLiked(!isLiked)}

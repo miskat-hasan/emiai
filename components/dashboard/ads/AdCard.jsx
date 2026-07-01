@@ -5,6 +5,7 @@ import { BookmarkSVG, BookmarkFilledSVG } from "@/components/common/Svg";
 
 const AdCard = ({
   imageUrl,
+  mediaType,
   userName,
   userAvatar,
   description,
@@ -18,14 +19,26 @@ const AdCard = ({
       onClick={onClick}
       className="relative rounded-2xl overflow-hidden aspect-[4/5] group cursor-pointer"
     >
-      {/* Background image */}
-      <Image
-        src={imageUrl}
-        alt={description || "Ad"}
-        fill
-        className="object-cover transition-transform duration-300 group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-      />
+      {/* Background image or video */}
+      {mediaType === "video" ||
+      imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i) ? (
+        <video
+          src={imageUrl}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          muted
+          loop
+          autoPlay
+          playsInline
+        />
+      ) : (
+        <Image
+          src={imageUrl}
+          alt={description || "Ad"}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+        />
+      )}
 
       {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0.15)_50%,rgba(0,0,0,0.75)_100%)]" />
@@ -68,9 +81,7 @@ const AdCard = ({
 
             {/* Bottom row: description and time ago */}
             <div className="flex justify-between items-center gap-2">
-              <p className="text-white/70 text-xs truncate">
-                {description}
-              </p>
+              <p className="text-white/70 text-xs truncate">{description}</p>
               <span className="text-white/60 text-[11px] whitespace-nowrap shrink-0 mt-0.5">
                 {timeAgo}
               </span>
