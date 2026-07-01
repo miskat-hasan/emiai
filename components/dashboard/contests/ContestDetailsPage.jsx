@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +12,7 @@ import {
   useAnnounceWinnerMutation,
   useJoinContestMutation,
 } from "@/redux/api/services/contestApi";
+import AnnounceWinnerModal from "./AnnounceWinnerModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -85,6 +86,9 @@ export default function ContestDetailsPage({ params, role }) {
   const { id } = use(params);
   const searchParams = useSearchParams();
 
+  const [winnerModalOpen, setWinnerModalOpen] = useState(false);
+  const [winnerIds, setWinnerIds] = useState([]);
+
   // variant comes from the card's href: /contests/[id]?v=my|contest|participated
   const variant = searchParams.get("v") ?? "contest";
 
@@ -101,10 +105,33 @@ export default function ContestDetailsPage({ params, role }) {
   const totalFunds =
     c?.sponsorships?.reduce((sum, s) => sum + (s.amount ?? 0), 0) ?? 0;
 
+  const participantOptions =
+    c?.participants?.map(user => ({
+      id: user.id,
+      name: user.name,
+    })) || [];
+  
   const handleAnnounceWinner = async () => {
+    if (!winnerIds.length) {
+      toast.error("Please select at least one winner.");
+      return;
+    }
+
     try {
-      await announceWinner({ contest_id: id }).unwrap();
+      const formData = new FormData();
+
+      formData.append("contest_id", id);
+
+      winnerIds.forEach(id => {
+        formData.append("winner_ids[]", id);
+      });
+
+      await announceWinner(formData).unwrap();
+
       toast.success("Winner announced!");
+
+      setWinnerModalOpen(false);
+      setWinnerIds([]);
     } catch (err) {
       toast.error(err?.data?.message ?? "Failed to announce winner.");
     }
@@ -211,7 +238,7 @@ export default function ContestDetailsPage({ params, role }) {
       {isMyContest && (
         <div className="flex justify-end">
           <button
-            onClick={handleAnnounceWinner}
+            onClick={() => setWinnerModalOpen(true)}
             disabled={isAnnouncing}
             className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
           >
@@ -319,33 +346,21 @@ export default function ContestDetailsPage({ params, role }) {
                 </div>
               ))}
             </div>
-          ) : /* Collaborators as fallback when no participants yet */
-          c.collaborators && c.collaborators.length > 0 ? (
-            <div className="space-y-4">
-              {c.collaborators.map(p => (
-                <div key={p.id} className="flex items-center gap-3">
-                  <UserAvatar avatar={p.avatar} name={p.name} />
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-black leading-tight">
-                      {p.name}{" "}
-                      <span
-                        className={`text-xs font-medium capitalize ${ROLE_COLORS[p.role] ?? "text-gray-400"}`}
-                      >
-                        ({p.role})
-                      </span>
-                    </p>
-                    <p className="text-xs text-gray mt-0.5">
-                      {p.pivot?.status ?? "invited"}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
           ) : (
             <p className="text-sm text-gray">No participants yet.</p>
           )}
         </div>
       </div>
+
+      <AnnounceWinnerModal
+        open={winnerModalOpen}
+        onClose={() => setWinnerModalOpen(false)}
+        participants={participantOptions}
+        value={winnerIds}
+        onChange={setWinnerIds}
+        onSubmit={handleAnnounceWinner}
+        isLoading={isAnnouncing}
+      />
     </div>
   );
 }

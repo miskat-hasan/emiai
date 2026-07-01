@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, Plus, Upload, Calendar } from "lucide-react";
 import { useCreateContestMutation } from "@/redux/api/services/contestApi";
+import MultiSelect from "../ui/MultiSelect";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -72,6 +73,7 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm();
 
@@ -83,6 +85,17 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
   const [prizePhoto, setPrizePhoto] = useState(null);
   const [document, setDocument] = useState(null);
   const [isPublished, setIsPublished] = useState(false);
+
+  const collaboratorOptions = [
+    {
+      id: "1",
+      name: "uewan afjsdifnn",
+    },
+    {
+      id: "2",
+      name: "asdjfn sdjfioan",
+    },
+  ];
 
   // Reset on close
   useEffect(() => {
@@ -291,21 +304,38 @@ export default function CreateContestModal({ open, onClose, onSuccess }) {
 
           {/* Sponsored + Payment Request */}
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Sponsored">
-              <Input placeholder="here." {...register("sponsored")} />
-            </Field>
+            <Controller
+              name="sponsored"
+              control={control}
+              render={({ field }) => (
+                <MultiSelect
+                  {...field}
+                  label="Sponsored"
+                  placeholder="Search and select sponsored..."
+                  // isLoading={collaboratorLoading}
+                  options={collaboratorOptions}
+                />
+              )}
+            />
             <Field label="Payment Request">
               <Input placeholder="here." {...register("payment_request")} />
             </Field>
           </div>
 
           {/* Invite Collaborator */}
-          <Field label="Invite Collaborator (Optional)">
-            <Input
-              placeholder="Search for an influencer..."
-              {...register("collaborator")}
-            />
-          </Field>
+          <Controller
+            name="collaborator"
+            control={control}
+            render={({ field }) => (
+              <MultiSelect
+                {...field}
+                label="Invite Collaborator (Optional)"
+                placeholder="Search and select collaborators..."
+                // isLoading={collaboratorLoading}
+                options={collaboratorOptions}
+              />
+            )}
+          />
 
           {/* Publish toggle */}
           <div className="flex items-center justify-between">
