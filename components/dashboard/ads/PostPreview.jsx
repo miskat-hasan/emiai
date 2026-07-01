@@ -79,9 +79,17 @@ export default function PostPreview() {
       <h1 className="text-[22px] font-bold text-black">Post Privew</h1>
 
       {/* Main Image */}
-      <div className="relative w-full h-[350px] md:h-[450px] rounded-[2rem] overflow-hidden shadow-sm">
+      <div className="relative w-full h-[350px] md:h-[450px] rounded-[2rem] overflow-hidden shadow-sm bg-black">
         {draft.previewUrl ? (
-          <Image src={draft.previewUrl} alt="Ad Preview" fill className="object-cover" />
+          draft.mediaFile?.type?.startsWith('video/') || draft.mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i) ? (
+            <video
+              src={draft.previewUrl}
+              controls
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <Image src={draft.previewUrl} alt="Ad Preview" fill className="object-cover" />
+          )
         ) : (
           <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-gray-400">
             <Image src="/images/placeholder.png" alt="No image" width={100} height={100} className="opacity-20" />

@@ -1,4 +1,8 @@
+"use client";
+
+import React, { use, useMemo } from "react";
 import Link from "next/link";
+import { useGetAdByIdQuery } from "@/redux/api/services/adApi";
 import {
   AdDetailHero,
   AdUserBar,
@@ -8,50 +12,78 @@ import {
   AdActionButtons,
 } from "./index";
 
-// Mock data
-const mockAds = {
-  1: {
-    id: 1,
-    imageUrl:
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=1200&auto=format&fit=crop&q=80",
-    userName: "Jane Smith",
-    userAvatar: "https://i.pravatar.cc/150?u=janesmith",
-    likes: 24,
-    views: 24,
-    boostLabel: "Boost Credited",
-    description: [
-      "Step into a night of unparalleled elegance at the Black Diamond Ball, a collaboration between Lumina Moda and renowned designer, Seraphina Dubois!",
-      "Experience an evening where fashion transcends artistry, with a showcase of exclusive designs and breathtaking displays.",
-      "Indulge in gourmet cuisine, captivating music, and the company of the city's most stylish elite. Secure your tickets now for a gala that promises to be the highlight of the social calendar.",
-      "Don't miss the chance to be part of this extraordinary fusion of style and sophistication!",
-    ],
-    info: [
-      { label: "Ads Create", value: "Jane Smith" },
-      { label: "Prize Number", value: "03" },
-      { label: "Publish Time", value: "11:59 PM" },
-      { label: "Publish Date", value: "Feb 15, 2026" },
-    ],
-    topRankings: [
-      { id: 1, name: "Jane Cooper", role: "Influencer", score: 1000, avatar: "https://i.pravatar.cc/150?u=jane" },
-      { id: 2, name: "Jane Cooper", role: "Influencer", score: 900, avatar: "https://i.pravatar.cc/150?u=janec" },
-      { id: 3, name: "Jenny Wilson", role: "Advertiser", score: 800, avatar: "https://i.pravatar.cc/150?u=jenny" },
-      { id: 4, name: "Floyd Miles", role: "Guest", score: 700, avatar: "https://i.pravatar.cc/150?u=floyd" },
-      { id: 5, name: "David Johnson", role: "Guest", score: 550, avatar: "https://i.pravatar.cc/150?u=david" },
-    ],
-  },
-};
+// Client Component
+export default function AdDetailsPage({ role, params, parentPath, parentName }) {
+  const { id } = use(params);
+  const { data: response, isLoading, isError } = useGetAdByIdQuery(id);
 
-function getAd(id) {
-  return mockAds[id] ?? { ...mockAds[1], id: Number(id) };
-}
+  const ad = useMemo(() => {
+    let rawAd = null;
+    if (response) {
+      if (response.data?.data) rawAd = response.data.data;
+      else if (response.data) rawAd = response.data;
+      else rawAd = response;
+    }
 
-// Server Component
-export default async function AdDetailsPage({ role, params, parentPath, parentName }) {
-  const { id } = await params;
-  const ad = getAd(id);
+    if (!rawAd) return null;
+
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+    const origin = new URL(apiUrl).origin;
+    let imageUrl = rawAd.media_url;
+    if (imageUrl && !imageUrl.startsWith('http')) {
+      imageUrl = `${origin}${imageUrl}`;
+    }
+    let mediaType = rawAd.media_type;
+
+    if (!mediaType && imageUrl) {
+      if (imageUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
+        mediaType = "video";
+      } else {
+        mediaType = "image";
+      }
+    }
+
+    // Format date securely
+    let publishDateStr = "N/A";
+    let publishTimeStr = "N/A";
+    if (rawAd.publish_at || rawAd.created_at) {
+      const d = new Date(rawAd.publish_at || rawAd.created_at);
+      if (!isNaN(d)) {
+        publishDateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+        publishTimeStr = d.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+
+    return {
+      id: rawAd.id,
+      imageUrl,
+      mediaType,
+      userName: "Advertiser " + (rawAd.advertiser_id || ""),
+      userAvatar: "https://i.pravatar.cc/150?u=" + (rawAd.advertiser_id || rawAd.id),
+      likes: rawAd.likes || 0,
+      views: rawAd.views || 0,
+      boostLabel: rawAd.is_boosted ? "Boost Credited" : null,
+      description: [rawAd.description || ""],
+      info: [
+        { label: "Ads Create", value: "Advertiser " + (rawAd.advertiser_id || "") },
+        { label: "Prize Number", value: rawAd.prizes ? rawAd.prizes.length.toString().padStart(2, '0') : "00" },
+        { label: "Publish Time", value: publishTimeStr },
+        { label: "Publish Date", value: publishDateStr },
+      ],
+      topRankings: [], // No rankings data in the API currently
+    };
+  }, [response, role]);
 
   const backPath = parentPath || `/dashboard/${role}/ads`;
   const backName = parentName || "Ads";
+
+  if (isLoading) {
+    return <div className="p-10 text-center animate-pulse">Loading ad details...</div>;
+  }
+
+  if (isError || !ad) {
+    return <div className="p-10 text-center text-red-500">Failed to load ad details.</div>;
+  }
 
   return (
     <div className="space-y-5">
@@ -83,7 +115,7 @@ export default async function AdDetailsPage({ role, params, parentPath, parentNa
       </div>
 
       {/* Hero Image */}
-      <AdDetailHero imageUrl={ad.imageUrl} alt="Ad Banner" />
+      <AdDetailHero imageUrl={ad.imageUrl} mediaType={ad.mediaType} alt="Ad Banner" />
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -101,9 +133,11 @@ export default async function AdDetailsPage({ role, params, parentPath, parentNa
           
           <AdDescription description={ad.description} />
           
-          <div className="md:w-1/2">
-            <AdTopRanking rankings={ad.topRankings} />
-          </div>
+          {ad.topRankings && ad.topRankings.length > 0 && (
+            <div className="md:w-1/2">
+              <AdTopRanking rankings={ad.topRankings} />
+            </div>
+          )}
         </div>
 
         {/* Right Column */}

@@ -24,10 +24,18 @@ export const store = configureStore({
   },
 
   // To avoid Redux warnings
-  middleware: getDefaultMiddleware =>
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER, "adCreation/setDraftData"],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+          "adCreation/setDraftData",
+        ],
         ignoredPaths: ["adCreation.draft.mediaFile"],
       },
     }).concat(apiSlice.middleware),

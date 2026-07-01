@@ -45,7 +45,7 @@ const Textarea = forwardRef(({ className = "", ...props }, ref) => {
 });
 Textarea.displayName = "Textarea";
 
-function UploadBox({ label, accept, hint, onChange, fileName, previewUrl }) {
+function UploadBox({ label, accept, hint, onChange, fileName, previewUrl, mediaType }) {
   const ref = useRef(null);
   return (
     <Field label={label}>
@@ -80,12 +80,20 @@ function UploadBox({ label, accept, hint, onChange, fileName, previewUrl }) {
       />
       {previewUrl && (
         <div className="relative w-full h-40 rounded-xl overflow-hidden mt-3">
-          <Image
-            src={previewUrl}
-            alt="Preview"
-            fill
-            className="object-cover"
-          />
+          {mediaType?.startsWith('video/') ? (
+            <video
+              src={previewUrl}
+              controls
+              className="w-full h-full object-cover bg-black"
+            />
+          ) : (
+            <Image
+              src={previewUrl}
+              alt="Preview"
+              fill
+              className="object-cover"
+            />
+          )}
         </div>
       )}
     </Field>
@@ -357,6 +365,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
             }}
             fileName={mediaFile?.name}
             previewUrl={previewUrl}
+            mediaType={mediaFile?.type || (mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i) ? 'video/mp4' : undefined)}
           />
 
           {/* Footer: Cancel | Publish Ads */}
