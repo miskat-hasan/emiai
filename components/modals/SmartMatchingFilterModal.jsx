@@ -168,8 +168,11 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
   const fmtK = v =>
     v >= 1000 ? `$${(v / 1000).toFixed(1).replace(".0", "")}k` : `$${v}`;
   const fmtN = v => String(v);
-  const fmtFollower = v =>
-    v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v);
+  const fmtFollower = v => {
+    if (v >= 1000000) return `${(v / 1000000).toFixed(1).replace(".0", "")}M`;
+    if (v >= 1000) return `${(v / 1000).toFixed(0)}k`;
+    return String(v);
+  };
 
   return (
     <div
@@ -216,7 +219,7 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
             <RangeSlider
               label="Avg Price"
               min={0}
-              max={5000}
+              max={100000}
               value={priceRange}
               onChange={setPriceRange}
               format={fmtK}
@@ -244,7 +247,7 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
             <RangeSlider
               label="Avg Follower"
               min={100}
-              max={100000}
+              max={50000000}
               value={follRange}
               onChange={setFollRange}
               format={fmtFollower}

@@ -2,19 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Info, CalendarDays } from "lucide-react";
 
-/**
- * ContestCard — three variants controlled by the `variant` prop:
- *
- *  "my"           → orange gradient "Details" button  (My Contest tab)
- *  "contest"      → entry fee + "Join Contest" button  (Contest tab)
- *  "participated" → calendar icon + end date row       (Participated tab)
- *
- * Props:
- *  id, title, hostBy, prize, endDate, description,
- *  totalSlots, totalParticipants, prizePhotoUrl, href  — shared
- *  entryFee   — used by "contest" variant (null/0 renders "Free")
- *  onJoin     — callback for "contest" variant Join button
- */
 export default function ContestCard({
   id,
   variant = "my",
@@ -42,7 +29,6 @@ export default function ContestCard({
       })
     : null;
 
-  // Prize row shows date on "my" and "contest" tabs, not on "participated"
   const showDateInPrizeRow = variant !== "participated";
 
   return (
