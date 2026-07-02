@@ -25,8 +25,8 @@ export default function CoinsModal({ open, onClose }) {
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent flex flex-col transform transition-all duration-300 scale-100 opacity-100">
         {/* Gradient Overlay at bottom */}
         <div
-          className="absolute inset-0 pointer-events-none z-0"
-          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(240, 90, 40, 0.08) 100%)" }}
+          className="absolute inset-0 pointer-events-none z-0 rounded-3xl overflow-hidden"
+          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.08) 100%)" }}
         />
 
         <div className="relative z-10 p-6 md:p-8">
@@ -34,7 +34,7 @@ export default function CoinsModal({ open, onClose }) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-black">Coin</h2>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 px-3 py-1 bg-orange-50 rounded-full shadow-sm border border-orange-100">
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-[rgba(var(--color-primary-rgb),0.1)] rounded-full shadow-sm border border-[rgba(var(--color-primary-rgb),0.2)]">
                 <Zap size={14} className="text-primary fill-primary" />
                 <span className="text-sm font-semibold text-primary">10</span>
               </div>
@@ -59,10 +59,10 @@ export default function CoinsModal({ open, onClose }) {
                   setSelectedPackage(pkg);
                 }}
               >
-                <div className="w-full aspect-[4/3] bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-center mb-4 group-hover:border-primary group-hover:shadow-md transition-all relative">
+                <div className="w-full aspect-[4/3] bg-white border border-gray-200 rounded-2xl p-4 flex items-center justify-center mb-4 group-hover:border-primary group-hover:shadow-[0_4px_14px_rgba(var(--color-primary-rgb),0.25)] transition-all relative">
                   <div
                     className="absolute inset-0 pointer-events-none rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(240, 90, 40, 0.05) 100%)" }}
+                    style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(var(--color-primary-rgb), 0.08) 100%)" }}
                   />
                   <img
                     src={`/images/${pkg.amount}%20coins.png`}

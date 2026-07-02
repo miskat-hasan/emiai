@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { useSubmitSupportTicketMutation } from "@/redux/api/services/commonApi";
+import { toast } from "react-toastify";
 
 export default function ContactSupportModal({ open, onClose, collapsed, role = "advertiser" }) {
   const [mounted, setMounted] = useState(false);
@@ -11,6 +13,8 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
 
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+
+  const [submitSupportTicket, { isLoading }] = useSubmitSupportTicketMutation();
 
   useEffect(() => {
     setMounted(true);
@@ -32,7 +36,7 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
 
   return createPortal(
     <div
-      className={`theme-${role} fixed inset-y-0 right-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all duration-200
+      className={`theme-${role} font-dm-sans fixed inset-y-0 right-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all duration-200
         ${collapsed ? "max-lg:left-0 lg:left-[72px]" : "max-lg:left-0 lg:left-[245px]"}
         ${isAnimating ? "opacity-100" : "opacity-0"}
       `}
@@ -50,10 +54,23 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
         </div>
 
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            console.log("Sending support message", { supportType, message });
-            onClose();
+            if (!message.trim()) {
+               toast.error("Message is required.");
+               return;
+            }
+            try {
+              const res = await submitSupportTicket({
+                subject: supportType,
+                message: message.trim(),
+              }).unwrap();
+              toast.success(res.message || "Support ticket submitted successfully.");
+              setMessage("");
+              onClose();
+            } catch (err) {
+              toast.error(err?.data?.message || "Failed to submit ticket.");
+            }
           }}
           className="px-6 py-6 flex flex-col gap-6"
         >
@@ -101,9 +118,10 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
 
             <button
               type="submit"
-              className="px-8 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(var(--color-primary-rgb),0.2)] cursor-pointer"
+              disabled={isLoading}
+              className="px-8 py-2.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(var(--color-primary-rgb),0.2)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Send
+              {isLoading ? "Sending..." : "Send"}
             </button>
           </div>
         </form>

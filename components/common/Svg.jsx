@@ -790,8 +790,8 @@ export const TicketSVG = ({ className, ...props }) => {
           y2="120.425"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor="#F57802" />
-          <stop offset="1" stopColor="#EB4A35" />
+          <stop stopColor="var(--color-primary, #F57802)" />
+          <stop offset="1" stopColor="var(--color-secondary, #EB4A35)" />
         </linearGradient>
       </defs>
     </svg>

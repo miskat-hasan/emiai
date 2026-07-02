@@ -9,6 +9,7 @@ import {
   Settings,
   User,
   Coins,
+  Zap,
 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
@@ -24,11 +25,10 @@ export default function Topbar({ onToggleSidebar }) {
   const pathname = usePathname();
   const dispatch = useDispatch();
 
-  const isShareAppPage = pathname?.includes('/share-app');
+  const isShareAppPage =
+    pathname?.includes("/share-app") || pathname?.includes("/share");
 
-  const user = useSelector(state => state.auth?.user);
-
-  console.log("topbar user", user);
+  const user = useSelector((state) => state.auth?.user);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function Topbar({ onToggleSidebar }) {
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
   useEffect(() => {
-    const handler = e => {
+    const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target))
         setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target))
@@ -120,12 +120,14 @@ export default function Topbar({ onToggleSidebar }) {
 
         {/* Share App page only*/}
         {isShareAppPage && (
-          <div 
+          <div
             onClick={() => router.push("?showCoins=true", { scroll: false })}
-            className="flex items-center gap-1.5 px-3 py-1.5 mr-1 rounded-full border border-orange-100 bg-orange-50 text-primary hover:cursor-pointer transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 mr-1 cursor-pointer transition-all hover:scale-[1.02] active:scale-95 rounded-2xl bg-white bg-gradient-to-b from-white/50 from-[56.57%] to-primary/50 to-[206.38%] backdrop-blur-[5.7px]"
           >
-            <Coins size={15} className="text-primary" />
-            <span className="text-sm font-semibold">0</span>
+            <Zap size={18} className="text-primary fill-primary" />
+            <span className="text-base font-medium text-primary leading-none">
+              0
+            </span>
           </div>
         )}
 
@@ -171,7 +173,7 @@ export default function Topbar({ onToggleSidebar }) {
         <div ref={profileRef} className="relative">
           <button
             onClick={() => {
-              setProfileOpen(v => !v);
+              setProfileOpen((v) => !v);
               setNotifOpen(false);
             }}
             className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"
@@ -224,9 +226,10 @@ export default function Topbar({ onToggleSidebar }) {
                   disabled={isLoggingOut && danger}
                   className={`
                     w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer
-                    ${danger
-                      ? "text-red-500 hover:bg-red-50"
-                      : "text-black hover:bg-primary/5"
+                    ${
+                      danger
+                        ? "text-red-500 hover:bg-red-50"
+                        : "text-black hover:bg-primary/5"
                     }
                     disabled:opacity-50 disabled:cursor-not-allowed
                   `}

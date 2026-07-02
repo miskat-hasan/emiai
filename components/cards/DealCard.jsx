@@ -11,8 +11,9 @@ export default function DealCard({
   description = "I need a video Ads for my Cyberpunk 2077 Game lunching",
   netPayout = "SAR 4500",
   href,
+  role = "influencer",
 }) {
-  const detailHref = href ?? `/dashboard/influencer/deals/${id}`;
+  const detailHref = href ?? `/dashboard/${role}/deals/${id}`;
 
   return (
     <Link href={detailHref} className="block group">

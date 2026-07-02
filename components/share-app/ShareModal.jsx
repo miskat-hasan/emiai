@@ -22,9 +22,15 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
     >
       <div className="relative flex flex-col w-full max-w-[340px]">
         {/* Modal Card */}
-        <div className="bg-white rounded-[24px] shadow-2xl p-6 flex flex-col items-center text-center">
+        <div className="bg-white rounded-[24px] shadow-2xl overflow-hidden flex flex-col relative">
+          {/*Gradient Overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.15) 100%)" }}
+          />
+          <div className="relative z-10 p-6 flex flex-col items-center text-center">
 
-          {mode === "success" ? (
+            {mode === "success" ? (
             <>
               {/* Reward Placeholder Image */}
               <div className="w-full flex justify-center mb-6">
@@ -41,7 +47,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
 
               <button 
                 onClick={onClose}
-                className="w-[85%] py-3.5 rounded-full bg-primary text-white text-[18px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)]"
+                className="w-[85%] py-3.5 rounded-full bg-gradient-to-r from-primary to-secondary text-white text-[18px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
               >
                 Ok
               </button>
@@ -75,7 +81,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
                   // Simulate successful share backend call
                   setMode("success");
                 }}
-                className="w-full py-3.5 rounded-xl bg-primary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)] mb-4"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25 mb-4"
               >
                 Share Link
               </button>
@@ -111,7 +117,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
                   // Simulate successful share backend call
                   setMode("success");
                 }}
-                className="w-full py-3.5 rounded-xl bg-primary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-[0_8px_20px_rgba(240,90,40,0.25)]"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-[16px] font-medium hover:opacity-90 transition-opacity shadow-lg shadow-primary/25"
               >
                 Share QR Code
               </button>
@@ -125,7 +131,7 @@ export default function ShareModal({ open, onClose, initialMode = "link", link =
               </button>
             </>
           )}
-
+          </div>
         </div>
       </div>
     </div>

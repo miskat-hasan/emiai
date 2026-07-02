@@ -11,16 +11,15 @@ export default function AdActionButtons() {
       {/* Bookmark */}
       <button
         onClick={() => setIsBookmarked(v => !v)}
-        className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${
-          isBookmarked
+        className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${isBookmarked
             ? "bg-gradient-to-r from-primary to-secondary text-white"
             : "bg-gray-100 text-gray hover:bg-gray-200"
-        }`}
+          }`}
       >
         <Bookmark size={18} fill={isBookmarked ? "currentColor" : "none"} />
       </button>
 
-      {/* QR / Scan */}
+      {/* QR  */}
       <button className="p-2 bg-gray-100 text-gray rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
         <ScanLine size={18} />
       </button>
