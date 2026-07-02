@@ -27,6 +27,37 @@ function timeSince(dateString) {
   return Math.floor(seconds) + " secs ago";
 }
 
+const AdCardSkeleton = () => (
+  <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-200 animate-pulse">
+    <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-10 flex items-center gap-3 w-full">
+      <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 border-2 border-white/30"></div>
+      <div className="flex-1 flex flex-col gap-2">
+        <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+        <div className="h-3 bg-gray-300 rounded w-full"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const ReelSkeleton = () => (
+  <div className="relative w-full max-w-4xl h-full bg-gray-200 animate-pulse rounded-3xl overflow-hidden">
+    <div className="absolute top-1/2 right-4 md:right-6 -translate-y-1/2 flex flex-col gap-4 z-10">
+      <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+      <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+      <div className="w-12 h-12 bg-gray-300 rounded-full"></div>
+    </div>
+    <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 flex items-end justify-between z-10">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gray-300 shrink-0 border-2 border-white/30"></div>
+        <div className="flex flex-col gap-2 w-48 md:w-64">
+          <div className="h-5 bg-gray-300 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-300 rounded w-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 // Remove mock data
 const TABS = [
   { key: "your-interests", label: "Your Interests" },
@@ -35,9 +66,10 @@ const TABS = [
 
 export default function ExplorePage({ role }) {
   const [activeTab, setActiveTab] = useState("your-interests");
-  
-  const queryType = activeTab === "explore" ? "explore" : "all";
-  const { data: exploreAdsResponse, isLoading } = useGetGuestExploreAdsQuery(queryType);
+
+  const queryType = activeTab === "explore" ? "all" : "all"; //we will later use explore, now for showing data we are using all
+  const { data: exploreAdsResponse, isLoading } =
+    useGetGuestExploreAdsQuery(queryType);
 
   const [bookmarkedApiAds, setBookmarkedApiAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,15 +118,15 @@ export default function ExplorePage({ role }) {
 
   const displayAds = mappedApiAds;
 
-  const filteredAds = displayAds.filter(
-    (ad) => {
-      const matchesSearch = ad.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            ad.description?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCountry = selectedCountry === "" || 
-                             ad.targetCountries.some(tc => tc.country_code === selectedCountry);
-      return matchesSearch && matchesCountry;
-    }
-  );
+  const filteredAds = displayAds.filter((ad) => {
+    const matchesSearch =
+      ad.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ad.description?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCountry =
+      selectedCountry === "" ||
+      ad.targetCountries.some((tc) => tc.country_code === selectedCountry);
+    return matchesSearch && matchesCountry;
+  });
 
   const handleBookmarkToggle = (id) => {
     setBookmarkedApiAds((prev) =>
@@ -181,8 +213,10 @@ export default function ExplorePage({ role }) {
       {/* Ads grid (Only show under Your Interests) */}
       {activeTab === "your-interests" &&
         (isLoading ? (
-          <div className="flex justify-center py-20 text-gray animate-pulse">
-            Loading ads...
+          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <AdCardSkeleton key={i} />
+            ))}
           </div>
         ) : filteredAds.length > 0 ? (
           <AdsGrid
@@ -192,21 +226,24 @@ export default function ExplorePage({ role }) {
           />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 mt-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-500">
-            <span className="text-lg font-medium">No ads match your filters.</span>
-            <p className="text-sm mt-1">Try adjusting your search or country filter.</p>
+            <span className="text-lg font-medium">
+              No ads match your filters.
+            </span>
+            <p className="text-sm mt-1">
+              Try adjusting your search or country filter.
+            </p>
           </div>
         ))}
 
       {/* Reels View (Only show under Explore) */}
-      {activeTab === "explore" && 
+      {activeTab === "explore" &&
         (isLoading ? (
-          <div className="flex justify-center py-20 text-gray animate-pulse">
-            Loading reels...
+          <div className="flex flex-col items-center w-full h-[calc(100vh-200px)] overflow-hidden">
+            <ReelSkeleton />
           </div>
         ) : (
           <ExploreReelsView ads={filteredAds} />
-        ))
-      }
+        ))}
 
       {/* Filter Modal */}
       <ExploreFilterModal

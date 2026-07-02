@@ -33,14 +33,13 @@ export default function AdDetailsPage({ role, params, parentPath, parentName }) 
     if (imageUrl && !imageUrl.startsWith('http')) {
       imageUrl = `${origin}${imageUrl}`;
     }
+    
     let mediaType = rawAd.media_type;
-
-    if (!mediaType && imageUrl) {
-      if (imageUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
-        mediaType = "video";
-      } else {
-        mediaType = "image";
-      }
+    // Fallback and override for videos that might be incorrectly labeled as images
+    if (imageUrl && imageUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
+      mediaType = "video";
+    } else if (!mediaType && imageUrl) {
+      mediaType = "image";
     }
 
     // Format date securely
@@ -69,6 +68,7 @@ export default function AdDetailsPage({ role, params, parentPath, parentName }) 
         { label: "Prize Number", value: rawAd.prizes ? rawAd.prizes.length.toString().padStart(2, '0') : "00" },
         { label: "Publish Time", value: publishTimeStr },
         { label: "Publish Date", value: publishDateStr },
+        ...(rawAd.promo_code ? [{ label: "Promo Code", value: rawAd.promo_code.code }] : []),
       ],
       topRankings: [], // No rankings data in the API currently
     };
