@@ -18,7 +18,7 @@ export const adApi = apiSlice.injectEndpoints({
     }),
 
     getAdById: builder.query({
-      query: (id) => ({ url: `/api/ads/${id}`, method: "GET" }),
+      query: (id) => ({ url: `/api/ads/details/${id}`, method: "GET" }),
       providesTags: (result, error, id) => [{ type: "Ad", id }],
     }),
 
