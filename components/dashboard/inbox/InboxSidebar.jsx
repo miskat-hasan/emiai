@@ -15,7 +15,7 @@ const InboxSidebar = React.memo(({ activeTab, setActiveTab, counts }) => {
   return (
     <div className="w-full lg:w-[250px] shrink-0 flex flex-col gap-6">
       {/* Create Group Button */}
-      <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-secondary text-white py-3.5 rounded-xl font-medium shadow-[0_8px_20px_rgba(240,90,40,0.25)] hover:opacity-90 transition-opacity">
+      <button className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-secondary text-white py-3.5 rounded-xl font-medium shadow-[0_8px_20px_theme(colors.primary/25%)] hover:opacity-90 transition-opacity">
         <Plus size={20} />
         Create Group
       </button>
