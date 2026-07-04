@@ -1,16 +1,34 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bookmark, ScanLine, Share2, Trash2, Edit } from "lucide-react";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
-export default function AdActionButtons({ onEdit, onDelete }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+export default function AdActionButtons({ adId, initialBookmarked, onEdit, onDelete }) {
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked || false);
+  
+  useEffect(() => {
+    setIsBookmarked(initialBookmarked || false);
+  }, [initialBookmarked]);
+
+  const [toggleBookmark] = useToggleBookmarkMutation();
+
+  const handleBookmarkToggle = async () => {
+    setIsBookmarked(v => !v);
+    if (adId) {
+      try {
+        await toggleBookmark({ id: adId, type: 'ad' }).unwrap();
+      } catch (err) {
+        setIsBookmarked(v => !v);
+      }
+    }
+  };
 
   return (
     <div className="flex items-center gap-2.5">
       {/* Bookmark */}
       <button
-        onClick={() => setIsBookmarked(v => !v)}
+        onClick={handleBookmarkToggle}
         className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${
           isBookmarked
             ? "bg-gradient-to-r from-primary to-secondary text-white"

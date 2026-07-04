@@ -1,11 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
-import { Bookmark, ScanLine, Share2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Bookmark, ScanLine, Share2, SquarePen, Trash2 } from "lucide-react";
 import BuyTicketModal from "./BuyTicketModal";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
-export default function MyEventActionButtons({ onJoin }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+export default function MyEventActionButtons({
+  eventId,
+  initialBookmarked,
+  onJoin,
+  onShare,
+  onEdit,
+  onDelete,
+}) {
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked || false);
+
+  useEffect(() => {
+    setIsBookmarked(initialBookmarked || false);
+  }, [initialBookmarked]);
+
+  const [toggleBookmark] = useToggleBookmarkMutation();
+
+  const handleBookmarkToggle = async () => {
+    setIsBookmarked(v => !v);
+    if (eventId) {
+      try {
+        await toggleBookmark({ id: eventId, type: "event" }).unwrap();
+      } catch (err) {
+        setIsBookmarked(v => !v);
+      }
+    }
+  };
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleJoinClick = () => {
@@ -18,7 +43,7 @@ export default function MyEventActionButtons({ onJoin }) {
       <div className="flex items-center gap-2.5 flex-wrap">
         {/* Bookmark */}
         <button
-          onClick={() => setIsBookmarked(v => !v)}
+          onClick={handleBookmarkToggle}
           className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${isBookmarked
               ? "bg-gradient-to-b from-primary to-secondary text-white"
               : "bg-gray/10 text-gray hover:bg-gray/20"

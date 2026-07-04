@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import AdCard from "./AdCard";
 
-const AdsGrid = memo(function AdsGrid({ ads, onAdClick, onBookmarkToggle }) {
+const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkToggle }) {
   if (!ads || ads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -25,6 +25,9 @@ const AdsGrid = memo(function AdsGrid({ ads, onAdClick, onBookmarkToggle }) {
           description={ad.description}
           timeAgo={ad.timeAgo}
           isBookmarked={ad.isBookmarked}
+          status={ad.status}
+          publishAt={ad.publishAt}
+          tabType={activeTab}
           onClick={() => onAdClick?.(ad.id)}
           onBookmarkToggle={() => onBookmarkToggle?.(ad.id)}
         />
