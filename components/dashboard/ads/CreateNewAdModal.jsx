@@ -7,7 +7,11 @@ import { X, Upload, Plus, ChevronDown, Check } from "lucide-react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
-import { useGetCategoriesQuery, useGetCountriesQuery } from "@/redux/api/services/commonApi";
+import {
+  useGetCategoriesQuery,
+  useGetCountriesQuery,
+} from "@/redux/api/services/commonApi";
+import MultiSelect from "@/components/ui/MultiSelect";
 
 // Sub-components
 
@@ -45,7 +49,15 @@ const Textarea = forwardRef(({ className = "", ...props }, ref) => {
 });
 Textarea.displayName = "Textarea";
 
-function UploadBox({ label, accept, hint, onChange, fileName, previewUrl, mediaType }) {
+function UploadBox({
+  label,
+  accept,
+  hint,
+  onChange,
+  fileName,
+  previewUrl,
+  mediaType,
+}) {
   const ref = useRef(null);
   return (
     <Field label={label}>
@@ -80,7 +92,7 @@ function UploadBox({ label, accept, hint, onChange, fileName, previewUrl, mediaT
       />
       {previewUrl && (
         <div className="relative w-full h-40 rounded-xl overflow-hidden mt-3">
-          {mediaType?.startsWith('video/') ? (
+          {mediaType?.startsWith("video/") ? (
             <video
               src={previewUrl}
               controls
@@ -120,9 +132,9 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
 
   const [previewUrl, setPreviewUrl] = useState(draft.previewUrl || null);
   const [mediaFile, setMediaFile] = useState(draft.mediaFile || null);
-  const [prizesCount, setPrizesCount] = useState(Math.max(1, draft.prizes?.length || 1));
-  const [showCountries, setShowCountries] = useState(false);
-  const countryDropdownRef = useRef(null);
+  const [prizesCount, setPrizesCount] = useState(
+    Math.max(1, draft.prizes?.length || 1),
+  );
   const isLoading = false;
 
   const {
@@ -138,6 +150,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
   });
 
   const selectedCountries = watch("countries") || [];
+  const prizeType = watch("prizeType");
 
   // Reset on close
   useEffect(() => {
@@ -149,16 +162,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
     }
   }, [open, reset, draft]);
 
-  // Click outside country dropdown to close
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target)) {
-        setShowCountries(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
 
   const onSubmit = async (data) => {
     // Save draft and move to next step
@@ -197,10 +201,16 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
           className="px-6 py-5 flex flex-col gap-5"
         >
           {/* Ads Description */}
-          <Field label="Ads Description *" error={errors.adsDescription?.message}>
-            <Input
+          <Field
+            label="Ads Description *"
+            error={errors.adsDescription?.message}
+          >
+            <Textarea
+              rows={4}
               placeholder="Write Ads Description here..."
-              {...register("adsDescription", { required: "Ads Description is required" })}
+              {...register("adsDescription", {
+                required: "Ads Description is required",
+              })}
               className={errors.adsDescription ? "border-red-500" : ""}
             />
           </Field>
@@ -210,7 +220,9 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
             <div className="relative">
               <select
                 defaultValue=""
-                {...register("adsCategory", { required: "Ads Category is required" })}
+                {...register("adsCategory", {
+                  required: "Ads Category is required",
+                })}
                 className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer ${errors.adsCategory ? "border-red-500" : ""}`}
               >
                 <option value="" disabled hidden>
@@ -229,54 +241,28 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
             </div>
           </Field>
 
-          {/* Location / Countries */}
-          <Field label="Location *" error={errors.countries?.message}>
-            <div className="relative" ref={countryDropdownRef}>
-              <div
-                onClick={() => setShowCountries(!showCountries)}
-                className={`w-full rounded-xl bg-gray-100 border border-transparent px-4 py-2.5 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all cursor-pointer flex justify-between items-center ${errors.countries ? "border-red-500" : ""}`}
-              >
-                <span className={selectedCountries.length ? "text-black" : "text-gray/60"}>
-                  {selectedCountries.length > 0 
-                    ? `${selectedCountries.length} countr${selectedCountries.length > 1 ? 'ies' : 'y'} selected` 
-                    : "Select Countries"}
-                </span>
-                <ChevronDown size={16} className="text-gray text-xs" />
-              </div>
-              
-              {showCountries && (
-                <div className="absolute z-10 top-full left-0 right-0 mt-2 bg-white border border-gray-100 rounded-xl shadow-lg max-h-60 overflow-y-auto py-2">
-                  <Controller
-                    name="countries"
-                    control={control}
-                    rules={{ required: "At least one country is required" }}
-                    render={({ field }) => (
-                      <>
-                        {countries.map((country) => {
-                          const isSelected = field.value?.includes(country.code);
-                          return (
-                            <div
-                              key={country.code}
-                              onClick={() => {
-                                const newValue = isSelected
-                                  ? field.value.filter((c) => c !== country.code)
-                                  : [...(field.value || []), country.code];
-                                field.onChange(newValue);
-                              }}
-                              className="px-4 py-2 hover:bg-gray-50 flex items-center justify-between cursor-pointer"
-                            >
-                              <span className="text-sm text-black">{country.name}</span>
-                              {isSelected && <Check size={16} className="text-primary" />}
-                            </div>
-                          );
-                        })}
-                      </>
-                    )}
-                  />
-                </div>
-              )}
-            </div>
+          {/* Publish Time */}
+          <Field label="Schedule Publish Time (Optional)">
+            <Input type="datetime-local" {...register("publishAt")} />
           </Field>
+
+          {/* Location / Countries */}
+          <Controller
+            name="countries"
+            control={control}
+            rules={{ required: "At least one country is required" }}
+            render={({ field }) => (
+              <MultiSelect
+                id="countries"
+                label="Countries *"
+                placeholder="Select Countries"
+                options={countries.map((c) => ({ ...c, id: c.code }))}
+                value={field.value || []}
+                onChange={field.onChange}
+                error={errors.countries?.message}
+              />
+            )}
+          />
 
           {/* Prize Type */}
           <Field label="Prize Type">
@@ -300,52 +286,58 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
           </Field>
 
           {/* Dynamic Prizes */}
-          {Array.from({ length: prizesCount }).map((_, index) => (
-            <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`}>
-              <div className="flex gap-3 items-center">
-                <input type="hidden" value={index + 1} {...register(`prizes.${index}.rank`)} />
+          {prizeType !== "coupon" &&
+            Array.from({ length: prizesCount }).map((_, index) => (
+              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`}>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="hidden"
+                    value={index + 1}
+                    {...register(`prizes.${index}.rank`)}
+                  />
+                  <Input
+                    placeholder="Write prize value..."
+                    {...register(`prizes.${index}.value`)}
+                  />
+                  {index === prizesCount - 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setPrizesCount((prev) => prev + 1)}
+                      className="shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:opacity-90 transition-opacity cursor-pointer shadow-sm shadow-primary/20"
+                    >
+                      <Plus size={20} />
+                    </button>
+                  )}
+                </div>
+              </Field>
+            ))}
+
+          {/* Promo Code Fields */}
+          {prizeType === "coupon" && (
+            <>
+              {/* Create Promo Code */}
+              <Field label="Create Promo Code">
                 <Input
-                  placeholder="Write prize value..."
-                  {...register(`prizes.${index}.value`)}
+                  placeholder="Write Promo Code here..."
+                  {...register("promoCode")}
                 />
-                {index === prizesCount - 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setPrizesCount((prev) => prev + 1)}
-                    className="shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:opacity-90 transition-opacity cursor-pointer shadow-sm shadow-primary/20"
-                  >
-                    <Plus size={20} />
-                  </button>
-                )}
+              </Field>
+
+              {/* Promo Code Discount & Expiry */}
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Discount Percentage (%)">
+                  <Input
+                    type="number"
+                    placeholder="e.g. 10"
+                    {...register("promoCodeDiscount")}
+                  />
+                </Field>
+                <Field label="Expiry Date">
+                  <Input type="date" {...register("promoCodeExpiry")} />
+                </Field>
               </div>
-            </Field>
-          ))}
-
-          {/* Create Promo Code */}
-          <Field label="Create Promo Code">
-            <Input
-              placeholder="Write Promo Code here..."
-              {...register("promoCode")}
-            />
-          </Field>
-
-          {/* Promo Code Discount & Expiry */}
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Discount Percentage (%)">
-              <Input
-                type="number"
-                placeholder="e.g. 10"
-                {...register("promoCodeDiscount")}
-              />
-            </Field>
-            <Field label="Expiry Date">
-              <Input
-                type="date"
-                {...register("promoCodeExpiry")}
-              />
-            </Field>
-          </div>
-
+            </>
+          )}
 
           {/* Photo/Video */}
           <UploadBox
@@ -365,7 +357,12 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
             }}
             fileName={mediaFile?.name}
             previewUrl={previewUrl}
-            mediaType={mediaFile?.type || (mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i) ? 'video/mp4' : undefined)}
+            mediaType={
+              mediaFile?.type ||
+              (mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i)
+                ? "video/mp4"
+                : undefined)
+            }
           />
 
           {/* Footer: Cancel | Publish Ads */}

@@ -1,13 +1,32 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bookmark, ScanLine, Share2, SquarePen } from "lucide-react";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
 export default function EventActionButtons({
+  eventId,
+  initialBookmarked,
   onCreateInvite,
   onCheckTicketByScan,
 }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked || false);
+  
+  useEffect(() => {
+    setIsBookmarked(initialBookmarked || false);
+  }, [initialBookmarked]);
+  const [toggleBookmark] = useToggleBookmarkMutation();
+
+  const handleBookmarkToggle = async () => {
+    setIsBookmarked(v => !v);
+    if (eventId) {
+      try {
+        await toggleBookmark({ id: eventId, type: "event" }).unwrap();
+      } catch (err) {
+        setIsBookmarked(v => !v);
+      }
+    }
+  };
 
   return (
     <div className="flex items-center gap-2.5 flex-wrap">
@@ -29,7 +48,7 @@ export default function EventActionButtons({
 
       {/* Bookmark */}
       <button
-        onClick={() => setIsBookmarked(v => !v)}
+        onClick={handleBookmarkToggle}
         className={`p-2.5 rounded-full transition-all duration-200 cursor-pointer ${isBookmarked
             ? "bg-primary text-white"
             : "bg-[#F0F2F5] text-[#63716E] hover:bg-gray-200"

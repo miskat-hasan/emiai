@@ -189,22 +189,36 @@ const MultiSelect = ({
             </div>
 
             {/* Footer */}
-            {selected.length > 0 && (
+            {options.length > 0 && (
               <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-white">
                 <span className="text-xs text-gray">
                   {selected.length} selected
                 </span>
 
-                <button
-                  type="button"
-                  onClick={e => {
-                    e.stopPropagation();
-                    onChange([]);
-                  }}
-                  className="text-xs font-medium text-primary hover:opacity-80 transition cursor-pointer"
-                >
-                  Clear all
-                </button>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onChange(options.map(o => String(o.id)));
+                    }}
+                    className="text-xs font-medium text-black hover:text-primary transition cursor-pointer"
+                  >
+                    Select All
+                  </button>
+                  {selected.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation();
+                        onChange([]);
+                      }}
+                      className="text-xs font-medium text-primary hover:opacity-80 transition cursor-pointer"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>

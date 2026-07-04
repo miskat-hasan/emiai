@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TabSwitcher from "@/components/common/TabSwitcher";
 import { AdsGrid } from "@/components/dashboard/ads";
@@ -8,6 +8,7 @@ import { Search, Calendar, Filter } from "lucide-react";
 import ExploreReelsView from "./ExploreReelsView";
 import ExploreFilterModal from "./ExploreFilterModal";
 import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
+import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
 
 // Utility to calculate time ago
 function timeSince(dateString) {
@@ -77,6 +78,7 @@ export default function ExplorePage({ role }) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("");
   const router = useRouter();
+  const [storeInteraction] = useStoreInteractionMutation();
 
   let rawAds = [];
   if (Array.isArray(exploreAdsResponse)) rawAds = exploreAdsResponse;
@@ -111,12 +113,23 @@ export default function ExplorePage({ role }) {
       userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
       description: ad.description,
       timeAgo: timeSince(ad.publish_at || ad.created_at),
-      isBookmarked: bookmarkedApiAds.includes(ad.id),
+      isBookmarked: ad.is_bookmarked || false,
       targetCountries: ad.target_countries || [],
     };
   });
 
-  const displayAds = mappedApiAds;
+  useEffect(() => {
+    if (rawAds && rawAds.length > 0) {
+      setBookmarkedApiAds(
+        rawAds.filter((ad) => ad.is_bookmarked).map((ad) => ad.id),
+      );
+    }
+  }, [rawAds]);
+
+  const displayAds = mappedApiAds.map((ad) => ({
+    ...ad,
+    isBookmarked: bookmarkedApiAds.includes(ad.id),
+  }));
 
   const filteredAds = displayAds.filter((ad) => {
     const matchesSearch =
@@ -136,6 +149,13 @@ export default function ExplorePage({ role }) {
 
   const handleAdClick = (id) => {
     // Navigate to the ads details page in the explore module
+    if (id) {
+      storeInteraction({
+        target_id: id,
+        target_type: "ad",
+        interaction_type: "click",
+      }).catch(() => {});
+    }
     router.push(`/dashboard/${role}/explore/${id}`);
   };
 
