@@ -1,17 +1,21 @@
+// components/dashboard/contests/ContestsPage.jsx
 "use client";
 
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import TabSwitcher from "@/components/common/TabSwitcher";
-import ContestCard from "@/components/contests/ContestCard";
+import ContestCard from "@/components/dashboard/contests/ContestCard";
 import {
   useGetMyContestsQuery,
   useGetAllContestsQuery,
   useGetParticipatedContestsQuery,
 } from "@/redux/api/services/contestApi";
 
-const CreateContestModal = dynamic(() => import("@/components/contests/CreateContestModal"), { ssr: false });
+const CreateContestModal = dynamic(
+  () => import("@/components/dashboard/contests/CreateContestModal"),
+  { ssr: false },
+);
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────────
 
@@ -92,11 +96,7 @@ function TabPanel({ query, variant, role }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {items.map(item => (
-        <ContestCard
-          key={item.id}
-          {...normalize(item, variant)}
-          role={role}
-        />
+        <ContestCard key={item.id} {...normalize(item, variant)} role={role} />
       ))}
     </div>
   );
@@ -105,12 +105,13 @@ function TabPanel({ query, variant, role }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function ContestsPage({ role }) {
-  const [activeTab, setActiveTab] = useState(role === "guest" ? "contest" : "my");
+  const [activeTab, setActiveTab] = useState(
+    role === "guest" ? "contest" : "my",
+  );
   const [modalOpen, setModalOpen] = useState(false);
-  
-  const displayTabs = role === "guest" 
-    ? TABS.filter(t => t.key !== "my")
-    : TABS;
+
+  const displayTabs =
+    role === "guest" ? TABS.filter(t => t.key !== "my") : TABS;
 
   const myQuery = useGetMyContestsQuery(undefined, {
     skip: activeTab !== "my",
@@ -149,7 +150,11 @@ export default function ContestsPage({ role }) {
 
         {/* Toolbar: tabs + Create button */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <TabSwitcher tabs={displayTabs} active={activeTab} onChange={setActiveTab} />
+          <TabSwitcher
+            tabs={displayTabs}
+            active={activeTab}
+            onChange={setActiveTab}
+          />
 
           {role !== "guest" && (
             <button

@@ -1,3 +1,4 @@
+// components/dashboard/contests/ContestCard.jsx
 import Image from "next/image";
 import Link from "next/link";
 import { Info, CalendarDays } from "lucide-react";

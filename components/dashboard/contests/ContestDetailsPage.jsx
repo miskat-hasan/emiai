@@ -1,3 +1,4 @@
+// components/dashboard/contests/ContestDetailsPage.jsx
 "use client";
 
 import { use, useState } from "react";
