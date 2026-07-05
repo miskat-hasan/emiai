@@ -4,132 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import PortfolioBookmarkCard from "@/components/cards/PortfolioBookmarkCard";
 import EventBookmarkCard from "@/components/cards/EventBookmarkCard";
-import MessageBookmarkCard from "@/components/cards/MessageBookmarkCard";
+import AdCard from "@/components/dashboard/ads/AdCard";
 import Pagination from "@/components/common/Pagination";
+import { useToggleBookmarkMutation, useGetBookmarksQuery } from "@/redux/api/services/bookmarkApi";
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 
-const FILTERS = ["Portfolio", "Events", "Message"];
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const PORTFOLIO_DATA = Array.from({ length: 8 }, (_, i) => ({
-  id: i + 1,
-  title: i % 3 === 3 ? "Mobile Ads Portfolio" : "Bike Ads Portfolio",
-  details: "Hello this is about my por...",
-  likes: "23k",
-  views: "23k",
-  bookmarked: true,
-  image: null,
-}));
-
-const EVENT_DATA = Array.from({ length: 6 }, (_, i) => ({
-  id: i + 1,
-  title: "Digital Marketing Forum 2025",
-  description: "Hello this is about my portfolio",
-  organizer: "Event CO.",
-  date: "Feb 17, 2026",
-  bookmarked: true,
-  image: null,
-}));
-
-const MESSAGE_DATA = [
-  {
-    id: 1,
-    initials: "HR",
-    avatarBg: "bg-teal-700",
-    threadLabel: "Group Chat",
-    senderName: "Esther Howard",
-    time: "03:11 PM",
-    preview:
-      "Hi there, I'm interested in learning more about the company's privacy policy. Can you direct...",
-    bookmarked: true,
-  },
-  {
-    id: 2,
-    avatar: null,
-    initials: "JB",
-    avatarBg: "bg-gray-500",
-    senderName: "Jerome Bell",
-    time: "09:40 AM",
-    preview:
-      "Hey there, I received an email from your company about a promotion. Can you give m...",
-    bookmarked: true,
-  },
-  {
-    id: 3,
-    initials: "HR",
-    avatarBg: "bg-teal-700",
-    threadLabel: "Group Chat",
-    senderName: "Esther Howard",
-    time: "03:11 PM",
-    preview:
-      "Hi there, I'm interested in learning more about the company's privacy policy. Can you direct...",
-    bookmarked: true,
-  },
-  {
-    id: 4,
-    initials: "KM",
-    avatarBg: "bg-blue-500",
-    senderName: "Kathryn Murphy",
-    time: "09:40 AM",
-    preview:
-      "Hey there, I received an email from your company about a promotion. Can you give m...",
-    bookmarked: true,
-  },
-  {
-    id: 5,
-    initials: "RE",
-    avatarBg: "bg-gray-600",
-    senderName: "Ralph Edwards",
-    time: "09:40 AM",
-    preview:
-      "Hey there, I received an email from your company about a promotion. Can you give m...",
-    bookmarked: true,
-  },
-  {
-    id: 6,
-    initials: "DR",
-    avatarBg: "bg-pink-500",
-    senderName: "Dianne Russell",
-    time: "09:40 AM",
-    preview:
-      "Hey there, I received an email from your company about a promotion. Can you give m...",
-    bookmarked: true,
-  },
-  {
-    id: 7,
-    initials: "HR",
-    avatarBg: "bg-teal-700",
-    threadLabel: "Group Chat",
-    senderName: "Esther Howard",
-    time: "03:11 PM",
-    preview:
-      "Hi there, I'm interested in learning more about the company's privacy policy. Can you direct...",
-    bookmarked: true,
-  },
-  {
-    id: 8,
-    initials: "KW",
-    avatarBg: "bg-rose-400",
-    senderName: "Kristin Watson",
-    time: "09:40 AM",
-    preview:
-      "Hey there, I received an email from your company about a promotion. Can you give m...",
-    bookmarked: true,
-  },
-  {
-    id: 9,
-    initials: "HR",
-    avatarBg: "bg-teal-700",
-    threadLabel: "Group Chat",
-    senderName: "Esther Howard",
-    time: "03:11 PM",
-    preview:
-      "Hi there, I'm interested in learning more about the company's privacy policy. Can you direct...",
-    bookmarked: true,
-  },
-];
+const FILTERS = ["Portfolio", "Events", "Ads"];
 
 // ─── Filter dropdown ──────────────────────────────────────────────────────────
 
@@ -184,52 +65,112 @@ function FilterDropdown({ value, onChange }) {
 // ─── Grid layouts per filter ──────────────────────────────────────────────────
 
 function PortfolioGrid({ items, onToggle }) {
+  if (!items || items.length === 0) {
+    return <div className="text-gray text-sm py-10 text-center w-full">No portfolio bookmarks found.</div>;
+  }
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {items.map(item => (
-        <PortfolioBookmarkCard
-          key={item.id}
-          {...item}
-          onBookmark={() => onToggle(item.id)}
-        />
-      ))}
+      {items.map(item => {
+        const pf = item.bookmarkable || item;
+        
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+        const origin = new URL(apiUrl).origin;
+        let imageUrl = pf.image || pf.photo || pf.imageUrl || pf.media_url;
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = `${origin}${imageUrl}`;
+        }
+        
+        return (
+          <PortfolioBookmarkCard
+            key={pf.id}
+            image={imageUrl}
+            title={pf.title || "Portfolio"}
+            details={pf.details || pf.description || "Portfolio Details"}
+            likes={pf.likes || "0"}
+            views={pf.views || "0"}
+            bookmarked={true}
+            onBookmark={() => onToggle(pf.id)}
+          />
+        );
+      })}
     </div>
   );
 }
 
 function EventGrid({ items, onToggle }) {
+  if (!items || items.length === 0) {
+    return <div className="text-gray text-sm py-10 text-center w-full">No event bookmarks found.</div>;
+  }
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {items.map(item => (
-        <EventBookmarkCard
-          key={item.id}
-          {...item}
-          onBookmark={() => onToggle(item.id)}
-        />
-      ))}
+      {items.map(item => {
+        const ev = item.bookmarkable || item;
+        
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+        const origin = new URL(apiUrl).origin;
+        let imageUrl = ev.photo || ev.image || ev.imageUrl || ev.media_url;
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = `${origin}${imageUrl}`;
+        }
+        
+        return (
+          <EventBookmarkCard
+            key={ev.id}
+            image={imageUrl}
+            title={ev.title || "Event Title"}
+            description={ev.description || "Event Description"}
+            organizer={ev.organizer || ev.event_sponsorships?.[0]?.sponsor?.name || "Event CO."}
+            date={ev.date || ev.start_date || "Event Date"}
+            bookmarked={true}
+            onBookmark={() => onToggle(ev.id)}
+          />
+        );
+      })}
     </div>
   );
 }
 
-function MessageList({ items, onToggle }) {
-  // Split into 3 equal columns like the screenshot
-  const col1 = items.filter((_, i) => i % 3 === 0);
-  const col2 = items.filter((_, i) => i % 3 === 1);
-  const col3 = items.filter((_, i) => i % 3 === 2);
-
+function AdGrid({ items, onToggle }) {
+  if (!items || items.length === 0) {
+    return <div className="text-gray text-sm py-10 text-center w-full">No ad bookmarks found.</div>;
+  }
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6">
-      {[col1, col2, col3].map((col, ci) => (
-        <div key={ci} className="divide-y divide-gray-100">
-          {col.map(item => (
-            <MessageBookmarkCard
-              key={item.id}
-              {...item}
-              onBookmark={() => onToggle(item.id)}
-            />
-          ))}
-        </div>
-      ))}
+    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      {items.map(item => {
+        const ad = item.bookmarkable || item;
+        
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+        const origin = new URL(apiUrl).origin;
+        let imageUrl = ad.media_url || ad.imageUrl;
+        if (imageUrl && !imageUrl.startsWith('http')) {
+          imageUrl = `${origin}${imageUrl}`;
+        }
+        let mediaType = ad.media_type || ad.mediaType;
+
+        if (!mediaType && imageUrl) {
+          if (imageUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
+            mediaType = "video";
+          } else {
+            mediaType = "image";
+          }
+        }
+
+        return (
+          <AdCard
+            key={ad.id}
+            imageUrl={imageUrl}
+            mediaType={mediaType}
+            userName={ad.userName || "Advertiser " + (ad.advertiser_id || "1")}
+            userAvatar={ad.userAvatar || "https://i.pravatar.cc/150?u=" + (ad.advertiser_id || "1")}
+            description={ad.description}
+            timeAgo={ad.timeAgo || ""}
+            isBookmarked={true}
+            status={ad.status || "active"}
+            publishAt={ad.publish_at || ad.publishAt}
+            onBookmarkToggle={() => onToggle(ad.id)}
+          />
+        );
+      })}
     </div>
   );
 }
@@ -237,38 +178,66 @@ function MessageList({ items, onToggle }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BookmarksPage({ role }) {
-  const [filter, setFilter] = useState("Portfolio");
+  const [filter, setFilter] = useState("Ads");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  // Local bookmark toggle state
-  const [portfolioItems, setPortfolioItems] = useState(PORTFOLIO_DATA);
-  const [eventItems, setEventItems] = useState(EVENT_DATA);
-  const [messageItems, setMessageItems] = useState(MESSAGE_DATA);
+  const typeMap = {
+    Portfolio: "portfolio",
+    Events: "event",
+    Ads: "ad",
+  };
 
-  const togglePortfolio = id =>
-    setPortfolioItems(prev =>
-      prev.map(i => (i.id === id ? { ...i, bookmarked: !i.bookmarked } : i)),
-    );
-  const toggleEvent = id =>
-    setEventItems(prev =>
-      prev.map(i => (i.id === id ? { ...i, bookmarked: !i.bookmarked } : i)),
-    );
-  const toggleMessage = id =>
-    setMessageItems(prev =>
-      prev.map(i => (i.id === id ? { ...i, bookmarked: !i.bookmarked } : i)),
-    );
+  const { data: responseData, isLoading, isError } = useGetBookmarksQuery(typeMap[filter]);
+  const [toggleBookmark] = useToggleBookmarkMutation();
 
-  // Reset page when filter changes
+  let rawItems = [];
+  if (Array.isArray(responseData)) rawItems = responseData;
+  else if (Array.isArray(responseData?.data)) rawItems = responseData.data;
+  else if (Array.isArray(responseData?.data?.data)) rawItems = responseData.data.data;
+
+  // Optimistic tracking for unbookmarked items
+  const [unbookmarkedIds, setUnbookmarkedIds] = useState([]);
+
+  // Filter out items that were just unbookmarked, and filter by search
+  const visibleItems = rawItems.filter(item => {
+    const id = item.bookmarkable?.id || item.id;
+    if (unbookmarkedIds.includes(id)) return false;
+    
+    // basic search filtering
+    if (search) {
+      const title = item.bookmarkable?.title || item.title || "";
+      const desc = item.bookmarkable?.description || item.description || "";
+      const s = search.toLowerCase();
+      if (!title.toLowerCase().includes(s) && !desc.toLowerCase().includes(s)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  const handleToggle = async (id, type) => {
+    // Optimistic UI hide
+    setUnbookmarkedIds(prev => [...prev, id]);
+    try {
+      await toggleBookmark({ id, type }).unwrap();
+    } catch (err) {
+      // Revert on error
+      setUnbookmarkedIds(prev => prev.filter(bId => bId !== id));
+    }
+  };
+
+  // Reset page & clear optimistic state when filter changes
   const handleFilterChange = f => {
     setFilter(f);
     setPage(1);
     setSearch("");
+    setUnbookmarkedIds([]);
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col min-h-[calc(100vh-100px)] space-y-6">
       {/* Page heading */}
       <div>
         <h1 className="text-2xl font-bold text-black">All Bookmark</h1>
@@ -291,7 +260,7 @@ export default function BookmarksPage({ role }) {
               type="text"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Search in name"
+              placeholder="Search..."
               className="bg-transparent text-sm text-black placeholder-gray/60 outline-none w-40"
             />
           </div>
@@ -302,25 +271,37 @@ export default function BookmarksPage({ role }) {
       </div>
 
       {/* Content */}
-      {filter === "Portfolio" && (
-        <PortfolioGrid items={portfolioItems} onToggle={togglePortfolio} />
-      )}
-      {filter === "Events" && (
-        <EventGrid items={eventItems} onToggle={toggleEvent} />
-      )}
-      {filter === "Message" && (
-        <MessageList items={messageItems} onToggle={toggleMessage} />
+      {isLoading ? (
+        <div className="py-10 text-center text-gray animate-pulse">Loading bookmarks...</div>
+      ) : isError ? (
+        <div className="py-10 text-center text-red-500">Failed to load bookmarks.</div>
+      ) : (
+        <>
+          {filter === "Portfolio" && (
+            <PortfolioGrid items={visibleItems} onToggle={(id) => handleToggle(id, "portfolio")} />
+          )}
+          {filter === "Events" && (
+            <EventGrid items={visibleItems} onToggle={(id) => handleToggle(id, "event")} />
+          )}
+          {filter === "Ads" && (
+            <AdGrid items={visibleItems} onToggle={(id) => handleToggle(id, "ad")} />
+          )}
+        </>
       )}
 
       {/* Pagination */}
-      <Pagination
-        currentPage={page}
-        totalPages={8}
-        onPageChange={setPage}
-        perPage={perPage}
-        onPerPageChange={setPerPage}
-        totalResults={80}
-      />
+      <div className="mt-auto pt-6">
+        {visibleItems.length > 0 && (
+          <Pagination
+            currentPage={page}
+            totalPages={8}
+            onPageChange={setPage}
+            perPage={perPage}
+            onPerPageChange={setPerPage}
+            totalResults={80}
+          />
+        )}
+      </div>
     </div>
   );
 }

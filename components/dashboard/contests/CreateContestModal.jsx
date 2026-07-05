@@ -5,7 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, Plus, Upload, Calendar } from "lucide-react";
 import { useCreateContestMutation } from "@/redux/api/services/contestApi";
-import MultiSelect from "../ui/MultiSelect";
+import MultiSelect from "../../ui/MultiSelect";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

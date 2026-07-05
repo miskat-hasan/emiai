@@ -2,13 +2,19 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Heart, Bookmark, Share, VolumeX, Volume2 } from "lucide-react";
+import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
 export default function ExploreReelsView({ ads }) {
   if (!ads || ads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center w-full h-[calc(100vh-200px)] bg-primary/5 rounded-3xl border border-dashed border-primary/20">
-        <div className="text-gray-500 text-lg font-medium">No reels match your filters.</div>
-        <p className="text-gray-400 text-sm mt-2">Try adjusting your search or country filter.</p>
+        <div className="text-gray-500 text-lg font-medium">
+          No reels match your filters.
+        </div>
+        <p className="text-gray-400 text-sm mt-2">
+          Try adjusting your search or country filter.
+        </p>
       </div>
     );
   }
@@ -26,20 +32,48 @@ export default function ExploreReelsView({ ads }) {
 function ReelCard({ ad }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(ad.isBookmarked || false);
+  
+  useEffect(() => {
+    setIsBookmarked(ad.isBookmarked || ad.is_bookmarked || false);
+  }, [ad.isBookmarked, ad.is_bookmarked]);
+
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
   const containerRef = useRef(null);
+  const hasViewedRef = useRef(false);
+  const [storeInteraction] = useStoreInteractionMutation();
+  const [toggleBookmark] = useToggleBookmarkMutation();
+
+  const handleBookmarkToggle = async () => {
+    setIsBookmarked(!isBookmarked);
+    if (ad.id) {
+      try {
+        await toggleBookmark({ id: ad.id, type: "ad" }).unwrap();
+      } catch (err) {
+        setIsBookmarked(!isBookmarked);
+      }
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           videoRef.current?.play().catch(() => {});
+
+          if (!hasViewedRef.current && ad.id) {
+            hasViewedRef.current = true;
+            storeInteraction({
+              target_id: ad.id,
+              target_type: "ad",
+              interaction_type: "view",
+            }).catch(() => {});
+          }
         } else {
           videoRef.current?.pause();
         }
       },
-      { threshold: 0.6 }
+      { threshold: 0.6 },
     );
 
     if (containerRef.current) {
@@ -56,10 +90,12 @@ function ReelCard({ ad }) {
     setIsMuted(!isMuted);
   };
 
-  const isVideo = ad.mediaType === "video" || ad.imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i);
+  const isVideo =
+    ad.mediaType === "video" ||
+    ad.imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i);
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-primary/10"
     >
@@ -80,7 +116,7 @@ function ReelCard({ ad }) {
           className="absolute inset-0 w-full h-full object-cover"
         />
       )}
-      
+
       {/* Gradient Overlay for Text Readability */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none" />
 
@@ -96,7 +132,7 @@ function ReelCard({ ad }) {
 
       {/* Play/Pause Area */}
       {isVideo && (
-        <div 
+        <div
           className="absolute inset-0 z-0 cursor-pointer"
           onClick={() => {
             if (videoRef.current?.paused) videoRef.current.play();
@@ -109,22 +145,37 @@ function ReelCard({ ad }) {
       <div className="absolute top-1/2 right-4 md:right-6 -translate-y-1/2 flex flex-col gap-4 z-10 pointer-events-auto">
         {/* Like */}
         <button
-          onClick={() => setIsLiked(!isLiked)}
+          onClick={() => {
+            setIsLiked(!isLiked);
+            if (ad.id) {
+              storeInteraction({
+                target_id: ad.id,
+                target_type: "ad",
+                interaction_type: "like",
+              }).catch(() => {});
+            }
+          }}
           className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer"
         >
-          <Heart size={22} className={isLiked ? "fill-primary text-primary" : "text-gray-600"} />
+          <Heart
+            size={22}
+            className={isLiked ? "fill-primary text-primary" : "text-gray-600"}
+          />
         </button>
         {/* Bookmark */}
         <button
-          onClick={() => setIsBookmarked(!isBookmarked)}
+          onClick={handleBookmarkToggle}
           className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer"
         >
-          <Bookmark size={22} className={isBookmarked ? "fill-primary text-primary" : "text-gray-600"} />
+          <Bookmark
+            size={22}
+            className={
+              isBookmarked ? "fill-primary text-primary" : "text-gray-600"
+            }
+          />
         </button>
         {/* Share */}
-        <button
-          className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer"
-        >
+        <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
           <Share size={22} className="text-gray-600" />
         </button>
       </div>
@@ -147,9 +198,7 @@ function ReelCard({ ad }) {
           </div>
         </div>
 
-        <span className="text-white/90 text-sm font-medium">
-          {ad.timeAgo}
-        </span>
+        <span className="text-white/90 text-sm font-medium">{ad.timeAgo}</span>
       </div>
     </div>
   );

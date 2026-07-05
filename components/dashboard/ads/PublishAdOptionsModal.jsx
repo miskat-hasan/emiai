@@ -65,6 +65,7 @@ export default function PublishAdOptionsModal({ onCancel, onApply }) {
             >
               <option value="promo_code">Partner code or promo code</option>
               <option value="coin">Use Coin</option>
+              <option value="none">None</option>
             </select>
             <ChevronDown
               size={16}

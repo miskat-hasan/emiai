@@ -8,17 +8,20 @@ export const adApi = apiSlice.injectEndpoints({
     }),
 
     getAllAds: builder.query({
-      query: () => ({ url: "/api/ads/list?type=active", method: "GET" }),
+      query: () => ({ url: "/api/ads/list?type=all", method: "GET" }),
       providesTags: ["Ad"],
     }),
 
     getGuestExploreAds: builder.query({
-      query: (type = "all") => ({ url: `/api/ads/list?type=${type}`, method: "GET" }),
+      query: (type = "all") => ({
+        url: `/api/ads/list?type=${type}`,
+        method: "GET",
+      }),
       providesTags: ["Ad"],
     }),
 
     getAdById: builder.query({
-      query: (id) => ({ url: `/api/ads/${id}`, method: "GET" }),
+      query: (id) => ({ url: `/api/ads/details/${id}`, method: "GET" }),
       providesTags: (result, error, id) => [{ type: "Ad", id }],
     }),
 

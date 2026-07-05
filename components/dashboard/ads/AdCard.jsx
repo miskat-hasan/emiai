@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
-
 import { BookmarkSVG, BookmarkFilledSVG } from "@/components/common/Svg";
+import CountdownTimer from "@/components/common/CountdownTimer";
 
 const AdCard = ({
   imageUrl,
@@ -11,14 +11,26 @@ const AdCard = ({
   description,
   timeAgo,
   isBookmarked = false,
+  status,
+  publishAt,
+  tabType,
   onClick,
   onBookmarkToggle,
 }) => {
+  const preventAction = status === "scheduled" && tabType === "all-ads";
+
   return (
     <div
-      onClick={onClick}
-      className="relative rounded-2xl overflow-hidden aspect-[4/5] group cursor-pointer"
+      onClick={preventAction ? undefined : onClick}
+      className={`relative rounded-2xl overflow-hidden aspect-[4/5] group ${
+        preventAction ? "cursor-default" : "cursor-pointer"
+      }`}
     >
+      {/* Floating Countdown for Scheduled Ads */}
+      {status === "scheduled" && publishAt && (
+        <CountdownTimer targetDate={publishAt} />
+      )}
+
       {/* Background image or video */}
       {mediaType === "video" ||
       imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i) ? (
@@ -27,7 +39,7 @@ const AdCard = ({
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           muted
           loop
-          autoPlay
+          autoPlay={!preventAction}
           playsInline
         />
       ) : (
