@@ -5,6 +5,7 @@ import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import PortfolioBookmarkCard from "@/components/cards/PortfolioBookmarkCard";
 import EventBookmarkCard from "@/components/cards/EventBookmarkCard";
 import AdCard from "@/components/dashboard/ads/AdCard";
+import AdCardSkeleton from "@/components/dashboard/ads/AdCardSkeleton";
 import Pagination from "@/components/common/Pagination";
 import { useToggleBookmarkMutation, useGetBookmarksQuery } from "@/redux/api/services/bookmarkApi";
 
@@ -272,7 +273,15 @@ export default function BookmarksPage({ role }) {
 
       {/* Content */}
       {isLoading ? (
-        <div className="py-10 text-center text-gray animate-pulse">Loading bookmarks...</div>
+        filter === "Ads" ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <AdCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="py-10 text-center text-gray animate-pulse">Loading bookmarks...</div>
+        )
       ) : isError ? (
         <div className="py-10 text-center text-red-500">Failed to load bookmarks.</div>
       ) : (

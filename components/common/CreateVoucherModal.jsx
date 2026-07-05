@@ -3,7 +3,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useCreateVoucherMutation, useGetVoucherCategoriesQuery } from "@/redux/api/services/voucherApi";
+import {
+  useCreateVoucherMutation,
+  useGetVoucherCategoriesQuery,
+} from "@/redux/api/services/voucherApi";
 import { CalendarIcon } from "lucide-react";
 
 function Field({ label, error, children, className = "" }) {
@@ -36,9 +39,15 @@ function Textarea({ className = "", ...props }) {
   );
 }
 
-export default function CreateVoucherModal({ open, onClose, onSuccess, role = "influencer" }) {
+export default function CreateVoucherModal({
+  open,
+  onClose,
+  onSuccess,
+  role = "influencer",
+}) {
   // Fetch from backend
-  const { data: categoriesResponse, isLoading: loadingCategories } = useGetVoucherCategoriesQuery();
+  const { data: categoriesResponse, isLoading: loadingCategories } =
+    useGetVoucherCategoriesQuery();
   const categories = categoriesResponse?.data || [];
 
   const [createVoucher, { isLoading }] = useCreateVoucherMutation();
@@ -56,7 +65,7 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
     }
   }, [open, reset]);
 
-  const onSubmit = async data => {
+  const onSubmit = async (data) => {
     try {
       const fd = new FormData();
       fd.append("promo_code", data.promo_code);
@@ -68,7 +77,7 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
       fd.append("description", data.description);
 
       const res = await createVoucher(fd).unwrap();
-      
+
       if (res?.success || res?.code === 201 || res?.code === 200) {
         toast.success(res?.message || "Voucher created successfully!");
         onClose();
@@ -84,7 +93,7 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-      onClick={e => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         className={`theme-${role} relative w-full max-w-3xl bg-white rounded-[24px] shadow-2xl max-h-[90vh] overflow-hidden flex flex-col`}
@@ -92,7 +101,10 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
         {/* Gradient Overlay */}
         <div
           className="absolute inset-0 pointer-events-none z-0"
-          style={{ background: "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.15) 100%)" }}
+          style={{
+            background:
+              "linear-gradient(to bottom, transparent 60%, rgba(var(--color-primary-rgb), 0.15) 100%)",
+          }}
         />
 
         <div className="relative z-10 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
@@ -100,20 +112,29 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
             onSubmit={handleSubmit(onSubmit)}
             className="px-8 pt-8 pb-6 flex flex-col gap-6"
           >
-            <h2 className="text-[22px] font-bold text-black mb-2">Create New Voucher</h2>
+            <h2 className="text-[22px] font-bold text-black mb-2">
+              Create New Voucher
+            </h2>
 
             <div className="border-t border-gray-200" />
 
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Field label="Voucher Category" error={errors.category_id?.message}>
+              <Field
+                label="Voucher Category"
+                error={errors.category_id?.message}
+              >
                 <div className="relative">
                   <select
-                    {...register("category_id", { required: "Category is required" })}
+                    {...register("category_id", {
+                      required: "Category is required",
+                    })}
                     className="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
                   >
-                    <option value="" disabled hidden>Category</option>
-                    {categories.map(cat => (
+                    <option value="" disabled hidden>
+                      Category
+                    </option>
+                    {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.name}
                       </option>
@@ -125,62 +146,92 @@ export default function CreateVoucherModal({ open, onClose, onSuccess, role = "i
               <Field label="Promo Code" error={errors.promo_code?.message}>
                 <Input
                   placeholder="Write Your Promo Code"
-                  {...register("promo_code", { required: "Promo code is required" })}
+                  {...register("promo_code", {
+                    required: "Promo code is required",
+                  })}
                 />
               </Field>
 
               <Field label="End Date" error={errors.end_date?.message}>
-              <div className="relative">
+                <div className="relative">
+                  <Input
+                    type="date"
+                    className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
+                    {...register("end_date", {
+                      required: "End date is required",
+                    })}
+                  />
+                  <CalendarIcon
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none"
+                    size={18}
+                  />
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 2: Added fields to match backend expectations */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Field label="Discount Value" error={errors.discount?.message}>
                 <Input
-                  type="date"
-                  className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
-                  {...register("end_date", { required: "End date is required" })}
+                  type="number"
+                  placeholder="e.g. 20"
+                  {...register("discount", {
+                    required: "Discount is required",
+                  })}
                 />
-                <CalendarIcon className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none" size={18} />
-              </div>
-            </Field>
-          </div>
+              </Field>
 
-          {/* Row 2: Added fields to match backend expectations */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Field label="Discount Value" error={errors.discount?.message}>
-              <Input
-                type="number"
-                placeholder="e.g. 20"
-                {...register("discount", { required: "Discount is required" })}
-              />
-            </Field>
+              <Field
+                label="Discount Type"
+                error={errors.discount_type?.message}
+              >
+                <div className="relative">
+                  <select
+                    {...register("discount_type", {
+                      required: "Type is required",
+                    })}
+                    className="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount</option>
+                  </select>
+                </div>
+              </Field>
 
-            <Field label="Discount Type" error={errors.discount_type?.message}>
-              <div className="relative">
-                <select
-                  {...register("discount_type", { required: "Type is required" })}
-                  className="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
-                >
-                  <option value="percentage">Percentage (%)</option>
-                  <option value="fixed">Fixed Amount</option>
-                </select>
-              </div>
-            </Field>
+              <Field label="Start Date" error={errors.start_date?.message}>
+                <div className="relative">
+                  <Input
+                    type="date"
+                    className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
+                    {...register("start_date", {
+                      required: "Start date is required",
+                    })}
+                  />
+                  <CalendarIcon
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none"
+                    size={18}
+                  />
+                </div>
+              </Field>
+            </div>
 
-            <Field label="Start Date" error={errors.start_date?.message}>
-              <div className="relative">
-                <Input
-                  type="date"
-                  className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
-                  {...register("start_date", { required: "Start date is required" })}
-                />
-                <CalendarIcon className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none" size={18} />
-              </div>
-            </Field>
-          </div>
-
-          {/* Row 3 */}
-            <Field label="Voucher Description" error={errors.description?.message}>
+            {/* Row 3 */}
+            <Field
+              label="Voucher Description"
+              error={errors.description?.message}
+            >
               <Textarea
                 placeholder="Write Voucher Description here...."
                 rows={3}
-                {...register("description", { required: "Description is required" })}
+                {...register("description", {
+                  required: "Description is required",
+                  validate: (value) => {
+                    return (
+                      value.length === 120 ||
+                      `Description must be exactly 120 characters long`
+                    );
+                  },
+                })}
               />
             </Field>
 

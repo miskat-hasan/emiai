@@ -1,14 +1,17 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import EventHeroImage from "./EventHeroImage";
 import EventDescription from "./EventDescription";
 import EventInfoCard from "./EventInfoCard";
 import EventLocation from "./EventLocation";
 import EventParticipants from "./EventParticipants";
-import EventActionButtons from "./EventActionButtons";
+import MyEventActionButtons from "./MyEventActionButtons";
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
+import dynamic from "next/dynamic";
+
+const CreateEventModal = dynamic(() => import("./CreateEventModal"), { ssr: false });
 
 const EventDetailsSkeleton = () => (
   <div className="space-y-5 animate-pulse">
@@ -53,6 +56,8 @@ const EventDetailsSkeleton = () => (
  */
 export default function MyEventDetailsPage({ role, params }) {
   const { id } = use(params);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const { data: response, isLoading } = useGetEventByIdQuery(id);
 
@@ -71,6 +76,8 @@ export default function MyEventDetailsPage({ role, params }) {
   }
 
   const event = {
+    id: rawEvent.id,
+    is_bookmarked: rawEvent.is_bookmarked,
     title: rawEvent.name || "Event Title",
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
@@ -129,9 +136,13 @@ export default function MyEventDetailsPage({ role, params }) {
           {event.title}
         </h2>
         {/* EventActionButtons is "use client" — fine inside a Server Component */}
-        <EventActionButtons
+        <MyEventActionButtons
           eventId={event.id}
           initialBookmarked={event.is_bookmarked}
+          onEdit={() => {
+            setEditingEvent(rawEvent);
+            setModalOpen(true);
+          }}
         />
       </div>
 
@@ -160,6 +171,15 @@ export default function MyEventDetailsPage({ role, params }) {
           <EventParticipants participants={formattedParticipants} />
         </div>
       </div>
+
+      <CreateEventModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingEvent(null);
+        }}
+        editingEvent={editingEvent}
+      />
     </div>
   );
 }

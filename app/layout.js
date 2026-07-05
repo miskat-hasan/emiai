@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${dmSans.variable} antialiased`}>
       <body>
         <ReduxProvider>
-          <ToastContainer autoClose={2000} pauseOnHover={false} />
+          <ToastContainer autoClose={3000} pauseOnHover hideProgressBar />
           {children}
         </ReduxProvider>
       </body>

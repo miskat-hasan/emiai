@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Heart, Eye } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setStep, clearDraft } from "@/redux/slices/adCreationSlice";
-import { useCreateAdMutation } from "@/redux/api/services/adApi";
+import { useCreateAdMutation, useUpdateAdMutation } from "@/redux/api/services/adApi";
 import { toast } from "react-toastify";
 
 
@@ -14,7 +14,9 @@ export default function PostPreview() {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
   const options = useSelector((state) => state.adCreation.options);
-  const [createAd, { isLoading }] = useCreateAdMutation();
+  const [createAd, { isLoading: isCreating }] = useCreateAdMutation();
+  const [updateAd, { isLoading: isUpdating }] = useUpdateAdMutation();
+  const isLoading = isCreating || isUpdating;
 
   const handleBack = () => {
     dispatch(setStep("create_ad"));
@@ -65,12 +67,21 @@ export default function PostPreview() {
       // Handle coin payment if needed by backend, e.g., fd.append("payment_method", "coin");
     }
 
+    if (draft.id) {
+      fd.append("id", draft.id);
+    }
+
     try {
-      await createAd(fd).unwrap();
-      toast.success("Ads published successfully!");
+      if (draft.id) {
+        await updateAd(fd).unwrap();
+        toast.success("Ads updated successfully!");
+      } else {
+        await createAd(fd).unwrap();
+        toast.success("Ads published successfully!");
+      }
       dispatch(clearDraft());
     } catch (err) {
-      toast.error(err?.data?.message || "Failed to publish ads.");
+      toast.error(err?.data?.message || `Failed to ${draft.id ? "update" : "publish"} ads.`);
     }
   };
 
@@ -161,7 +172,7 @@ export default function PostPreview() {
           disabled={isLoading}
           className="bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:opacity-90 hover:cursor-pointer transition-all shadow-md disabled:opacity-60"
         >
-          {isLoading ? "Publishing..." : "Publish Ads"}
+          {isLoading ? (draft.id ? "Saving..." : "Publishing...") : (draft.id ? "Save Changes" : "Publish Ads")}
         </button>
       </div>
     </div>
