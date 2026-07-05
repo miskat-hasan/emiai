@@ -5,19 +5,14 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import TabSwitcher from "@/components/common/TabSwitcher";
-import ContestCard from "@/components/dashboard/contests/ContestCard";
 import {
   useGetMyContestsQuery,
   useGetAllContestsQuery,
   useGetParticipatedContestsQuery,
 } from "@/redux/api/services/contestApi";
+import ContestCard from "./ContestCard";
 
-const CreateContestModal = dynamic(
-  () => import("@/components/dashboard/contests/CreateContestModal"),
-  { ssr: false },
-);
-
-// ─── Tabs ─────────────────────────────────────────────────────────────────────
+const CreateContestModal = dynamic(() => import("@/components/dashboard/contests/CreateContestModal"), { ssr: false });
 
 const TABS = [
   { key: "my", label: "My Contest" },
@@ -25,25 +20,42 @@ const TABS = [
   { key: "participated", label: "Participated" },
 ];
 
-// ─── Normalize API responses to card props ────────────────────────────────────
+const ROLE_TABS = {
+  influencer: ["my", "contest", "participated"],
+  advertiser: ["my", "contest", "participated"],
+  agency: ["my"],
+  guest: ["contest", "participated"],
+};
+
+const ROLE_DEFAULT_TAB = {
+  influencer: "my",
+  advertiser: "my",
+  agency: "my",
+  guest: "contest",
+};
+
+const CAN_CREATE_ROLES = ["influencer", "advertiser", "agency"];
 
 function normalize(item, variant) {
+  const hostBy =
+    item.host_by ??
+    (typeof item.creator === "string" ? item.creator : item.creator?.name) ??
+    "—";
+
   return {
     id: item.id,
     variant,
     title: item.title,
-    hostBy: item.host_by ?? item.creator?.name ?? "A. R. Rahman",
+    hostBy,
     prize: item.prize,
     endDate: item.end_date,
-    entryFee: item.entry_fee ?? null,
-    description: item.description ?? "Show your best summer f...",
-    totalSlots: item.total_slots ?? 100,
+    entryFee: item.entry_fee,
+    description: item.description ?? "",
+    totalSlots: item.total_slots ?? null,
     totalParticipants: item.total_participants ?? 0,
     prizePhotoUrl: item.prize_photo_url ?? null,
   };
 }
-
-// ─── Tab panel ────────────────────────────────────────────────────────────────
 
 function TabPanel({ query, variant, role }) {
   const { data, isLoading, isError, refetch } = query;
@@ -96,34 +108,37 @@ function TabPanel({ query, variant, role }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {items.map(item => (
-        <ContestCard key={item.id} {...normalize(item, variant)} role={role} />
+        <ContestCard
+          key={item.id}
+          {...normalize(item, variant)}
+          role={role}
+        />
       ))}
     </div>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
 export default function ContestsPage({ role }) {
+  const allowedTabKeys = ROLE_TABS[role] ?? TABS.map(t => t.key);
+  const displayTabs = TABS.filter(t => allowedTabKeys.includes(t.key));
+
   const [activeTab, setActiveTab] = useState(
-    role === "guest" ? "contest" : "my",
+    ROLE_DEFAULT_TAB[role] ?? displayTabs[0]?.key ?? "my"
   );
   const [modalOpen, setModalOpen] = useState(false);
 
-  const displayTabs =
-    role === "guest" ? TABS.filter(t => t.key !== "my") : TABS;
+  const canCreate = CAN_CREATE_ROLES.includes(role);
 
   const myQuery = useGetMyContestsQuery(undefined, {
-    skip: activeTab !== "my",
+    skip: activeTab !== "my" || !allowedTabKeys.includes("my"),
   });
   const allQuery = useGetAllContestsQuery(undefined, {
-    skip: activeTab !== "contest",
+    skip: activeTab !== "contest" || !allowedTabKeys.includes("contest"),
   });
   const participatedQuery = useGetParticipatedContestsQuery(undefined, {
-    skip: activeTab !== "participated",
+    skip: activeTab !== "participated" || !allowedTabKeys.includes("participated"),
   });
 
-  // Refetch the active tab after creating a contest
   const handleCreated = () => {
     if (activeTab === "my") myQuery.refetch?.();
   };
@@ -150,13 +165,9 @@ export default function ContestsPage({ role }) {
 
         {/* Toolbar: tabs + Create button */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <TabSwitcher
-            tabs={displayTabs}
-            active={activeTab}
-            onChange={setActiveTab}
-          />
+          <TabSwitcher tabs={displayTabs} active={activeTab} onChange={setActiveTab} />
 
-          {role !== "guest" && (
+          {canCreate && (
             <button
               onClick={() => setModalOpen(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
@@ -172,11 +183,13 @@ export default function ContestsPage({ role }) {
       </div>
 
       {/* Modal */}
-      <CreateContestModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSuccess={handleCreated}
-      />
+      {canCreate && (
+        <CreateContestModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSuccess={handleCreated}
+        />
+      )}
     </>
   );
 }

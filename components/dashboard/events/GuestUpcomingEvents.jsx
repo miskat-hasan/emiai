@@ -46,7 +46,7 @@ export default function GuestUpcomingEvents() {
           <p className="text-base font-medium">No upcoming events found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {rawEvents.map(event => {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
             const origin = new URL(apiUrl).origin;

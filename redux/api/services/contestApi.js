@@ -23,6 +23,7 @@ export const contestApi = apiSlice.injectEndpoints({
     getSingleContest: builder.query({
       query: id => ({ url: `/api/contest/show?id=${id}`, method: "GET" }),
       providesTags: ["Contest"],
+      // providesTags: (result, error, id) => [{ type: "Contest", id }],
     }),
 
     createContest: builder.mutation({
@@ -45,12 +46,15 @@ export const contestApi = apiSlice.injectEndpoints({
     }),
 
     joinContest: builder.mutation({
-      query: body => ({
+      query: id => ({
         url: `/api/contest/join-contest?contest_id=${id}`,
         method: "POST",
-        body,
       }),
       invalidatesTags: ["Contest"],
+      // invalidatesTags: (result, error, contestId) => [
+      //   "Contest",
+      //   { type: "Contest", id: contestId },
+      // ],
     }),
   }),
 });

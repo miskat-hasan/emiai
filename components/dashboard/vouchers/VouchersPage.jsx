@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { VoucherCard } from "@/components/common/VoucherCard";
 import dynamic from "next/dynamic";
+import { toast } from "react-toastify";
 import { useGetVouchersQuery } from "@/redux/api/services/voucherApi";
 
 const CreateVoucherModal = dynamic(() => import("@/components/common/CreateVoucherModal"), { ssr: false });
@@ -31,6 +32,7 @@ export default function VouchersPage({ role }) {
 
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
+    toast.success("Promo code copied to clipboard!");
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import AdCard from "./AdCard";
 
-const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkToggle }) {
+const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkToggle, onEditClick }) {
   if (!ads || ads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -14,7 +14,7 @@ const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkTog
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
       {ads.map(ad => (
         <AdCard
           key={ad.id}
@@ -30,6 +30,7 @@ const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkTog
           tabType={activeTab}
           onClick={() => onAdClick?.(ad.id)}
           onBookmarkToggle={() => onBookmarkToggle?.(ad.id)}
+          onEditClick={onEditClick ? () => onEditClick(ad) : undefined}
         />
       ))}
     </div>

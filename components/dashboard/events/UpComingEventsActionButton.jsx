@@ -4,13 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Bookmark, ScanLine, Share2, SquarePen, Trash2 } from "lucide-react";
 import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
-export default function MyEventActionButtons({
+export default function UpComingEventsActionButton({
   eventId,
   initialBookmarked,
   onJoin,
   onShare,
-  onEdit,
-  onDelete,
 }) {
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked || false);
 
@@ -38,15 +36,6 @@ export default function MyEventActionButtons({
   return (
     <>
       <div className="flex items-center gap-2.5 flex-wrap">
-        {/* Create Invite */}
-        <button className="px-5 py-2 rounded-full border border-primary text-primary text-sm font-semibold hover:bg-primary/5 transition-colors cursor-pointer">
-          Create Invite
-        </button>
-        {/* Check Ticket By Scan */}
-        <button className="px-5 py-2 rounded-full bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer">
-          Check Ticket By Scan
-        </button>
-
         {/* Bookmark */}
         <button
           onClick={handleBookmarkToggle}
@@ -69,13 +58,10 @@ export default function MyEventActionButtons({
           <Share2 size={18} />
         </button>
 
-        {/* Edit */}
-        {onEdit && (
-          <button
-            onClick={onEdit}
-            className="p-2 bg-gray/10 text-gray rounded-full hover:bg-gray/20 transition-colors cursor-pointer"
-          >
-            <SquarePen size={18} />
+        {/* Join Event */}
+        {onJoin && (
+          <button className="px-5 py-2 rounded-full bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer">
+            Join This Event
           </button>
         )}
       </div>

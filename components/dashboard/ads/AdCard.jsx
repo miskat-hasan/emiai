@@ -16,6 +16,7 @@ const AdCard = ({
   tabType,
   onClick,
   onBookmarkToggle,
+  onEditClick,
 }) => {
   const preventAction = status === "scheduled" && tabType === "all-ads";
 
@@ -26,20 +27,46 @@ const AdCard = ({
         preventAction ? "cursor-default" : "cursor-pointer"
       }`}
     >
+      {/* Edit button */}
+      {onEditClick && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEditClick();
+          }}
+          className="absolute top-3 right-3 z-20 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/40 transition-colors shadow-sm"
+          title="Edit Ad"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M12 20h9" />
+            <path d="M16.376 3.622a2.12 2.12 0 1 1 2.998 2.999L7.382 18.61a4.5 4.5 0 0 1-1.742 1.054l-3.554 1.18a.33.33 0 0 1-.417-.416l1.18-3.554a4.5 4.5 0 0 1 1.054-1.742L16.376 3.622z" />
+          </svg>
+        </button>
+      )}
+
       {/* Floating Countdown for Scheduled Ads */}
       {status === "scheduled" && publishAt && (
         <CountdownTimer targetDate={publishAt} />
       )}
 
       {/* Background image or video */}
-      {mediaType === "video" ||
-      imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i) ? (
+      {mediaType === "video" || imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i) ? (
         <video
-          src={imageUrl}
+          src={status === "scheduled" ? `${imageUrl}#t=1.0` : imageUrl}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           muted
           loop
-          autoPlay={!preventAction}
+          autoPlay={status !== "scheduled"}
           playsInline
         />
       ) : (
