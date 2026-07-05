@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import EventHeroImage from "./EventHeroImage";
 import EventDescription from "./EventDescription";
@@ -9,6 +9,11 @@ import EventLocation from "./EventLocation";
 import EventParticipants from "./EventParticipants";
 import MyEventActionButtons from "./MyEventActionButtons";
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
+import dynamic from "next/dynamic";
+import UpComingEventsActionButton from "./UpComingEventsActionButton";
+const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
+  ssr: false,
+});
 
 const EventDetailsSkeleton = () => (
   <div className="space-y-5 animate-pulse">
@@ -53,6 +58,8 @@ const EventDetailsSkeleton = () => (
  */
 export default function EventDetailsPage({ role, params }) {
   const { id } = use(params);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
 
   const { data: response, isLoading } = useGetEventByIdQuery(id);
 
@@ -71,6 +78,8 @@ export default function EventDetailsPage({ role, params }) {
   }
 
   const event = {
+    id: rawEvent.id,
+    is_bookmarked: rawEvent.is_bookmarked,
     title: rawEvent.name || "Event Title",
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
@@ -128,9 +137,13 @@ export default function EventDetailsPage({ role, params }) {
         <h2 className="text-xl md:text-2xl font-bold text-black">
           {event.title}
         </h2>
-        <MyEventActionButtons
+        <UpComingEventsActionButton
           eventId={event.id}
           initialBookmarked={event.is_bookmarked}
+          onJoin={() => {
+            setEditingEvent(rawEvent);
+            setModalOpen(true);
+          }}
         />
       </div>
 
@@ -159,6 +172,15 @@ export default function EventDetailsPage({ role, params }) {
           <EventParticipants participants={formattedParticipants} />
         </div>
       </div>
+
+      <CreateEventModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingEvent(null);
+        }}
+        editingEvent={editingEvent}
+      />
     </div>
   );
 }

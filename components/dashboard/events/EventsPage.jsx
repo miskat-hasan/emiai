@@ -66,7 +66,7 @@ const UpcomingPanel = memo(function UpcomingPanel({ events, onCardClick, onButto
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {events.map(event => (
         <EventCard
           key={event.id}
@@ -84,7 +84,7 @@ const UpcomingPanel = memo(function UpcomingPanel({ events, onCardClick, onButto
   );
 });
 
-const MyEventPanel = memo(function MyEventPanel({ events, onCardClick }) {
+const MyEventPanel = memo(function MyEventPanel({ events, onCardClick, onEditClick }) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -94,7 +94,7 @@ const MyEventPanel = memo(function MyEventPanel({ events, onCardClick }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       {events.map(event => (
         <MyEventCard
           key={event.id}
@@ -104,6 +104,7 @@ const MyEventPanel = memo(function MyEventPanel({ events, onCardClick }) {
           organizer={event.organizer}
           date={event.date}
           onClick={() => onCardClick(event.id)}
+          onEditClick={() => onEditClick(event)}
         />
       ))}
     </div>
@@ -145,7 +146,9 @@ const MyTicketPanel = memo(function MyTicketPanel({ tickets }) {
 export default function EventsPage({ role }) {
   const [activeTab, setActiveTab] = useState("upcoming");
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState(null);
   const [sendInviteModalOpen, setSendInviteModalOpen] = useState(false);
+  const [selectedEventId, setSelectedEventId] = useState(null);
   const router = useRouter();
 
   const handleCardClick = useCallback(
@@ -162,7 +165,8 @@ export default function EventsPage({ role }) {
     [router, role],
   );
 
-  const handleCreateInviteClick = useCallback(() => {
+  const handleCreateInviteClick = useCallback((id) => {
+    setSelectedEventId(id);
     setSendInviteModalOpen(true);
   }, []);
 
@@ -211,7 +215,10 @@ export default function EventsPage({ role }) {
           <TabSwitcher tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
           <button
-            onClick={() => setModalOpen(true)}
+            onClick={() => {
+              setEditingEvent(null);
+              setModalOpen(true);
+            }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
           >
             <Plus size={15} />
@@ -223,7 +230,7 @@ export default function EventsPage({ role }) {
 
         {activeTab === "upcoming" && (
           upcomingQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
             </div>
           ) : (
@@ -233,11 +240,19 @@ export default function EventsPage({ role }) {
         
         {activeTab === "my-event" && (
           myEventsQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
             </div>
           ) : (
-            <MyEventPanel events={myEvents} onCardClick={handleMyEventCardClick} />
+            <MyEventPanel 
+              events={myEvents} 
+              onCardClick={handleMyEventCardClick} 
+              onEditClick={(event) => {
+                const rawEvent = myEventsQuery.data?.data?.find(e => e.id === event.id);
+                setEditingEvent(rawEvent || event);
+                setModalOpen(true);
+              }}
+            />
           )
         )}
         
@@ -263,11 +278,16 @@ export default function EventsPage({ role }) {
       {/* Create Event Modal — dynamically imported */}
       <CreateEventModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingEvent(null);
+        }}
         onSuccess={() => { }}
+        editingEvent={editingEvent}
       />
 
       <SendInvitationFlow
+        eventId={selectedEventId}
         open={sendInviteModalOpen}
         onClose={() => setSendInviteModalOpen(false)}
       />

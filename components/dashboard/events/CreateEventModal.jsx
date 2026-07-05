@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { X, Upload, Sparkles } from "lucide-react";
-import { useCreateEventMutation } from "@/redux/api/services/eventApi";
+import { useCreateEventMutation, useUpdateEventMutation } from "@/redux/api/services/eventApi";
 import { useLazySearchUsersQuery } from "@/redux/api/services/commonApi";
 
 // Sub-components
@@ -179,8 +179,10 @@ const VISIBILITY_OPTIONS = [
 
 // Main modal
 
-export default function CreateEventModal({ open, onClose, onSuccess }) {
-  const [createEvent, { isLoading }] = useCreateEventMutation();
+export default function CreateEventModal({ open, onClose, onSuccess, editingEvent }) {
+  const [createEvent, { isLoading: isCreating }] = useCreateEventMutation();
+  const [updateEvent, { isLoading: isUpdating }] = useUpdateEventMutation();
+  const isLoading = isCreating || isUpdating;
 
   const {
     register,
@@ -206,7 +208,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
     { type: "free", price: "" },
   ]);
 
-  // Reset on close
+  // Reset on close or when editingEvent changes
   useEffect(() => {
     if (!open) {
       reset();
@@ -224,8 +226,30 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
         { type: "Normal", price: "" },
         { type: "free", price: "" },
       ]);
+    } else if (editingEvent) {
+      reset({
+        title: editingEvent.name || editingEvent.title || "",
+        event_type: editingEvent.type || "offline",
+        entry_fee: editingEvent.entry_fee || "",
+        event_date: (editingEvent.start_date || editingEvent.date) ? new Date(editingEvent.start_date || editingEvent.date).toISOString().split('T')[0] : "",
+        location: editingEvent.location || "",
+        full_location: editingEvent.full_location || "",
+        description: editingEvent.description || "",
+      });
+      setIsPublished(editingEvent.is_published === 1 || editingEvent.is_published === true);
+      setVisibility(editingEvent.event_restriction || "public");
+      setInvitationMessage(editingEvent.message || "");
+      // If the backend returns detailed tickets or collaborators, they can be set here.
+      // For now, reset to default if not available.
+      setTickets(editingEvent.tickets?.length > 0 ? editingEvent.tickets : [
+        { type: "VIP", price: "" },
+        { type: "Normal", price: "" },
+        { type: "free", price: "" },
+      ]);
+    } else {
+      reset();
     }
-  }, [open, reset]);
+  }, [open, editingEvent, reset]);
 
   const handleGenerateAI = () => {
     setGeneratingAI(true);
@@ -275,16 +299,24 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
     });
 
 
+    if (editingEvent?.id) {
+      fd.append("id", editingEvent.id);
+    }
+
     if (eventPhoto) fd.append("photo", eventPhoto);
 
     try {
-      const res = await createEvent(fd).unwrap();
-      // Assuming res?.success is present, otherwise adapt to API format
-      toast.success("Event created successfully!");
+      if (editingEvent?.id) {
+        await updateEvent(fd).unwrap();
+        toast.success("Event updated successfully!");
+      } else {
+        await createEvent(fd).unwrap();
+        toast.success("Event created successfully!");
+      }
       onClose();
       onSuccess?.();
     } catch (err) {
-      toast.error(err?.data?.message ?? "Failed to create event.");
+      toast.error(err?.data?.message ?? `Failed to ${editingEvent?.id ? "update" : "create"} event.`);
     }
   };
 
@@ -306,7 +338,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
         <div className="relative z-10 overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent flex flex-col w-full h-full">
           {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray/10">
-          <h2 className="text-base font-bold text-black">Create New Event</h2>
+          <h2 className="text-base font-bold text-black">{editingEvent ? "Edit Event" : "Create New Event"}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-gray/10 text-gray transition-colors cursor-pointer"
@@ -586,7 +618,7 @@ export default function CreateEventModal({ open, onClose, onSuccess }) {
                 disabled={isLoading}
                 className="px-6 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
               >
-                {isLoading ? "Creating..." : "Create Event"}
+                {isLoading ? (editingEvent ? "Saving..." : "Creating...") : (editingEvent ? "Save Changes" : "Create Event")}
               </button>
             </div>
           </div>
