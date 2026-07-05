@@ -29,6 +29,11 @@ export const adApi = apiSlice.injectEndpoints({
       query: (body) => ({ url: "/api/ads/store", method: "POST", body }),
       invalidatesTags: ["Ad"],
     }),
+
+    updateAd: builder.mutation({
+      query: (body) => ({ url: "/api/ads/update", method: "POST", body }),
+      invalidatesTags: ["Ad"],
+    }),
   }),
 });
 
@@ -38,4 +43,5 @@ export const {
   useGetGuestExploreAdsQuery,
   useGetAdByIdQuery,
   useCreateAdMutation,
+  useUpdateAdMutation,
 } = adApi;

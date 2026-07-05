@@ -120,7 +120,7 @@ const getOrdinalNumber = (n) => {
 
 // Main modal
 
-export default function CreateNewAdModal({ open, onClose, onSuccess }) {
+export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }) {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
 
@@ -152,21 +152,34 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
   const selectedCountries = watch("countries") || [];
   const prizeType = watch("prizeType");
 
-  // Reset on close
+  // Reset on close or when editingAd changes
   useEffect(() => {
     if (!open) {
       reset(draft);
       setMediaFile(draft.mediaFile || null);
       setPreviewUrl(draft.previewUrl || null);
       setPrizesCount(Math.max(1, draft.prizes?.length || 1));
+    } else if (editingAd) {
+      // Prepopulate form when editing an existing ad
+      reset({
+        ...draft,
+        id: editingAd.id,
+        adsDescription: editingAd.description || "",
+        adsCategory: editingAd.category_id || "",
+        publishAt: editingAd.publishAt ? new Date(editingAd.publishAt).toISOString().slice(0,16) : "",
+        // Other fields like countries/prizes can be populated if available from backend
+      });
+      if (editingAd.imageUrl) {
+        setPreviewUrl(editingAd.imageUrl);
+      }
     }
-  }, [open, reset, draft]);
+  }, [open, editingAd, reset, draft]);
 
 
 
   const onSubmit = async (data) => {
     // Save draft and move to next step
-    const dataToSave = { ...data, mediaFile, previewUrl };
+    const dataToSave = { ...data, mediaFile, previewUrl, id: editingAd?.id };
     dispatch(setDraftData(dataToSave));
 
     if (onSuccess) {
@@ -187,7 +200,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess }) {
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-black">Create New Ads</h2>
+          <h2 className="text-base font-bold text-black">{editingAd ? "Edit Ad" : "Create New Ads"}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray transition-colors cursor-pointer"

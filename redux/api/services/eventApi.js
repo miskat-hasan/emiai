@@ -11,6 +11,24 @@ export const eventApi = apiSlice.injectEndpoints({
       invalidatesTags: ["Event"],
     }),
 
+    updateEvent: builder.mutation({
+      query: (data) => ({
+        url: "/api/events-update",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Event"],
+    }),
+
+
+    sendEventInvitation: builder.mutation({
+      query: (data) => ({
+        url: "/api/events/invite",
+        method: "POST",
+        body: data,
+      }),
+    }),
+
     getUpcomingEvents: builder.query({
       query: () => ({ url: "/api/events?type=upcoming", method: "GET" }),
       providesTags: ["Event"],
@@ -35,6 +53,8 @@ export const eventApi = apiSlice.injectEndpoints({
 
 export const {
   useCreateEventMutation,
+  useUpdateEventMutation,
+  useSendEventInvitationMutation,
   useGetUpcomingEventsQuery,
   useGetMyEventsQuery,
   useGetEventByIdQuery,

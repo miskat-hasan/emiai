@@ -1,5 +1,6 @@
 export { default as AdActionButtons } from "./AdActionButtons";
 export { default as AdCard } from "./AdCard";
+export { default as AdCardSkeleton } from "./AdCardSkeleton";
 export { default as AdDescription } from "./AdDescription";
 export { default as AdDetailHero } from "./AdDetailHero";
 export { default as AdInfoCard } from "./AdInfoCard";

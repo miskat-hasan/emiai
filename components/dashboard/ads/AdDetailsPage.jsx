@@ -1,8 +1,15 @@
 "use client";
 
-import React, { use, useMemo } from "react";
+import React, { use, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { setStep } from "@/redux/slices/adCreationSlice";
 import { useGetAdByIdQuery } from "@/redux/api/services/adApi";
+import dynamic from "next/dynamic";
+
+const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
+
 import {
   AdDetailHero,
   AdUserBar,
@@ -20,6 +27,13 @@ export default function AdDetailsPage({
   parentName,
 }) {
   const { id } = use(params);
+  const searchParams = useSearchParams();
+  const source = searchParams.get("source");
+  const isMyAd = source === "my-ads";
+  
+  const dispatch = useDispatch();
+  const [editingAd, setEditingAd] = useState(null);
+
   const { data: response, isLoading, isError } = useGetAdByIdQuery(id);
 
   const ad = useMemo(() => {
@@ -75,8 +89,11 @@ export default function AdDetailsPage({
         "https://i.pravatar.cc/150?u=" + (rawAd.advertiser_id || rawAd.id),
       likes: rawAd.likes_count || 0,
       views: rawAd.views_count || 0,
+      is_bookmarked: rawAd.is_bookmarked || false,
       boostLabel: rawAd.is_boosted ? "Boost Credited" : null,
       description: [rawAd.description || ""],
+      category_id: rawAd.category_id || "",
+      publishAt: rawAd.publish_at || rawAd.created_at || null,
       info: [
         {
           label: "Ads Create",
@@ -145,7 +162,23 @@ export default function AdDetailsPage({
         </div>
 
         {/* Action Buttons */}
-        <AdActionButtons adId={ad.id} initialBookmarked={ad.is_bookmarked} />
+        <AdActionButtons 
+          adId={ad.id} 
+          initialBookmarked={ad.is_bookmarked} 
+          isGuest={role === "guest"}
+          onEdit={isMyAd ? () => {
+            // Re-construct the rawAd equivalent object for CreateAdFlow
+            const editData = {
+              id: ad.id,
+              description: ad.description[0] || "",
+              category_id: ad.category_id,
+              publishAt: ad.publishAt,
+              imageUrl: ad.imageUrl,
+            };
+            setEditingAd(editData);
+            dispatch(setStep("create_ad"));
+          } : undefined}
+        />
       </div>
 
       {/* Hero Image */}
@@ -183,6 +216,11 @@ export default function AdDetailsPage({
           <AdInfoCard items={ad.info} />
         </div>
       </div>
+
+      <CreateAdFlow 
+        editingAd={editingAd} 
+        onCloseFlow={() => setEditingAd(null)} 
+      />
     </div>
   );
 }

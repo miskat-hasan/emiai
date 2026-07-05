@@ -8,12 +8,13 @@ import Modal from "@/components/common/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { setStep, clearDraft } from "@/redux/slices/adCreationSlice";
 
-export default function CreateAdFlow() {
+export default function CreateAdFlow({ editingAd, onCloseFlow }) {
   const dispatch = useDispatch();
   const step = useSelector((state) => state.adCreation.step);
 
   const handleClose = () => {
     dispatch(clearDraft());
+    if (onCloseFlow) onCloseFlow();
   };
 
   return (
@@ -21,6 +22,7 @@ export default function CreateAdFlow() {
       <CreateNewAdModal
         open={step === "create_ad"}
         onClose={handleClose}
+        editingAd={editingAd}
       />
       
       {step === "post_options" && (

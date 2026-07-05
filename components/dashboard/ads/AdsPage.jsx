@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { AdsGrid } from "./index";
+import { AdsGrid, AdCardSkeleton } from "./index";
 import dynamic from "next/dynamic";
 import { useDispatch, useSelector } from "react-redux";
 import { setStep } from "@/redux/slices/adCreationSlice";
@@ -19,34 +19,42 @@ import {
 } from "@/redux/api/services/adApi";
 import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
-const AdCardSkeleton = () => (
-  <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-200 animate-pulse">
-    <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-10 flex items-center gap-3 w-full">
-      <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 border-2 border-white/30"></div>
-      <div className="flex-1 flex flex-col gap-2">
-        <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-        <div className="h-3 bg-gray-300 rounded w-full"></div>
-      </div>
-    </div>
-  </div>
-);
-
-// Utility to calculate time ago
 function timeSince(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
   const seconds = Math.floor((new Date() - date) / 1000);
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + " years ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + " months ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + " days ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + " hrs ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + " mins ago";
-  return Math.floor(seconds) + " secs ago";
+
+  const isFuture = seconds < 0;
+  const absSeconds = Math.abs(seconds);
+
+  let interval = absSeconds / 31536000;
+  if (interval > 1)
+    return isFuture
+      ? "in " + Math.floor(interval) + " years"
+      : Math.floor(interval) + " years ago";
+  interval = absSeconds / 2592000;
+  if (interval > 1)
+    return isFuture
+      ? "in " + Math.floor(interval) + " months"
+      : Math.floor(interval) + " months ago";
+  interval = absSeconds / 86400;
+  if (interval > 1)
+    return isFuture
+      ? "in " + Math.floor(interval) + " days"
+      : Math.floor(interval) + " days ago";
+  interval = absSeconds / 3600;
+  if (interval > 1)
+    return isFuture
+      ? "in " + Math.floor(interval) + " hrs"
+      : Math.floor(interval) + " hrs ago";
+  interval = absSeconds / 60;
+  if (interval > 1)
+    return isFuture
+      ? "in " + Math.floor(interval) + " mins"
+      : Math.floor(interval) + " mins ago";
+  return isFuture
+    ? "in " + Math.floor(absSeconds) + " secs"
+    : Math.floor(absSeconds) + " secs ago";
 }
 
 const TABS = [
@@ -58,6 +66,7 @@ export default function AdsPage({ role }) {
   const isGuest = role === "guest";
   const [activeTab, setActiveTab] = useState("all-ads");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [editingAd, setEditingAd] = useState(null);
 
   // Always fetch all ads; only fetch my ads if not guest
   const { data: allAdsResponse, isLoading: isLoadingAllAds } =
@@ -75,6 +84,20 @@ export default function AdsPage({ role }) {
   if (Array.isArray(response)) rawAds = response;
   else if (Array.isArray(response?.data)) rawAds = response.data;
   else if (Array.isArray(response?.data?.data)) rawAds = response.data.data;
+  else if (Array.isArray(response?.ads)) rawAds = response.data.data;
+  else if (Array.isArray(response?.data?.ads)) rawAds = response.data.data;
+  else if (response && typeof response === "object") {
+    const possibleArray = Object.values(response).find((val) =>
+      Array.isArray(val),
+    );
+    if (possibleArray) rawAds = possibleArray;
+    else if (response.data && typeof response.data === "object") {
+      const possibleDataArray = Object.values(response.data).find((val) =>
+        Array.isArray(val),
+      );
+      if (possibleDataArray) rawAds = possibleDataArray;
+    }
+  }
 
   const mappedAds = rawAds.map((ad) => {
     const apiUrl =
@@ -134,7 +157,12 @@ export default function AdsPage({ role }) {
     const matchesSearch =
       ad.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (ad.description &&
-        ad.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        (Array.isArray(ad.description)
+          ? ad.description.join(" ")
+          : String(ad.description)
+        )
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()));
 
     const matchesStatus = statusFilter === "all" || ad.status === statusFilter;
 
@@ -156,12 +184,23 @@ export default function AdsPage({ role }) {
   };
 
   const handleAdClick = (id) => {
-    // If we are in "Published Ads" page, URL might be different, but AdsPage handles this dynamically via `role/ads` or similar
-    router.push(`/dashboard/${role}/ads/${id}`);
+    // Pass activeTab as source so AdDetailsPage knows if it was clicked from "my-ads"
+    router.push(`/dashboard/${role}/ads/${id}?source=${activeTab}`);
   };
 
   const handlePost = () => {
+    setEditingAd(null);
     dispatch(setStep("create_ad"));
+  };
+
+  const handleEditClick = (ad) => {
+    // The `ad` object here is from finalAds, which was mapped from rawAds.
+    // Let's pass the raw ad object to have all original data
+    const rawAd = rawAds.find((r) => r.id === ad.id);
+    if (rawAd) {
+      setEditingAd(rawAd);
+      dispatch(setStep("create_ad"));
+    }
   };
 
   if (step === "preview") {
@@ -232,7 +271,7 @@ export default function AdsPage({ role }) {
 
       {/* Ads grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <AdCardSkeleton key={i} />
           ))}
@@ -242,14 +281,18 @@ export default function AdsPage({ role }) {
           ads={filteredAds}
           activeTab={activeTab}
           onAdClick={handleAdClick}
-          onBookmarkToggle={handleBookmarkToggle}
+          onBookmarkToggle={!isGuest ? handleBookmarkToggle : undefined}
+          onEditClick={activeTab === "my-ads" ? handleEditClick : undefined}
         />
       ) : (
         <div className="flex justify-center py-20 text-gray">No ads found.</div>
       )}
 
       {/* Create Ad Flow Modals */}
-      <CreateAdFlow />
+      <CreateAdFlow
+        editingAd={editingAd}
+        onCloseFlow={() => setEditingAd(null)}
+      />
     </div>
   );
 }
