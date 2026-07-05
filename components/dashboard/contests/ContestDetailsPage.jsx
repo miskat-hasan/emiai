@@ -14,6 +14,7 @@ import {
   useJoinContestMutation,
 } from "@/redux/api/services/contestApi";
 import AnnounceWinnerModal from "./AnnounceWinnerModal";
+import JoinContestModal from "./JoinContestModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -89,6 +90,7 @@ export default function ContestDetailsPage({ params, role }) {
 
   const [winnerModalOpen, setWinnerModalOpen] = useState(false);
   const [winnerIds, setWinnerIds] = useState([]);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
 
   // variant comes from the card's href: /contests/[id]?v=my|contest|participated
   const variant = searchParams.get("v") ?? "contest";
@@ -111,7 +113,7 @@ export default function ContestDetailsPage({ params, role }) {
       id: user.id,
       name: user.name,
     })) || [];
-  
+
   const handleAnnounceWinner = async () => {
     if (!winnerIds.length) {
       toast.error("Please select at least one winner.");
@@ -137,11 +139,12 @@ export default function ContestDetailsPage({ params, role }) {
       toast.error(err?.data?.message ?? "Failed to announce winner.");
     }
   };
-
+  
   const handleJoin = async () => {
     try {
-      await joinContest({ contest_id: id }).unwrap();
+      await joinContest(id).unwrap();
       toast.success("Successfully joined the contest!");
+      setJoinModalOpen(false);
     } catch (err) {
       toast.error(err?.data?.message ?? "Failed to join contest.");
     }
@@ -214,7 +217,7 @@ export default function ContestDetailsPage({ params, role }) {
       <div className="relative w-full h-[340px] lg:h-[380px] rounded-2xl overflow-hidden">
         {c.prize_photo_url ? (
           <Image
-            src={c.prize_photo_url}
+            src={process.env.NEXT_PUBLIC_API_URL + "/" + c.prize_photo_url}
             alt={c.title}
             fill
             className="object-cover"
@@ -235,7 +238,8 @@ export default function ContestDetailsPage({ params, role }) {
         )}
       </div>
 
-      {/* ── CTA row below banner ── */}
+      {/* ── CTA row below banner ──
+          my: Announce Winner | contest: Join Contest (opens modal) | participated: none */}
       {isMyContest && (
         <div className="flex justify-end">
           <button
@@ -251,19 +255,22 @@ export default function ContestDetailsPage({ params, role }) {
       {isContestView && (
         <div className="flex items-center justify-end gap-4">
           <span className="text-xl font-bold text-black">
-            {c.entry_fee && Number(c.entry_fee) > 0
-              ? `$${Number(c.entry_fee).toLocaleString()}`
-              : "Free"}
+            {c.entry_fee === undefined || c.entry_fee === null
+              ? "—"
+              : Number(c.entry_fee) > 0
+                ? `$${Number(c.entry_fee).toLocaleString()}`
+                : "Free"}
           </span>
           <button
-            onClick={handleJoin}
-            disabled={isJoining}
-            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm hover:opacity-90 disabled:opacity-60 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+            onClick={() => setJoinModalOpen(true)}
+            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
           >
-            {isJoining ? "Joining..." : "Join Contest"}
+            Join Contest
           </button>
         </div>
       )}
+
+      {/* isParticipated: no CTA row — user already joined */}
 
       {/* ── Three-column content ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -342,7 +349,7 @@ export default function ContestDetailsPage({ params, role }) {
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-gray mt-0.5">2 hours ago</p>
+                    <p className="text-xs text-gray mt-0.5">--</p>
                   </div>
                 </div>
               ))}
@@ -361,6 +368,14 @@ export default function ContestDetailsPage({ params, role }) {
         onChange={setWinnerIds}
         onSubmit={handleAnnounceWinner}
         isLoading={isAnnouncing}
+      />
+
+      <JoinContestModal
+        open={joinModalOpen}
+        onClose={() => setJoinModalOpen(false)}
+        onConfirm={handleJoin}
+        isLoading={isJoining}
+        contest={c}
       />
     </div>
   );

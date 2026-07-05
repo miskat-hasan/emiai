@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 const ROLE_HOME = {
   influencer: "/dashboard/influencer",
   advertiser: "/dashboard/advertiser",
@@ -10,13 +9,24 @@ const ROLE_HOME = {
 
 const DEFAULT_DASHBOARD = "/dashboard/influencer";
 
+const ROLE_PREFIX = {
+  influencer: "/dashboard/influencer",
+  advertiser: "/dashboard/advertiser",
+  agency: "/dashboard/agency",
+  business_manager: "/dashboard/business_manager",
+  guest: "/dashboard/guest",
+};
+
 export function proxy(request) {
   const { pathname } = request.nextUrl;
+
   const token = request.cookies.get("token")?.value;
   const role = request.cookies.get("role")?.value;
 
   const isAuthRoute =
-    pathname.startsWith("/login") || pathname.startsWith("/registration");
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/registration");
+
   const isDashboardRoot = pathname === "/dashboard";
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
@@ -25,13 +35,23 @@ export function proxy(request) {
   }
 
   if (isDashboardRoot && token) {
-    const home = ROLE_HOME[role] ?? DEFAULT_DASHBOARD;
-    return NextResponse.redirect(new URL(home, request.url));
+    return NextResponse.redirect(
+      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url)
+    );
   }
 
   if (isAuthRoute && token) {
-    const home = ROLE_HOME[role] ?? DEFAULT_DASHBOARD;
-    return NextResponse.redirect(new URL(home, request.url));
+    return NextResponse.redirect(
+      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url)
+    );
+  }
+
+  if (isDashboardRoute && token) {
+    const allowedPrefix = ROLE_PREFIX[role];
+
+    if (allowedPrefix && !pathname.startsWith(allowedPrefix)) {
+      return NextResponse.rewrite(new URL("/not-found", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -39,8 +59,8 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
     "/dashboard",
+    "/dashboard/:path*",
     "/login",
     "/registration/:path*",
   ],
