@@ -44,6 +44,11 @@ export const NAV_ITEMS = {
       href: "/dashboard/influencer/peer-invitations",
     },
     {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/influencer/agencies",
+    },
+    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/influencer/collaborations",
@@ -71,7 +76,11 @@ export const NAV_ITEMS = {
     },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/influencer/vouchers" },
     { label: "Ads", icon: AdsSVG, href: "/dashboard/influencer/ads" },
-    { label: "Block Person", icon: UserX, href: "/dashboard/influencer/block-person" },
+    {
+      label: "Block Person",
+      icon: UserX,
+      href: "/dashboard/influencer/block-person",
+    },
     {
       label: "Contact Support",
       icon: HeadphonesIcon,
@@ -141,7 +150,11 @@ export const NAV_ITEMS = {
       icon: HeadphonesIcon,
       href: "/dashboard/advertiser/support",
     },
-    { label: "Share app", icon: ShareAppSVG, href: "/dashboard/advertiser/share" },
+    {
+      label: "Share app",
+      icon: ShareAppSVG,
+      href: "/dashboard/advertiser/share",
+    },
   ],
   agency: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/agency" },
