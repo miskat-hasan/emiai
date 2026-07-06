@@ -383,6 +383,7 @@ export default function PortfolioPage() {
         </div>
       )}
       <AddPortfolioModal
+        role="advertiser"
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmitPortfolio={data => console.log("Portfolio added:", data)}
