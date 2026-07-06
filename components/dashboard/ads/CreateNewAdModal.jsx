@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, forwardRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
-import { X, Upload, Plus, ChevronDown, Check } from "lucide-react";
+import { X, Upload, Plus, Minus, ChevronDown, Check } from "lucide-react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
@@ -144,6 +144,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
     reset,
     watch,
     control,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: draft,
@@ -175,7 +176,15 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
     }
   }, [open, editingAd, reset, draft]);
 
-
+  const removePrize = (indexToRemove) => {
+    const currentPrizesCount = prizesCount;
+    for (let i = indexToRemove; i < currentPrizesCount - 1; i++) {
+      const nextValue = getValues(`prizes.${i + 1}.value`);
+      setValue(`prizes.${i}.value`, nextValue || "");
+    }
+    setValue(`prizes.${currentPrizesCount - 1}.value`, "");
+    setPrizesCount((prev) => prev - 1);
+  };
 
   const onSubmit = async (data) => {
     // Save draft and move to next step
@@ -312,6 +321,15 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
                     placeholder="Write prize value..."
                     {...register(`prizes.${index}.value`)}
                   />
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removePrize(index)}
+                      className="shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm"
+                    >
+                      <Minus size={20} />
+                    </button>
+                  )}
                   {index === prizesCount - 1 && (
                     <button
                       type="button"
