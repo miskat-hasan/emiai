@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import PortfolioBookmarkCard from "@/components/cards/PortfolioBookmarkCard";
 import EventBookmarkCard from "@/components/cards/EventBookmarkCard";
 import AdCard from "@/components/dashboard/ads/AdCard";
@@ -131,7 +132,7 @@ function EventGrid({ items, onToggle }) {
   );
 }
 
-function AdGrid({ items, onToggle }) {
+function AdGrid({ items, onToggle, onAdClick }) {
   if (!items || items.length === 0) {
     return <div className="text-gray text-sm py-10 text-center w-full">No ad bookmarks found.</div>;
   }
@@ -169,6 +170,7 @@ function AdGrid({ items, onToggle }) {
             status={ad.status || "active"}
             publishAt={ad.publish_at || ad.publishAt}
             onBookmarkToggle={() => onToggle(ad.id)}
+            onClick={() => onAdClick(ad)}
           />
         );
       })}
@@ -179,6 +181,7 @@ function AdGrid({ items, onToggle }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BookmarksPage({ role }) {
+  const router = useRouter();
   const [filter, setFilter] = useState("Ads");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -237,6 +240,12 @@ export default function BookmarksPage({ role }) {
     setUnbookmarkedIds([]);
   };
 
+  const handleAdClick = (ad) => {
+    if (ad.status !== "scheduled") {
+      router.push(`/dashboard/${role}/ads/${ad.id}`);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-100px)] space-y-6">
       {/* Page heading */}
@@ -293,7 +302,7 @@ export default function BookmarksPage({ role }) {
             <EventGrid items={visibleItems} onToggle={(id) => handleToggle(id, "event")} />
           )}
           {filter === "Ads" && (
-            <AdGrid items={visibleItems} onToggle={(id) => handleToggle(id, "ad")} />
+            <AdGrid items={visibleItems} onToggle={(id) => handleToggle(id, "ad")} onAdClick={handleAdClick} />
           )}
         </>
       )}
