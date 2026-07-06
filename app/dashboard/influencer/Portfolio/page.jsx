@@ -393,6 +393,7 @@ export default function PortfolioPage() {
 
       {/* Add Portfolio Modal */}
       <AddPortfolioModal
+        role="influencer"
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onSubmitPortfolio={(data) => console.log("Portfolio added:", data)}

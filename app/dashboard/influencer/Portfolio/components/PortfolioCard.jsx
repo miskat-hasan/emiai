@@ -10,11 +10,11 @@ export default function PortfolioCard({ item, onClick }) {
       className="cursor-pointer rounded-2xl bg-white border border-[#E5E6E6] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
     >
       <div className="overflow-hidden bg-white">
-        <div className="h-[212px] w-full overflow-hidden bg-[#f3f3f3]">
+        <div className="h-70 w-full overflow-hidden">
           <Image
             src={item.image}
             alt={item.title}
-            className="h-full w-full rounded-[14px] object-cover transition-all duration-500 hover:scale-105"
+            className="h-full w-full rounded-[14px] object-center  transition-all duration-500 hover:scale-105"
             width={400}
             height={212}
           />
