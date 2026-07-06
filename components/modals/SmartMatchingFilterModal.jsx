@@ -22,13 +22,28 @@ const CATEGORIES = [
   "Beauty & Makeup",
 ];
 
-// ─── Range slider (dual thumb) ────────────────────────────────────────────────
+// Fixed, realistic follower tiers. The slider snaps to these indices only.
+const FOLLOWER_STEPS = [
+  10000, // 10K
+  25000, // 25K
+  50000, // 50K
+  100000, // 100K
+  250000, // 250K
+  500000, // 500K
+  1000000, // 1M
+  2500000, // 2.5M
+  5000000, // 5M
+  10000000, // 10M+
+];
+
+// ─── Range slider (dual thumb, continuous) ────────────────────────────────────
 
 function RangeSlider({ label, min, max, value, onChange, format }) {
   const [low, high] = value;
 
   const pctLow = ((low - min) / (max - min)) * 100;
   const pctHigh = ((high - min) / (max - min)) * 100;
+  const lowOnTop = pctLow > 50;
 
   return (
     <div className="space-y-2">
@@ -42,13 +57,14 @@ function RangeSlider({ label, min, max, value, onChange, format }) {
           {format(high)}
         </span>
       </div>
-      {/* Track */}
-      <div className="relative h-1.5 rounded-full bg-gray-200 mx-1">
+
+      <div className="relative h-4 flex items-center mx-1">
+        <div className="absolute left-0 right-0 h-1.5 rounded-full bg-gray-200" />
         <div
-          className="absolute h-full rounded-full bg-secondary"
+          className="absolute h-1.5 rounded-full bg-secondary"
           style={{ left: `${pctLow}%`, right: `${100 - pctHigh}%` }}
         />
-        {/* Low thumb */}
+
         <input
           type="range"
           min={min}
@@ -57,9 +73,10 @@ function RangeSlider({ label, min, max, value, onChange, format }) {
           onChange={e =>
             onChange([Math.min(Number(e.target.value), high - 1), high])
           }
-          className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
+          className="range-thumb-input absolute inset-0 w-full h-full"
+          style={{ zIndex: lowOnTop ? 5 : 3 }}
+          aria-label={`${label} minimum`}
         />
-        {/* High thumb */}
         <input
           type="range"
           min={min}
@@ -68,18 +85,196 @@ function RangeSlider({ label, min, max, value, onChange, format }) {
           onChange={e =>
             onChange([low, Math.max(Number(e.target.value), low + 1)])
           }
-          className="absolute inset-0 w-full opacity-0 cursor-pointer h-full"
+          className="range-thumb-input absolute inset-0 w-full h-full"
+          style={{ zIndex: lowOnTop ? 4 : 5 }}
+          aria-label={`${label} maximum`}
         />
-        {/* Thumb visuals */}
+
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
           style={{ left: `calc(${pctLow}% - 8px)` }}
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
           style={{ left: `calc(${pctHigh}% - 8px)` }}
         />
       </div>
+
+      <style jsx>{`
+        .range-thumb-input {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          pointer-events: none;
+          margin: 0;
+        }
+        .range-thumb-input::-webkit-slider-runnable-track {
+          -webkit-appearance: none;
+          background: transparent;
+        }
+        .range-thumb-input::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          pointer-events: auto;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: grab;
+        }
+        .range-thumb-input::-moz-range-track {
+          background: transparent;
+        }
+        .range-thumb-input::-moz-range-thumb {
+          pointer-events: auto;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: grab;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+// ─── Stepped range slider (dual thumb, snaps to a fixed array of values) ──────
+// Used for follower count so users can only land on realistic tiers
+// (10K, 25K, 50K, 100K, 250K, 500K, 1M, 2.5M, 5M, 10M) instead of any integer.
+
+function SteppedRangeSlider({ label, steps, value, onChange, format }) {
+  // value here is [lowValue, highValue] in real units (e.g. 100000).
+  // We convert to/from the nearest index in `steps` for the native inputs.
+  const closestIndex = v => {
+    let bestIdx = 0;
+    let bestDiff = Infinity;
+    steps.forEach((s, i) => {
+      const diff = Math.abs(s - v);
+      if (diff < bestDiff) {
+        bestDiff = diff;
+        bestIdx = i;
+      }
+    });
+    return bestIdx;
+  };
+
+  const lowIdx = closestIndex(value[0]);
+  const highIdx = closestIndex(value[1]);
+
+  const lastIdx = steps.length - 1;
+  const pctLow = (lowIdx / lastIdx) * 100;
+  const pctHigh = (highIdx / lastIdx) * 100;
+  const lowOnTop = pctLow > 50;
+
+  const setLowIdx = idx => {
+    const clamped = Math.min(idx, highIdx - 1 < 0 ? 0 : highIdx - 1);
+    onChange([steps[clamped], steps[highIdx]]);
+  };
+
+  const setHighIdx = idx => {
+    const clamped = Math.max(idx, lowIdx + 1 > lastIdx ? lastIdx : lowIdx + 1);
+    onChange([steps[lowIdx], steps[clamped]]);
+  };
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs font-medium text-[#63716E]">{label}</p>
+      <div className="flex items-center gap-2 text-xs text-[#203430]">
+        <span className="bg-white border border-gray-200 px-2 py-0.5 rounded-lg min-w-[40px] text-center">
+          {format(steps[lowIdx])}
+        </span>
+        <span className="flex-1" />
+        <span className="bg-white border border-gray-200 px-2 py-0.5 rounded-lg min-w-[40px] text-center">
+          {format(steps[highIdx])}
+          {highIdx === lastIdx ? "+" : ""}
+        </span>
+      </div>
+
+      <div className="relative h-4 flex items-center mx-1">
+        <div className="absolute left-0 right-0 h-1.5 rounded-full bg-gray-200" />
+        <div
+          className="absolute h-1.5 rounded-full bg-secondary"
+          style={{ left: `${pctLow}%`, right: `${100 - pctHigh}%` }}
+        />
+
+        {/* Tick marks for each step so users can see the discrete stops */}
+        {steps.map((_, i) => (
+          <div
+            key={i}
+            className="pointer-events-none absolute w-0.5 h-2 bg-white/70 rounded-full"
+            style={{ left: `${(i / lastIdx) * 100}%` }}
+          />
+        ))}
+
+        <input
+          type="range"
+          min={0}
+          max={lastIdx}
+          step={1}
+          value={lowIdx}
+          onChange={e => setLowIdx(Number(e.target.value))}
+          className="range-thumb-input absolute inset-0 w-full h-full"
+          style={{ zIndex: lowOnTop ? 5 : 3 }}
+          aria-label={`${label} minimum`}
+        />
+        <input
+          type="range"
+          min={0}
+          max={lastIdx}
+          step={1}
+          value={highIdx}
+          onChange={e => setHighIdx(Number(e.target.value))}
+          className="range-thumb-input absolute inset-0 w-full h-full"
+          style={{ zIndex: lowOnTop ? 4 : 5 }}
+          aria-label={`${label} maximum`}
+        />
+
+        <div
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
+          style={{ left: `calc(${pctLow}% - 8px)` }}
+        />
+        <div
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-secondary border-2 border-white shadow"
+          style={{ left: `calc(${pctHigh}% - 8px)` }}
+        />
+      </div>
+
+      <style jsx>{`
+        .range-thumb-input {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          pointer-events: none;
+          margin: 0;
+        }
+        .range-thumb-input::-webkit-slider-runnable-track {
+          -webkit-appearance: none;
+          background: transparent;
+        }
+        .range-thumb-input::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          pointer-events: auto;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: grab;
+        }
+        .range-thumb-input::-moz-range-track {
+          background: transparent;
+        }
+        .range-thumb-input::-moz-range-thumb {
+          pointer-events: auto;
+          width: 20px;
+          height: 20px;
+          border-radius: 9999px;
+          background: transparent;
+          border: none;
+          cursor: grab;
+        }
+      `}</style>
     </div>
   );
 }
@@ -148,7 +343,7 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
   const [numRange, setNumRange] = useState([5, 18]);
   const [ageRange, setAgeRange] = useState([18, 29]);
   const [rating, setRating] = useState(3);
-  const [follRange, setFollRange] = useState([5000, 39000]);
+  const [follRange, setFollRange] = useState([10000, 250000]);
 
   const handleApply = () => {
     onApply?.({
@@ -218,7 +413,7 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
             <p className="text-sm font-semibold text-[#203430]">Other</p>
             <RangeSlider
               label="Avg Price"
-              min={0}
+              min={100}
               max={100000}
               value={priceRange}
               onChange={setPriceRange}
@@ -244,10 +439,9 @@ export default function SmartMatchingFilterModal({ open, onClose, onApply }) {
               <p className="text-xs font-medium text-[#63716E]">Rating</p>
               <StarPicker value={rating} onChange={setRating} />
             </div>
-            <RangeSlider
+            <SteppedRangeSlider
               label="Avg Follower"
-              min={100}
-              max={50000000}
+              steps={FOLLOWER_STEPS}
               value={follRange}
               onChange={setFollRange}
               format={fmtFollower}

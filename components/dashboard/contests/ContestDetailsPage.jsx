@@ -35,6 +35,24 @@ function formatDate(dateStr) {
   });
 }
 
+const getDaysAgo = dateString => {
+  const created = new Date(dateString);
+  const now = new Date();
+
+  // Reset hours to compare calendar days, or keep them to compare exact 24-hour periods
+  const diffTime = now - created;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 1) {
+    // Optional: Handle if it was created just hours ago
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    if (diffHours < 1) return "Just now";
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+};
+
 // ─── Avatar with initials fallback ───────────────────────────────────────────
 
 function UserAvatar({ avatar, name, size = 10 }) {
@@ -56,17 +74,6 @@ function UserAvatar({ avatar, name, size = 10 }) {
     </div>
   );
 }
-
-// ─── Role badge color ─────────────────────────────────────────────────────────
-
-const ROLE_COLORS = {
-  influencer: "text-[#F57802]",
-  advertiser: "text-[#125896]",
-  agency: "text-[#DE4385]",
-  business_manager: "text-[#B05EE0]",
-  guest: "text-[#D20061]",
-  admin: "text-gray-400",
-};
 
 // ─── Icon action buttons (top-right) ─────────────────────────────────────────
 
@@ -92,10 +99,7 @@ export default function ContestDetailsPage({ params, role }) {
   const [winnerIds, setWinnerIds] = useState([]);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
 
-  // variant comes from the card's href: /contests/[id]?v=my|contest|participated
   const variant = searchParams.get("v") ?? "contest";
-
-  const currentUser = useSelector(state => state.auth?.user);
 
   const { data, isLoading, isError } = useGetSingleContestQuery(id);
   const [announceWinner, { isLoading: isAnnouncing }] =
@@ -139,7 +143,7 @@ export default function ContestDetailsPage({ params, role }) {
       toast.error(err?.data?.message ?? "Failed to announce winner.");
     }
   };
-  
+
   const handleJoin = async () => {
     try {
       await joinContest(id).unwrap();
@@ -343,13 +347,11 @@ export default function ContestDetailsPage({ params, role }) {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-black leading-tight">
                       {p.name}{" "}
-                      <span
-                        className={`text-xs font-medium capitalize ${ROLE_COLORS[p.role] ?? "text-gray-400"}`}
-                      >
+                      <span className="text-xs font-medium capitalize text-primary">
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-gray mt-0.5">--</p>
+                    <p className="text-xs text-gray mt-0.5">{getDaysAgo(p.pivot.created_at)}</p>
                   </div>
                 </div>
               ))}
