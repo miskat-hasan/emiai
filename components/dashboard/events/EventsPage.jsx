@@ -187,9 +187,16 @@ export default function EventsPage({ role }) {
     description: event.description || "Hello this is about my portfolio",
   });
 
-  const upcomingEvents = upcomingQuery.data?.data?.map(formatEvent) || [];
-  const myEvents = myEventsQuery.data?.data?.map(formatEvent) || [];
-  const myTickets = myTicketsQuery.data?.data || [];
+  const getArrayData = (queryData) => {
+    if (Array.isArray(queryData)) return queryData;
+    if (Array.isArray(queryData?.data)) return queryData.data;
+    if (Array.isArray(queryData?.data?.data)) return queryData.data.data;
+    return [];
+  };
+
+  const upcomingEvents = getArrayData(upcomingQuery.data).map(formatEvent);
+  const myEvents = getArrayData(myEventsQuery.data).map(formatEvent);
+  const myTickets = getArrayData(myTicketsQuery.data);
 
   return (
     <>
