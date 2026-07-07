@@ -95,7 +95,7 @@ function TabPanel({ query, variant, role }) {
     );
   }
 
-  const items = data?.data ?? [];
+  const items = data?.data?.data ?? [];
 
   if (items.length === 0) {
     return (
