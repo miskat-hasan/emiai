@@ -7,6 +7,7 @@ import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 export default function MyEventActionButtons({
   eventId,
   initialBookmarked,
+  onCreateInvite,
   onJoin,
   onShare,
   onEdit,
@@ -39,7 +40,10 @@ export default function MyEventActionButtons({
     <>
       <div className="flex items-center gap-2.5 flex-wrap">
         {/* Create Invite */}
-        <button className="px-5 py-2 rounded-full border border-primary text-primary text-sm font-semibold hover:bg-primary/5 transition-colors cursor-pointer">
+        <button 
+          onClick={onCreateInvite}
+          className="px-5 py-2 rounded-full border border-primary text-primary text-sm font-semibold hover:bg-primary/5 transition-colors cursor-pointer"
+        >
           Create Invite
         </button>
         {/* Check Ticket By Scan */}

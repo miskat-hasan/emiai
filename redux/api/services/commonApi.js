@@ -14,6 +14,10 @@ export const commonApi = apiSlice.injectEndpoints({
       query: (query) => `/api/user/search?query=${query}`,
       providesTags: ["Users"],
     }),
+    getAllUsers: builder.query({
+      query: () => "/api/user/all-users",
+      providesTags: ["Users"],
+    }),
     submitSupportTicket: builder.mutation({
       query: (data) => ({
         url: "/api/support/ticket/store",
@@ -28,5 +32,6 @@ export const {
   useGetCountriesQuery,
   useGetCategoriesQuery,
   useLazySearchUsersQuery,
+  useGetAllUsersQuery,
   useSubmitSupportTicketMutation,
 } = commonApi;
