@@ -1,3 +1,4 @@
+// app/(auth)/registration/verify-otp/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";

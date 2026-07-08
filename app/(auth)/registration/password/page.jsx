@@ -40,9 +40,10 @@ export default function RegistrationPasswordPage() {
         country: info.country,
         password,
         password_confirmation,
+        agree_to_terms: 1,
       }).unwrap();
 
-      if (res?.success) {
+      if (res?.status) {
         toast.success(
           res.message ?? "Account created! Please verify your email.",
         );
