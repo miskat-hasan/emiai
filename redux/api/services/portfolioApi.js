@@ -9,6 +9,13 @@ const portfolioApi = apiSlice.injectEndpoints({
       }),
     }),
 
+    getInfluencerPortfolios: builder.query({
+      query: () => ({
+        url: "/api/portfolios?role=influencer",
+        method: "GET",
+      }),
+    }),
+
     getMyClients: builder.query({
       query: () => ({
         url: "/api/portfolios/my-clients",
@@ -73,6 +80,7 @@ const portfolioApi = apiSlice.injectEndpoints({
 
 export const {
   useGetPortfoliosQuery,
+  useGetInfluencerPortfoliosQuery,
   useGetMyClientsQuery,
   useGetSinglePortfolioQuery,
   usePostPortfolioMutation,

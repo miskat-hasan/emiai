@@ -6,7 +6,7 @@ import {
   MailSVG,
   ShareSVG,
 } from "@/components/common/Svg";
-import { X, Heart, Eye } from "lucide-react";
+import { X, Heart, Eye, Pencil } from "lucide-react";
 import Image from "next/image";
 import { FaHeart } from "react-icons/fa";
 import { useGetSinglePortfolioQuery } from "@/redux/api/services/portfolioApi";
@@ -23,6 +23,7 @@ export default function PortfolioDetailsModal({
   onClose,
   portfolioId,
   user,
+  onEdit,
 }) {
   const { data: res, isLoading } = useGetSinglePortfolioQuery(portfolioId, {
     skip: !open || !portfolioId,
@@ -100,6 +101,17 @@ export default function PortfolioDetailsModal({
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">
             <MailSVG className="w-5 h-5 text-gray-400" />
           </button>
+
+          {/* Edit */}
+          {onEdit && (
+            <button
+              onClick={() => onEdit(rawPortfolio)}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
+              title="Edit Portfolio"
+            >
+              <Pencil size={18} className="text-gray-400" />
+            </button>
+          )}
 
           {/* Like */}
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">

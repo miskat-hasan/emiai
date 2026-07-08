@@ -6,14 +6,14 @@ import PortfolioCard from "@/app/dashboard/influencer/portfolio/components/Portf
 import AddPortfolioModal from "@/app/dashboard/influencer/portfolio/components/AddPortfolioModal";
 import PortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/PortfolioDetailsModal";
 import AgencyPortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/AgencyPortfolioDetailsModal";
-import { useGetPortfoliosQuery } from "@/redux/api/services/portfolioApi";
+import { useGetPortfoliosQuery, useGetInfluencerPortfoliosQuery } from "@/redux/api/services/portfolioApi";
 import { useSelector } from "react-redux";
 import PageLoader from "@/components/common/PageLoader";
 
 // Tabs
 export const portfolioTabs = [
   { label: "My Portfolio", value: "my_portfolio" },
-  { label: "Agency Portfolio", value: "agency_portfolio" },
+  { label: "Influencer Portfolio", value: "agency_portfolio" },
 ];
 
 // Portfolio Page
@@ -23,6 +23,9 @@ export default function PortfolioPage() {
 
   const user = useSelector((state) => state.auth?.user);
   const { data: portfoliosRes, isLoading } = useGetPortfoliosQuery();
+  const { data: influencerPortfoliosRes, isLoading: isLoadingInfluencer } = useGetInfluencerPortfoliosQuery(undefined, {
+    skip: !(user?.role === "influencer" || user?.role === "advertiser" || user?.role === "agency" || user?.role === "business_manager"),
+  });
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
 
   // Transform API data for card display
@@ -43,6 +46,38 @@ export default function PortfolioPage() {
       }));
   }, [portfoliosRes, user?.id, apiUrl]);
 
+  // Transform influencer portfolios for agency tab display
+  const agencyPortfolios = useMemo(() => {
+    if (!influencerPortfoliosRes?.data) return [];
+    return influencerPortfoliosRes.data.map((p) => ({
+      id: p.id,
+      type: "agency_portfolio",
+      title: p.title,
+      details: p.description,
+      image: p.media?.[0]?.media_url
+        ? `${apiUrl}/${p.media[0].media_url}`
+        : "",
+      likes: p.likes_count ?? 0,
+      views: p.views_count ?? 0,
+    }));
+  }, [influencerPortfoliosRes, apiUrl]);
+
+  // Build a lookup map for raw portfolio data (combined from both sources)
+  const portfolioMap = useMemo(() => {
+    const map = {};
+    if (portfoliosRes?.data) {
+      portfoliosRes.data.forEach((p) => {
+        map[p.id] = p;
+      });
+    }
+    if (influencerPortfoliosRes?.data) {
+      influencerPortfoliosRes.data.forEach((p) => {
+        map[p.id] = p;
+      });
+    }
+    return map;
+  }, [portfoliosRes, influencerPortfoliosRes]);
+
   // Modals state
   const [personalModalOpen, setPersonalModalOpen] = useState(false);
   const [selectedPersonalId, setSelectedPersonalId] = useState(null);
@@ -50,12 +85,16 @@ export default function PortfolioPage() {
   const [agencyModalOpen, setAgencyModalOpen] = useState(false);
   const [selectedAgencyId, setSelectedAgencyId] = useState(null);
 
+  // Edit modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingPortfolio, setEditingPortfolio] = useState(null);
+
   // Filter cards based on tab
   const filteredPortfolioItems = useMemo(() => {
     return activeTab === "my_portfolio"
       ? myPortfolios
-      : [];
-  }, [activeTab, myPortfolios]);
+      : agencyPortfolios;
+  }, [activeTab, myPortfolios, agencyPortfolios]);
 
   // Open modals
   const openPersonalModal = id => {
@@ -68,7 +107,27 @@ export default function PortfolioPage() {
     setAgencyModalOpen(true);
   };
 
-  if (isLoading) {
+  // Handlers for edit flow
+  const handleCardUpdate = (cardItem) => {
+    const raw = portfolioMap[cardItem.id];
+    if (raw) {
+      setEditingPortfolio(raw);
+      setEditModalOpen(true);
+    }
+  };
+
+  const handleDetailsEdit = (rawPortfolio) => {
+    setPersonalModalOpen(false);
+    setEditingPortfolio(rawPortfolio);
+    setEditModalOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditModalOpen(false);
+    setEditingPortfolio(null);
+  };
+
+  if (isLoading || isLoadingInfluencer) {
     return <PageLoader />;
   }
 
@@ -84,7 +143,7 @@ export default function PortfolioPage() {
                 key={tab.value}
                 type="button"
                 onClick={() => setActiveTab(tab.value)}
-                className={`h-8 rounded-[10px] px-5 text-xs font-semibold transition-all duration-300 ${isActive
+                className={`h-8 rounded-[10px] px-5 text-xs font-semibold transition-all duration-300 cursor-pointer ${isActive
                   ? "bg-primary text-white"
                   : "bg-[#f6ded5] text-[#202626] hover:bg-primary hover:text-white"
                   }`}
@@ -117,6 +176,7 @@ export default function PortfolioPage() {
                   ? openPersonalModal(item.id)
                   : openAgencyModal(item.id);
               }}
+              onUpdate={handleCardUpdate}
             />
           ))}
         </div>
@@ -150,6 +210,7 @@ export default function PortfolioPage() {
           role: user?.role ?? "Influencer",
           avatar: user?.avatar ?? "",
         }}
+        onEdit={handleDetailsEdit}
       />
 
       {/* Agency Portfolio Details Modal */}
@@ -161,6 +222,17 @@ export default function PortfolioPage() {
           name: user?.name ?? "Agency",
           role: "Marketing Agency",
           avatar: user?.avatar ?? "",
+        }}
+      />
+
+      {/* Edit Portfolio Modal */}
+      <AddPortfolioModal
+        role="agency"
+        open={editModalOpen}
+        onClose={handleEditClose}
+        editData={editingPortfolio}
+        onSubmitPortfolio={() => {
+          handleEditClose();
         }}
       />
     </section>
