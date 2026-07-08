@@ -3,18 +3,17 @@
 import { useForm, useFieldArray } from "react-hook-form";
 import Image from "next/image";
 import { useState } from "react";
-
-// Mock influencers who have granted portfolio access to this agency/business manager
-const MOCK_INFLUENCERS = [
-  { id: 1, name: "Arlene McCoy", avatar: "https://i.pravatar.cc/150?img=1" },
-  { id: 2, name: "Robert Fox", avatar: "https://i.pravatar.cc/150?img=2" },
-  { id: 3, name: "Cody Fisher", avatar: "https://i.pravatar.cc/150?img=3" },
-  { id: 4, name: "Marvin McKinney", avatar: "https://i.pravatar.cc/150?img=4" },
-  { id: 5, name: "Guy Hawkins", avatar: "https://i.pravatar.cc/150?img=5" },
-  { id: 6, name: "Lina Armand", avatar: "https://i.pravatar.cc/150?img=6" },
-];
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { usePostPortfolioMutation, useGetMyClientsQuery } from "@/redux/api/services/portfolioApi";
 
 export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, role }) {
+  const user = useSelector((state) => state.auth?.user);
+  const [postPortfolio, { isLoading: isSubmitting }] = usePostPortfolioMutation();
+  const { data: clientsRes, isLoading: loadingClients } = useGetMyClientsQuery(undefined, {
+    skip: !(role === "agency" || role === "business_manager"),
+  });
+  const influencers = clientsRes?.data || [];
   const [portfolioType, setPortfolioType] = useState("personal"); // "personal" | "influencer"
 
   const { register, control, handleSubmit, watch, setValue, reset } = useForm({
@@ -39,14 +38,48 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
     onClose?.();
   };
 
-  const handleFormSubmit = (data) => {
-    const payload = {
-      ...data,
-      portfolioType,
-    };
-    console.log("Portfolio submitted:", payload);
-    onSubmitPortfolio?.(payload);
-    handleClose();
+  const handleFormSubmit = async (data) => {
+    let userId;
+    if (portfolioType === "influencer" && data.selectedInfluencer) {
+      userId = data.selectedInfluencer;
+    } else {
+      userId = user?.id;
+    }
+
+    if (!userId) {
+      toast.error("User not identified. Please try again.");
+      return;
+    }
+
+    const mediaFiles = (data.items || [])
+      .filter((item) => item.photo instanceof File)
+      .map((item) => ({
+        file: item.photo,
+        title: item.details || "",
+        media_type: item.photo.type.startsWith("video/") ? "video" : "photo",
+      }));
+
+    if (mediaFiles.length === 0) {
+      toast.error("Please add at least one media file.");
+      return;
+    }
+
+    try {
+      const res = await postPortfolio({
+        user_id: userId,
+        title: data.portfolioTitle,
+        description: data.portfolioDescription,
+        mediaFiles,
+      }).unwrap();
+
+      if (res?.success || res?.code === 201 || res?.code === 200) {
+        toast.success(res?.message || "Portfolio created successfully!");
+        onSubmitPortfolio?.(data);
+        handleClose();
+      }
+    } catch (err) {
+      toast.error(err?.data?.message ?? "Failed to create portfolio.");
+    }
   };
 
   if (!open) return null;
@@ -70,23 +103,23 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                     setPortfolioType("personal");
                     setValue("selectedInfluencer", "");
                   }}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${portfolioType === "personal"
-                      ? "border-primary bg-primary/5 text-primary"
-                      : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
+                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer ${portfolioType === "personal"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
                     }`}
                 >
-                  <span className="block text-base">🙋</span>
+                  {/* <span className="block text-base">🙋</span> */}
                   <span className="block mt-1">Personal</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setPortfolioType("influencer")}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${portfolioType === "influencer"
-                      ? "border-primary bg-primary/5 text-primary"
-                      : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
+                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 cursor-pointer ${portfolioType === "influencer"
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
                     }`}
                 >
-                  <span className="block text-base">🌟</span>
+                  {/* <span className="block text-base">🌟</span> */}
                   <span className="block mt-1">Influencer</span>
                 </button>
               </div>
@@ -103,11 +136,17 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                       className="w-full appearance-none rounded-lg border border-gray-200 bg-[#f7f7f7] px-4 py-2 text-sm font-medium text-[#202626] outline-none focus:border-primary/40 cursor-pointer"
                     >
                       <option value="">Select from the list</option>
-                      {MOCK_INFLUENCERS.map((inf) => (
-                        <option key={inf.id} value={inf.id}>
-                          {inf.name}
-                        </option>
-                      ))}
+                      {loadingClients ? (
+                        <option value="" disabled>Loading...</option>
+                      ) : influencers.length === 0 ? (
+                        <option value="" disabled>No influencers found</option>
+                      ) : (
+                        influencers.map((inf) => (
+                          <option key={inf.id} value={inf.id}>
+                            {inf.name}
+                          </option>
+                        ))
+                      )}
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -167,12 +206,12 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                 <input
                   type="file"
                   accept="image/*,video/mp4"
-                  {...register(`items.${idx}.photo`)}
                   onChange={(e) => {
                     const file = e.target.files[0];
                     if (file) {
                       const preview = URL.createObjectURL(file);
                       setValue(`items.${idx}.preview`, preview);
+                      setValue(`items.${idx}.photo`, file);
                     }
                   }}
                   className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#202626] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-primary"
@@ -221,9 +260,10 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
             </button>
             <button
               type="submit"
-              className="cursor-pointer h-[38px] rounded-lg bg-gradient-to-r from-primary to-secondary px-6 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
+              disabled={isSubmitting}
+              className="cursor-pointer h-[38px] rounded-lg bg-gradient-to-r from-primary to-secondary px-6 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60 transition-opacity"
             >
-              Add Portfolio
+              {isSubmitting ? "Saving..." : "Add Portfolio"}
             </button>
           </div>
 
