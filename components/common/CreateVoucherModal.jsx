@@ -225,12 +225,10 @@ export default function CreateVoucherModal({
                 rows={3}
                 {...register("description", {
                   required: "Description is required",
-                  validate: (value) => {
-                    return (
-                      value.length === 120 ||
-                      `Description must be exactly 120 characters long`
-                    );
-                  },
+                  maxLength: {
+                    value: 120,
+                    message: "Description must be at most 120 characters long"
+                  }
                 })}
               />
             </Field>

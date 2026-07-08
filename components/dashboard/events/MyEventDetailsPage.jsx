@@ -11,6 +11,7 @@ import MyEventActionButtons from "./MyEventActionButtons";
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
 import dynamic from "next/dynamic";
 
+import SendInvitationFlow from "./SendInvitationFlow";
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), { ssr: false });
 
 const EventDetailsSkeleton = () => (
@@ -57,6 +58,7 @@ const EventDetailsSkeleton = () => (
 export default function MyEventDetailsPage({ role, params }) {
   const { id } = use(params);
   const [modalOpen, setModalOpen] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
 
   const { data: response, isLoading } = useGetEventByIdQuery(id);
@@ -76,7 +78,7 @@ export default function MyEventDetailsPage({ role, params }) {
   }
 
   const event = {
-    id: rawEvent.id,
+    id: rawEvent.event_id || rawEvent.id || id,
     is_bookmarked: rawEvent.is_bookmarked,
     title: rawEvent.name || "Event Title",
     location: rawEvent.location,
@@ -139,6 +141,7 @@ export default function MyEventDetailsPage({ role, params }) {
         <MyEventActionButtons
           eventId={event.id}
           initialBookmarked={event.is_bookmarked}
+          onCreateInvite={() => setInviteModalOpen(true)}
           onEdit={() => {
             setEditingEvent(rawEvent);
             setModalOpen(true);
@@ -179,6 +182,11 @@ export default function MyEventDetailsPage({ role, params }) {
           setEditingEvent(null);
         }}
         editingEvent={editingEvent}
+      />
+      <SendInvitationFlow
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        eventId={event.id}
       />
     </div>
   );
