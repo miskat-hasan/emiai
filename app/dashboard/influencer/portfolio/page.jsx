@@ -380,7 +380,7 @@ export default function PortfolioPage() {
           ))}
         </div>
       ) : (
-        <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
+        <div className="flex min-h-80 items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
           <div>
             <h3 className="mb-2 text-lg font-bold text-[#252525]">
               No portfolio found

@@ -70,11 +70,10 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                     setPortfolioType("personal");
                     setValue("selectedInfluencer", "");
                   }}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-                    portfolioType === "personal"
+                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${portfolioType === "personal"
                       ? "border-primary bg-primary/5 text-primary"
                       : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <span className="block text-base">🙋</span>
                   <span className="block mt-1">Personal</span>
@@ -82,11 +81,10 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                 <button
                   type="button"
                   onClick={() => setPortfolioType("influencer")}
-                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-                    portfolioType === "influencer"
+                  className={`flex-1 rounded-xl border-2 px-4 py-3 text-sm font-semibold transition-all duration-200 ${portfolioType === "influencer"
                       ? "border-primary bg-primary/5 text-primary"
                       : "border-gray-200 bg-white text-[#737D7A] hover:border-gray-300"
-                  }`}
+                    }`}
                 >
                   <span className="block text-base">🌟</span>
                   <span className="block mt-1">Influencer</span>
@@ -186,7 +184,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                     alt="Preview"
                     width={560}
                     height={200}
-                    className="mt-3 h-40 w-full rounded-lg object-cover"
+                    className="mt-3 h-40 w-full rounded-lg object-contain object-center"
                   />
                 )}
 
