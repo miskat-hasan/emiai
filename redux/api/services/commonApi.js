@@ -1,4 +1,3 @@
-// redux/api/services/commonApi.js
 import { apiSlice } from "@/redux/api/apiSlice";
 
 export const commonApi = apiSlice.injectEndpoints({
@@ -26,6 +25,26 @@ export const commonApi = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+
+    // TODO: swap in the real endpoint once it exists on the backend
+    updateOnboardingCategory: builder.mutation({
+      query: body => ({
+        url: "/api/user/update-onboarding-category",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    // TODO: swap in the real endpoint — expected to accept
+    // { platform, code, redirect_uri } and return the connected
+    // account's username/handle after exchanging the OAuth code
+    connectSocialAccount: builder.mutation({
+      query: body => ({
+        url: "/api/user/social/connect",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -35,4 +54,6 @@ export const {
   useLazySearchUsersQuery,
   useGetAllUsersQuery,
   useSubmitSupportTicketMutation,
+  useUpdateOnboardingCategoryMutation,
+  useConnectSocialAccountMutation,
 } = commonApi;

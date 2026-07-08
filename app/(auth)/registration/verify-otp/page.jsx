@@ -1,20 +1,23 @@
-// app/(auth)/registration/verify-otp/page.jsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import OtpInput from "react-otp-input";
 import {
   useVerifyRegistrationOtpMutation,
   useResendRegistrationOtpMutation,
 } from "@/redux/api/authApi";
+import { setUser } from "@/redux/slices/authSlice";
+import { saveAuthSession } from "@/lib/auth-storage";
 import AuthButton from "@/components/ui/AuthButton";
 
 const TIMER_SECONDS = 90;
 
 export default function RegistrationVerifyOtpPage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [verifyOtp, { isLoading: isVerifying }] =
     useVerifyRegistrationOtpMutation();
   const [resendOtp, { isLoading: isResending }] =
@@ -24,14 +27,12 @@ export default function RegistrationVerifyOtpPage() {
   const [timeLeft, setTimeLeft] = useState(TIMER_SECONDS);
   const [expired, setExpired] = useState(false);
 
-  // Guard: need email from previous step
   useEffect(() => {
     if (!sessionStorage.getItem("reg_email")) {
       router.replace("/registration");
     }
   }, [router]);
 
-  // Countdown
   useEffect(() => {
     if (timeLeft <= 0) {
       setExpired(true);
@@ -53,13 +54,19 @@ export default function RegistrationVerifyOtpPage() {
     const email = sessionStorage.getItem("reg_email");
     try {
       const res = await verifyOtp({ email, otp: Number(otp) }).unwrap();
-      if (res?.success) {
-        toast.success(res.message ?? "Email verified! Welcome to ReelUP 🎉");
-        // Clean up all registration session keys
+      if (res?.success && res?.data) {
+        const userData = res.data;
+
+        // Persist the session now — user is authenticated as soon as OTP is verified
+        dispatch(setUser(userData));
+        saveAuthSession(userData);
+
         ["reg_role", "reg_info", "reg_email"].forEach(k =>
           sessionStorage.removeItem(k),
         );
-        router.push("/login");
+
+        toast.success(res.message ?? "Email verified! Welcome to ReelUP 🎉");
+        router.push("/onboarding/category");
       }
     } catch (err) {
       toast.error(err?.data?.message ?? "Invalid or expired OTP.");
@@ -120,7 +127,6 @@ export default function RegistrationVerifyOtpPage() {
         />
       </div>
 
-      {/* Timer + resend */}
       <p className="text-center text-sm text-gray">
         {expired ? (
           <>

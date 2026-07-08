@@ -11,6 +11,7 @@ import { setUser } from "@/redux/slices/authSlice";
 import AuthInput from "@/components/ui/AuthInput";
 import AuthButton from "@/components/ui/AuthButton";
 import { AppleIcon, GoogleIcon } from "@/components/common/Svg";
+import { getRoleHomeRoute } from "@/lib/roleRoutes";
 
 const ROLE_ROUTES = {
   influencer: "/dashboard/influencer",
@@ -44,8 +45,7 @@ export default function LoginPage() {
         document.cookie = `role=${userData.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
 
         toast.success("Welcome back!");
-
-        const route = ROLE_ROUTES[userData.role] ?? "/dashboard";
+        const route = getRoleHomeRoute(userData.role);
         router.push(route);
       }
     } catch (err) {
