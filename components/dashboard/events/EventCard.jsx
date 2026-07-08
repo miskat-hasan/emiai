@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 const EventCard = ({
-  imageUrl = "/images/demo-event-photo.png",
+  imageUrl,
   title = "Digital Marketing Forum 2025",
   location = "Hello this is about my portfolio",
   sponsor = "Event CO.",
@@ -18,13 +18,17 @@ const EventCard = ({
     >
       {/* Image Section */}
       <div className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 400px"
-        />
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 400px"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-200" />
+        )}
       </div>
 
       {/* Details Section */}

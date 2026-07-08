@@ -1,22 +1,23 @@
 "use client";
 
-import React, { use, useMemo, useState } from "react";
+import { useGetAdByIdQuery } from "@/redux/api/services/adApi";
+import { setStep } from "@/redux/slices/adCreationSlice";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { setStep } from "@/redux/slices/adCreationSlice";
-import { useGetAdByIdQuery } from "@/redux/api/services/adApi";
-import dynamic from "next/dynamic";
+import { use, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
+const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
 import {
-  AdDetailHero,
-  AdUserBar,
+  AdActionButtons,
   AdDescription,
+  AdDetailHero,
   AdInfoCard,
   AdTopRanking,
-  AdActionButtons,
+  AdUserBar,
 } from "./index";
 
 // Client Component
@@ -30,8 +31,9 @@ export default function AdDetailsPage({
   const searchParams = useSearchParams();
   const source = searchParams.get("source");
   const isMyAd = source === "my-ads";
-  
+
   const dispatch = useDispatch();
+  const step = useSelector((state) => state.adCreation.step);
   const [editingAd, setEditingAd] = useState(null);
 
   const { data: response, isLoading, isError } = useGetAdByIdQuery(id);
@@ -46,8 +48,7 @@ export default function AdDetailsPage({
 
     if (!rawAd) return null;
 
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const origin = new URL(apiUrl).origin;
     let imageUrl = rawAd.media_url;
     if (imageUrl && !imageUrl.startsWith("http")) {
@@ -81,12 +82,12 @@ export default function AdDetailsPage({
     }
 
     return {
+      rawAd,
       id: rawAd.id,
       imageUrl,
       mediaType,
-      userName: "Advertiser " + (rawAd.advertiser_id || ""),
-      userAvatar:
-        "https://i.pravatar.cc/150?u=" + (rawAd.advertiser_id || rawAd.id),
+      userName: rawAd.advertiser.name,
+      userAvatar: rawAd.advertiser.avatar,
       likes: rawAd.likes_count || 0,
       views: rawAd.views_count || 0,
       is_bookmarked: rawAd.is_bookmarked || false,
@@ -96,8 +97,8 @@ export default function AdDetailsPage({
       publishAt: rawAd.publish_at || rawAd.created_at || null,
       info: [
         {
-          label: "Ads Create",
-          value: "Advertiser " + (rawAd.advertiser_id || ""),
+          label: "Ads Created By",
+          value: rawAd.advertiser.name,
         },
         {
           label: "Prize Number",
@@ -134,6 +135,10 @@ export default function AdDetailsPage({
     );
   }
 
+  if (step === "preview") {
+    return <PostPreview />;
+  }
+
   return (
     <div className="space-y-5">
       {/* Page heading */}
@@ -162,22 +167,58 @@ export default function AdDetailsPage({
         </div>
 
         {/* Action Buttons */}
-        <AdActionButtons 
-          adId={ad.id} 
-          initialBookmarked={ad.is_bookmarked} 
+        <AdActionButtons
+          adId={ad.id}
+          initialBookmarked={ad.is_bookmarked}
           isGuest={role === "guest"}
-          onEdit={isMyAd ? () => {
-            // Re-construct the rawAd equivalent object for CreateAdFlow
-            const editData = {
-              id: ad.id,
-              description: ad.description[0] || "",
-              category_id: ad.category_id,
-              publishAt: ad.publishAt,
-              imageUrl: ad.imageUrl,
-            };
-            setEditingAd(editData);
-            dispatch(setStep("create_ad"));
-          } : undefined}
+          onEdit={
+            isMyAd
+              ? () => {
+                  let safePublishAt = "";
+                  if (ad.publishAt) {
+                    try {
+                      safePublishAt = new Date(ad.publishAt).toISOString().slice(0, 16);
+                    } catch (e) {
+                      safePublishAt = "";
+                    }
+                  }
+
+                  let safeExpiryDate = "";
+                  if (ad.rawAd.promo_code?.expiry_date) {
+                    try {
+                      safeExpiryDate = new Date(ad.rawAd.promo_code.expiry_date).toISOString().split("T")[0];
+                    } catch (e) {
+                      safeExpiryDate = "";
+                    }
+                  }
+
+                  const prizes = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 
+                    ? ad.rawAd.prizes.map((p) => ({ rank: p.rank, value: p.prize_value }))
+                    : [];
+
+                  const prizeType = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 
+                    ? ad.rawAd.prizes[0].prize_type 
+                    : (ad.rawAd.promo_code ? "coupon" : "cash");
+
+                  const editData = {
+                    id: ad.id,
+                    description: ad.description[0] || "",
+                    category_id: ad.category_id,
+                    publishAt: safePublishAt,
+                    imageUrl: ad.imageUrl,
+                    countries: ad.rawAd.target_countries?.map((c) => c.country_code) || [],
+                    prizeType,
+                    prizes,
+                    promoCode: ad.rawAd.promo_code?.code || "",
+                    promoCodeDiscount: ad.rawAd.promo_code?.discount_percentage || "",
+                    promoCodeExpiry: safeExpiryDate,
+                  };
+                  
+                  setEditingAd(editData);
+                  dispatch(setStep("create_ad"));
+                }
+              : undefined
+          }
         />
       </div>
 
@@ -194,7 +235,11 @@ export default function AdDetailsPage({
         <div className="lg:col-span-2 flex flex-col gap-5">
           <AdUserBar
             userName={ad.userName}
-            userAvatar={ad.userAvatar}
+            userAvatar={
+              ad.userAvatar === null
+                ? "/images/avatar_placeholder.png"
+                : ad.userAvatar
+            }
             likes={ad.likes}
             views={ad.views}
             boostLabel={ad.boostLabel}
@@ -217,10 +262,12 @@ export default function AdDetailsPage({
         </div>
       </div>
 
-      <CreateAdFlow 
-        editingAd={editingAd} 
-        onCloseFlow={() => setEditingAd(null)} 
-      />
+      {step !== "preview" && (
+        <CreateAdFlow
+          editingAd={editingAd}
+          onCloseFlow={() => setEditingAd(null)}
+        />
+      )}
     </div>
   );
 }

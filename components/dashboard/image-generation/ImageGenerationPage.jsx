@@ -33,13 +33,30 @@ export default function ImageGenerationPage({ role }) {
   }, [messages]);
 
   const requestImage = async prompt => {
-    const res = await fetch("/api/generate-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-    const { imageUrl } = await res.json();
-    return imageUrl || null;
+    try {
+      const res = await fetch(
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
+          prompt,
+        )}&per_page=1`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Client-ID ${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch image");
+      }
+
+      const data = await res.json();
+
+      return data.results?.[0]?.urls?.regular ?? null;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   };
 
   const runGeneration = async (prompt, assistantId) => {

@@ -50,7 +50,7 @@ export default function PortfolioView() {
         <div className="flex items-center gap-3 w-full sm:w-auto ml-auto">
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary text-white text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
+            className="flex items-center gap-2 bg-linear-to-r from-primary to-secondary text-white text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
           >
             <Plus size={16} />
             <span>Add New Portfolio</span>

@@ -10,7 +10,7 @@ import {
   ChevronsUpDown,
   MinusCircle,
 } from "lucide-react";
-import Pagination from "@/components/common/Pagination";
+import Pagination from "@/components/ui/Pagination";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 

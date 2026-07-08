@@ -1,14 +1,18 @@
 "use client";
 
-import { useState, useCallback, memo } from "react";
-import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import { Plus } from "lucide-react";
 import TabSwitcher from "@/components/common/TabSwitcher";
+import { Ticket } from "@/components/common/Ticket";
+import {
+  useGetMyEventsQuery,
+  useGetMyTicketsQuery,
+  useGetUpcomingEventsQuery,
+} from "@/redux/api/services/eventApi";
+import { Plus } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { memo, useCallback, useState } from "react";
 import EventCard from "./EventCard";
 import MyEventCard from "./MyEventCard";
-import { Ticket } from "@/components/common/Ticket";
-import { useGetUpcomingEventsQuery, useGetMyEventsQuery, useGetMyTicketsQuery } from "@/redux/api/services/eventApi";
 
 // ── Dynamic imports for heavy modals (code-split, no SSR) ──────────────────
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
@@ -44,8 +48,8 @@ const EventCardSkeleton = memo(function EventCardSkeleton() {
         <div className="flex items-center gap-4 mt-1">
           <div className="h-4 bg-gray-200 rounded w-16 shrink-0"></div>
           <div className="flex-1 flex justify-between gap-4">
-             <div className="h-4 bg-gray-200 rounded w-20"></div>
-             <div className="h-4 bg-gray-200 rounded w-20"></div>
+            <div className="h-4 bg-gray-200 rounded w-20"></div>
+            <div className="h-4 bg-gray-200 rounded w-20"></div>
           </div>
         </div>
       </div>
@@ -56,7 +60,11 @@ const EventCardSkeleton = memo(function EventCardSkeleton() {
 
 // ── Tab Panels (memoized to avoid re-renders on tab switch) ─────────────────
 
-const UpcomingPanel = memo(function UpcomingPanel({ events, onCardClick, onButtonClick }) {
+const UpcomingPanel = memo(function UpcomingPanel({
+  events,
+  onCardClick,
+  onButtonClick,
+}) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -67,7 +75,7 @@ const UpcomingPanel = memo(function UpcomingPanel({ events, onCardClick, onButto
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {events.map(event => (
+      {events.map((event) => (
         <EventCard
           key={event.id}
           imageUrl={event.imageUrl}
@@ -84,7 +92,11 @@ const UpcomingPanel = memo(function UpcomingPanel({ events, onCardClick, onButto
   );
 });
 
-const MyEventPanel = memo(function MyEventPanel({ events, onCardClick, onEditClick }) {
+const MyEventPanel = memo(function MyEventPanel({
+  events,
+  onCardClick,
+  onEditClick,
+}) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -95,7 +107,7 @@ const MyEventPanel = memo(function MyEventPanel({ events, onCardClick, onEditCli
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {events.map(event => (
+      {events.map((event) => (
         <MyEventCard
           key={event.id}
           imageUrl={event.imageUrl}
@@ -125,7 +137,7 @@ const MyTicketPanel = memo(function MyTicketPanel({ tickets }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {tickets.map(ticket => (
+      {tickets.map((ticket) => (
         <Ticket
           key={ticket.id}
           title={ticket.title}
@@ -152,14 +164,14 @@ export default function EventsPage({ role }) {
   const router = useRouter();
 
   const handleCardClick = useCallback(
-    id => {
+    (id) => {
       router.push(`/dashboard/${role}/events/${id}`);
     },
     [router, role],
   );
 
   const handleMyEventCardClick = useCallback(
-    id => {
+    (id) => {
       router.push(`/dashboard/${role}/events/my-events/${id}`);
     },
     [router, role],
@@ -170,9 +182,15 @@ export default function EventsPage({ role }) {
     setSendInviteModalOpen(true);
   }, []);
 
-  const upcomingQuery = useGetUpcomingEventsQuery(undefined, { skip: activeTab !== "upcoming" });
-  const myEventsQuery = useGetMyEventsQuery(undefined, { skip: activeTab !== "my-event" });
-  const myTicketsQuery = useGetMyTicketsQuery(undefined, { skip: activeTab !== "my-ticket" });
+  const upcomingQuery = useGetUpcomingEventsQuery(undefined, {
+    skip: activeTab !== "upcoming",
+  });
+  const myEventsQuery = useGetMyEventsQuery(undefined, {
+    skip: activeTab !== "my-event",
+  });
+  const myTicketsQuery = useGetMyTicketsQuery(undefined, {
+    skip: activeTab !== "my-ticket",
+  });
 
   const formatEvent = (event) => ({
     id: event.id,
@@ -180,10 +198,14 @@ export default function EventsPage({ role }) {
     location: event.full_location || event.location,
     sponsor: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
     organizer: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
-    date: new Date(event.date).toLocaleDateString("en-US", { month: 'short', day: 'numeric', year: 'numeric' }),
-    imageUrl: event.photo 
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${event.photo}` 
-      : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60",
+    date: new Date(event.date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    imageUrl: event.photo
+      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${event.photo}`
+      : null,
     description: event.description || "Hello this is about my portfolio",
   });
 
@@ -235,39 +257,50 @@ export default function EventsPage({ role }) {
 
         {/* Content */}
 
-        {activeTab === "upcoming" && (
-          upcomingQuery.isLoading ? (
+        {activeTab === "upcoming" &&
+          (upcomingQuery.isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
+              {[1, 2, 3, 4].map((i) => (
+                <EventCardSkeleton key={i} />
+              ))}
             </div>
           ) : (
-            <UpcomingPanel events={upcomingEvents} onCardClick={handleCardClick} onButtonClick={handleCreateInviteClick} />
-          )
-        )}
-        
-        {activeTab === "my-event" && (
-          myEventsQuery.isLoading ? (
+            <UpcomingPanel
+              events={upcomingEvents}
+              onCardClick={handleCardClick}
+              onButtonClick={handleCreateInviteClick}
+            />
+          ))}
+
+        {activeTab === "my-event" &&
+          (myEventsQuery.isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map(i => <EventCardSkeleton key={i} />)}
+              {[1, 2, 3, 4].map((i) => (
+                <EventCardSkeleton key={i} />
+              ))}
             </div>
           ) : (
-            <MyEventPanel 
-              events={myEvents} 
-              onCardClick={handleMyEventCardClick} 
+            <MyEventPanel
+              events={myEvents}
+              onCardClick={handleMyEventCardClick}
               onEditClick={(event) => {
-                const rawEvent = myEventsQuery.data?.data?.find(e => e.id === event.id);
+                const rawEvent = myEventsQuery.data?.data?.find(
+                  (e) => e.id === event.id,
+                );
                 setEditingEvent(rawEvent || event);
                 setModalOpen(true);
               }}
             />
-          )
-        )}
-        
-        {activeTab === "my-ticket" && (
-          myTicketsQuery.isLoading ? (
+          ))}
+
+        {activeTab === "my-ticket" &&
+          (myTicketsQuery.isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white border border-gray/20 rounded-2xl h-[200px] w-full animate-pulse flex">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white border border-gray/20 rounded-2xl h-[200px] w-full animate-pulse flex"
+                >
                   <div className="w-[120px] bg-gray-200 h-full rounded-l-2xl"></div>
                   <div className="p-4 flex-1 flex flex-col justify-center gap-4">
                     <div className="h-6 bg-gray-200 rounded w-3/4"></div>
@@ -278,8 +311,7 @@ export default function EventsPage({ role }) {
             </div>
           ) : (
             <MyTicketPanel tickets={myTickets} />
-          )
-        )}
+          ))}
       </div>
 
       {/* Create Event Modal — dynamically imported */}
@@ -289,7 +321,7 @@ export default function EventsPage({ role }) {
           setModalOpen(false);
           setEditingEvent(null);
         }}
-        onSuccess={() => { }}
+        onSuccess={() => {}}
         editingEvent={editingEvent}
       />
 
