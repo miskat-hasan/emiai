@@ -5,7 +5,6 @@ import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Bookmark, QrCode, Share2, Pencil } from "lucide-react";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@/redux/api/services/contestApi";
 import AnnounceWinnerModal from "./AnnounceWinnerModal";
 import JoinContestModal from "./JoinContestModal";
+import CreateContestModal from "./CreateContestModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,6 +98,7 @@ export default function ContestDetailsPage({ params, role }) {
   const [winnerModalOpen, setWinnerModalOpen] = useState(false);
   const [winnerIds, setWinnerIds] = useState([]);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const variant = searchParams.get("v") ?? "contest";
 
@@ -213,7 +214,13 @@ export default function ContestDetailsPage({ params, role }) {
           <ActionIcon icon={Bookmark} title="Bookmark" />
           <ActionIcon icon={QrCode} title="QR Code" />
           <ActionIcon icon={Share2} title="Share" />
-          {isMyContest && <ActionIcon icon={Pencil} title="Edit contest" />}
+          {isMyContest && (
+            <ActionIcon
+              icon={Pencil}
+              title="Edit contest"
+              onClick={() => setEditModalOpen(true)}
+            />
+          )}
         </div>
       </div>
 
@@ -289,7 +296,16 @@ export default function ContestDetailsPage({ params, role }) {
           {c.rules && (
             <div className="mt-4">
               <p className="text-xs font-semibold text-black mb-1">Rules</p>
-              <p className="text-xs text-gray leading-relaxed">{c.rules}</p>
+              <ul>
+                {c.rules.map((rule, index) => (
+                  <li
+                    key={index}
+                    className="text-sm text-gray leading-relaxed list-disc ml-5"
+                  >
+                    {rule}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
@@ -351,7 +367,9 @@ export default function ContestDetailsPage({ params, role }) {
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-gray mt-0.5">{getDaysAgo(p.pivot.created_at)}</p>
+                    <p className="text-xs text-gray mt-0.5">
+                      {getDaysAgo(p.pivot.created_at)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -377,6 +395,12 @@ export default function ContestDetailsPage({ params, role }) {
         onClose={() => setJoinModalOpen(false)}
         onConfirm={handleJoin}
         isLoading={isJoining}
+        contest={c}
+      />
+
+      <CreateContestModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
         contest={c}
       />
     </div>

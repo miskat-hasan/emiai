@@ -6,21 +6,64 @@ import {
   MailSVG,
   ShareSVG,
 } from "@/components/common/Svg";
-import { X, Heart, Eye } from "lucide-react";
+import { X, Heart, Eye, Pencil } from "lucide-react";
 import Image from "next/image";
 import { FaHeart } from "react-icons/fa";
+import { useGetSinglePortfolioQuery } from "@/redux/api/services/portfolioApi";
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
 
 export default function PortfolioDetailsModal({
   open,
   onClose,
   portfolioId,
-  portfolioData,
   user,
+  onEdit,
 }) {
+  const { data: res, isLoading } = useGetSinglePortfolioQuery(portfolioId, {
+    skip: !open || !portfolioId,
+  });
+
   if (!open) return null;
 
-  const portfolio = portfolioData.find((p) => p.id === portfolioId);
-  if (!portfolio) return null;
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000]/90 p-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full border-2 border-white/20 absolute" />
+            <div className="w-12 h-12 rounded-full border-2 border-transparent border-t-white animate-spin absolute" />
+            <Image src="/logo.png" alt="Logo" width={22} height={22} className="object-contain z-10 brightness-0 invert" />
+          </div>
+          <span className="text-white/70 text-sm font-medium tracking-widest uppercase">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  const rawPortfolio = res?.data;
+  if (!rawPortfolio) return null;
+
+  const portfolio = {
+    id: rawPortfolio.id,
+    title: rawPortfolio.title,
+    likes: rawPortfolio.likes_count ?? 0,
+    views: rawPortfolio.views_count ?? 0,
+    publishedAt: formatDate(rawPortfolio.created_at),
+    items: (rawPortfolio.media || []).map((m) => ({
+      title: m.title,
+      description: "",
+      image: `${apiUrl}/${m.media_url}`,
+    })),
+  };
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000]/90 p-4 no-scrollbar">
@@ -58,6 +101,17 @@ export default function PortfolioDetailsModal({
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">
             <MailSVG className="w-5 h-5 text-gray-400" />
           </button>
+
+          {/* Edit */}
+          {onEdit && (
+            <button
+              onClick={() => onEdit(rawPortfolio)}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
+              title="Edit Portfolio"
+            >
+              <Pencil size={18} className="text-gray-400" />
+            </button>
+          )}
 
           {/* Like */}
           <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">

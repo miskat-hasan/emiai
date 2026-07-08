@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 const MyEventCard = ({
-  imageUrl = "/images/demo-event-photo.png",
+  imageUrl,
   title = "Digital Marketing Forum 2025",
   description = "Hello this is about my portfolio",
   organizer = "Event CO.",
@@ -43,13 +43,17 @@ const MyEventCard = ({
       )}
 
       {/* Background image */}
-      <Image
-        src={imageUrl}
-        alt={title}
-        fill
-        className="object-cover transition-transform duration-300 group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-      />
+      {imageUrl ? (
+        <Image
+          src={imageUrl}
+          alt={title}
+          fill
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gray-200 transition-transform duration-300 group-hover:scale-105" />
+      )}
 
       {/* Dark gradient overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,0.25)_60%,rgba(0,0,0,0.55)_80%,rgba(0,0,0,0.85)_100%)]" />

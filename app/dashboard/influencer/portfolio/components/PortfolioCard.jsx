@@ -1,20 +1,36 @@
 "use client";
 
-import { Eye, Heart } from "lucide-react";
 import Image from "next/image";
+import { Eye, Heart, Pencil } from "lucide-react";
 
-export default function PortfolioCard({ item, onClick }) {
+export default function PortfolioCard({ item, onClick, onUpdate }) {
+  const handleUpdate = (e) => {
+    e.stopPropagation();
+    onUpdate?.(item);
+  };
+
   return (
     <div
       onClick={() => onClick?.(item.id)}
-      className="cursor-pointer rounded-2xl bg-white border border-[#E5E6E6] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+      className="group cursor-pointer rounded-2xl bg-white border border-[#E5E6E6] p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-md relative"
     >
+      {/* Update button */}
+      {onUpdate && (
+        <button
+          onClick={handleUpdate}
+          className="absolute top-6 right-6 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white hover:shadow-lg"
+          title="Update Portfolio"
+        >
+          <Pencil size={15} className="text-gray-600" />
+        </button>
+      )}
+
       <div className="overflow-hidden bg-white">
         <div className="h-70 w-full overflow-hidden">
           <Image
             src={item.image}
             alt={item.title}
-            className="h-full w-full rounded-[14px] object-center  transition-all duration-500 hover:scale-105"
+            className="h-full w-full rounded-[14px] object-center transition-all duration-500 hover:scale-105"
             width={400}
             height={212}
           />

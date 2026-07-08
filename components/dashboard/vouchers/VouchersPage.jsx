@@ -1,22 +1,28 @@
 "use client";
 
-import { useState } from "react";
 import { VoucherCard } from "@/components/common/VoucherCard";
-import dynamic from "next/dynamic";
-import { toast } from "react-toastify";
 import { useGetVouchersQuery } from "@/redux/api/services/voucherApi";
+import dynamic from "next/dynamic";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
-const CreateVoucherModal = dynamic(() => import("@/components/common/CreateVoucherModal"), { ssr: false });
-const VoucherFilterModal = dynamic(() => import("@/components/common/VoucherFilterModal"), { ssr: false });
+const CreateVoucherModal = dynamic(
+  () => import("@/components/common/CreateVoucherModal"),
+  { ssr: false },
+);
+const VoucherFilterModal = dynamic(
+  () => import("@/components/common/VoucherFilterModal"),
+  { ssr: false },
+);
 
 // Utility to format date
 const formatDate = (dateString) => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -55,12 +61,37 @@ export default function VouchersPage({ role }) {
             onClick={() => setIsFilterModalOpen(true)}
             className="flex items-center gap-2 border border-gray/30 rounded-full px-5 py-2 text-sm font-medium hover:bg-gray/5 transition-colors text-black cursor-pointer"
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M1.75 3.5H12.25M4.08333 7H9.91667M5.83333 10.5H8.16667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 14 14"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M1.75 3.5H12.25M4.08333 7H9.91667M5.83333 10.5H8.16667"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             Filter
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg" className="ml-1">
-              <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              width="10"
+              height="6"
+              viewBox="0 0 10 6"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="ml-1"
+            >
+              <path
+                d="M1 1L5 5L9 1"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </button>
           {role !== "guest" && (
@@ -108,7 +139,7 @@ export default function VouchersPage({ role }) {
             <VoucherCard
               key={voucher.id}
               role={role}
-              title={`${voucher.discount}${voucher.discount_type === 'percentage' ? '%' : ''} off`}
+              title={`${voucher.discount}${voucher.discount_type === "percentage" ? "%" : ""} off`}
               description={voucher.description}
               label="Voucher"
               code={voucher.promo_code}
@@ -135,7 +166,7 @@ export default function VouchersPage({ role }) {
             delete processedFilters.country_id;
           }
           // Remove empty keys
-          Object.keys(processedFilters).forEach(key => {
+          Object.keys(processedFilters).forEach((key) => {
             if (!processedFilters[key]) {
               delete processedFilters[key];
             }

@@ -8,12 +8,12 @@ export const adApi = apiSlice.injectEndpoints({
     }),
 
     getAllAds: builder.query({
-      query: () => ({ url: "/api/ads/list?type=all", method: "GET" }),
+      query: () => ({ url: "/api/ads/list?type=active", method: "GET" }),
       providesTags: ["Ad"],
     }),
 
     getGuestExploreAds: builder.query({
-      query: (type = "all") => ({
+      query: (type = "active") => ({
         url: `/api/ads/list?type=${type}`,
         method: "GET",
       }),
@@ -31,7 +31,17 @@ export const adApi = apiSlice.injectEndpoints({
     }),
 
     updateAd: builder.mutation({
-      query: (body) => ({ url: "/api/ads/update", method: "POST", body }),
+      query: (data) => {
+        const id = data instanceof FormData ? data.get("id") : data.id;
+        if (data instanceof FormData && !data.has("_method")) {
+          data.append("_method", "PUT");
+        }
+        return {
+          url: `/api/ads/update/${id}`,
+          method: "POST",
+          body: data,
+        };
+      },
       invalidatesTags: ["Ad"],
     }),
   }),

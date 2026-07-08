@@ -1,21 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { AdsGrid, AdCardSkeleton } from "./index";
-import dynamic from "next/dynamic";
-import { useDispatch, useSelector } from "react-redux";
-import { setStep } from "@/redux/slices/adCreationSlice";
 import TabSwitcher from "@/components/common/TabSwitcher";
+import { setStep } from "@/redux/slices/adCreationSlice";
 import { Search } from "lucide-react";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AdCardSkeleton, AdsGrid } from "./index";
 
 // Dynamically import CreateAdFlow and PostPreview to avoid SSR issues
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
 const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
 import {
-  useGetPublishedAdsQuery,
   useGetAllAdsQuery,
+  useGetPublishedAdsQuery,
 } from "@/redux/api/services/adApi";
 import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
@@ -100,8 +100,7 @@ export default function AdsPage({ role }) {
   }
 
   const mappedAds = rawAds.map((ad) => {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const origin = new URL(apiUrl).origin;
     let imageUrl = ad.media_url;
     if (imageUrl && !imageUrl.startsWith("http")) {
@@ -121,7 +120,7 @@ export default function AdsPage({ role }) {
       id: ad.id,
       imageUrl,
       mediaType,
-      userName: "Advertiser " + ad.advertiser_id, // Fallback if no advertiser details are in response
+      userName: "Advertiser " + ad.advertiser_id,
       userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
       description: ad.description,
       timeAgo: timeSince(ad.publish_at || ad.created_at),
