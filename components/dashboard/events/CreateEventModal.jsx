@@ -140,14 +140,20 @@ export default function CreateEventModal({
     } else if (editingEvent) {
       reset({
         title: editingEvent.name || editingEvent.title || "",
-        event_type: editingEvent.type || "offline",
+        event_type: editingEvent.event_type || editingEvent.type || "offline",
         entry_fee: editingEvent.entry_fee || "",
-        event_date:
-          editingEvent.start_date || editingEvent.date
-            ? new Date(editingEvent.start_date || editingEvent.date)
-                .toISOString()
-                .split("T")[0]
-            : "",
+        event_date: (() => {
+          if (!editingEvent.start_date && !editingEvent.date) return "";
+          const dateStr = editingEvent.start_date || editingEvent.date;
+          if (typeof dateStr === "string" && dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
+            return dateStr.substring(0, 10);
+          }
+          try {
+            return new Date(dateStr).toISOString().split("T")[0];
+          } catch (e) {
+            return "";
+          }
+        })(),
         location: editingEvent.location || "",
         full_location: editingEvent.full_location || "",
         description: editingEvent.description || "",
@@ -163,7 +169,7 @@ export default function CreateEventModal({
       setTickets(
         editingEvent.tickets?.length > 0
           ? editingEvent.tickets.map((t) => ({
-              id: t.type || t.id,
+              id: t.ticket_type || t.type || t.id,
               price: t.price || "",
             }))
           : [],
@@ -173,7 +179,7 @@ export default function CreateEventModal({
       );
       setSponsors(
         editingEvent.sponsors?.map((s) => ({
-          id: s.user_id || s.id,
+          id: s.sponsor_id || s.user_id || s.id,
           amount: s.amount,
         })) || [],
       );
@@ -219,14 +225,16 @@ export default function CreateEventModal({
       fd.append(`tickets[${i}][price]`, t.price || "0");
     });
 
-    if (editingEvent?.id) {
-      fd.append("id", editingEvent.id);
+    const eventId = editingEvent?.id || editingEvent?.event_id;
+
+    if (eventId) {
+      fd.append("id", eventId);
     }
 
     if (eventPhoto) fd.append("photo", eventPhoto);
 
     try {
-      if (editingEvent?.id) {
+      if (eventId) {
         await updateEvent(fd).unwrap();
         toast.success("Event updated successfully!");
       } else {
@@ -238,7 +246,7 @@ export default function CreateEventModal({
     } catch (err) {
       toast.error(
         err?.data?.message ??
-          `Failed to ${editingEvent?.id ? "update" : "create"} event.`,
+          `Failed to ${eventId ? "update" : "create"} event.`,
       );
     }
   };
@@ -308,7 +316,7 @@ export default function CreateEventModal({
 
               <Field label="Entry Fee">
                 <Input
-                  placeholder="1212"
+                  placeholder="15"
                   type="number"
                   {...register("entry_fee")}
                 />
@@ -329,7 +337,7 @@ export default function CreateEventModal({
             <div className="grid grid-cols-2 gap-3">
               <Field label="Event Location" error={errors.location?.message}>
                 <Input
-                  placeholder="Here."
+                  placeholder="Enter event location.."
                   {...register("location", {
                     required: "Location is required",
                   })}

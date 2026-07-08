@@ -86,11 +86,11 @@ export default function EventDetailsPage({ role, params }) {
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
     date: rawEvent.start_date,
-    eventType: "Offline", // Assuming offline if no type is given in this API response example
-    participants: rawEvent.total_participants || 0,
+    eventType: rawEvent.event_type || "Offline(Check Backend Response)",
+    participants: rawEvent.participants.length || 0,
     imageUrl: rawEvent.photo
       ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
-      : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80",
+      : null,
     mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
@@ -102,8 +102,8 @@ export default function EventDetailsPage({ role, params }) {
     })) || [];
 
   const infoItems = [
-    { label: "Event Type", value: event.eventType || "Offline" },
-    { label: "Participants", value: String(event.participants || 213) },
+    { label: "Event Type", value: event.eventType },
+    { label: "Participants", value: String(event.participants) },
     { label: "Sponsored", value: event.sponsor },
     { label: "Location", value: event.location },
     { label: "Event Start", value: event.date },
@@ -148,7 +148,9 @@ export default function EventDetailsPage({ role, params }) {
       </div>
 
       {/* Hero Image */}
-      <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      {event.imageUrl && (
+        <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
