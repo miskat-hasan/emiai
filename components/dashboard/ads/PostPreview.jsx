@@ -42,16 +42,28 @@ export default function PostPreview() {
 
 
 
+    if (draft.publishAt) {
+      const publishDate = new Date(draft.publishAt);
+      const isFuture = publishDate > new Date();
+      if (!draft.id || isFuture) {
+        let formattedDate = draft.publishAt.replace('T', ' ');
+        if (formattedDate.length === 16) {
+          formattedDate += ':00';
+        }
+        fd.append("publish_at", formattedDate);
+      }
+    }
+
     fd.append("prize_type", draft.prizeType);
     
-    if (draft.prizes && draft.prizes.length > 0) {
+    if (draft.prizeType === "cash" && draft.prizes && draft.prizes.length > 0) {
       draft.prizes.forEach((prize, index) => {
         fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
         fd.append(`prizes[${index}][value]`, prize.value);
       });
     }
 
-    if (draft.promoCode) {
+    if (draft.prizeType === "coupon" && draft.promoCode) {
       fd.append("promo_code[code]", draft.promoCode);
       if (draft.promoCodeDiscount) {
         fd.append("promo_code[discount_percentage]", draft.promoCodeDiscount);

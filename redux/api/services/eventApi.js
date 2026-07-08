@@ -12,14 +12,16 @@ export const eventApi = apiSlice.injectEndpoints({
     }),
 
     updateEvent: builder.mutation({
-      query: (data) => ({
-        url: "/api/events-update",
-        method: "POST",
-        body: data,
-      }),
+      query: (data) => {
+        const id = data instanceof FormData ? data.get("id") : data.id;
+        return {
+          url: `/api/update-events/${id}`,
+          method: "PUT",
+          body: data,
+        };
+      },
       invalidatesTags: ["Event"],
     }),
-
 
     sendEventInvitation: builder.mutation({
       query: (data) => ({
