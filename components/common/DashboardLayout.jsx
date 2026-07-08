@@ -7,6 +7,7 @@ import { useGetMeQuery } from "@/redux/api/authApi";
 import { setUser, removeUser } from "@/redux/slices/authSlice";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import PageLoader from "./PageLoader";
 
 export default function DashboardLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -41,16 +42,7 @@ export default function DashboardLayout({ children }) {
   const themeClass = `theme-${role}`;
 
   if (!user && isLoading) {
-    return (
-      <div
-        className={`${themeClass} flex h-screen items-center justify-center bg-gray-50`}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-gray">Loading...</p>
-        </div>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   return (

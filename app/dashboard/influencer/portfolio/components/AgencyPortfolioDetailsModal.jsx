@@ -9,18 +9,60 @@ import {
 import { X, Heart, Eye } from "lucide-react";
 import Image from "next/image";
 import { FaHeart } from "react-icons/fa";
+import { useGetSinglePortfolioQuery } from "@/redux/api/services/portfolioApi";
+
+function formatDate(dateStr) {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
 
 export default function AgencyPortfolioDetailsModal({
   open,
   onClose,
   portfolioId,
-  portfolioData,
   user,
 }) {
+  const { data: res, isLoading } = useGetSinglePortfolioQuery(portfolioId, {
+    skip: !open || !portfolioId,
+  });
+
   if (!open) return null;
 
-  const portfolio = portfolioData.find((p) => p.id === portfolioId);
-  if (!portfolio) return null;
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000]/50 p-4">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full border-2 border-white/20 absolute" />
+            <div className="w-12 h-12 rounded-full border-2 border-transparent border-t-white animate-spin absolute" />
+            <Image src="/logo.png" alt="Logo" width={22} height={22} className="object-contain z-10 brightness-0 invert" />
+          </div>
+          <span className="text-white/70 text-sm font-medium tracking-widest uppercase">
+            Loading...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  const rawPortfolio = res?.data;
+  if (!rawPortfolio) return null;
+
+  const portfolio = {
+    id: rawPortfolio.id,
+    title: rawPortfolio.title,
+    likes: rawPortfolio.likes_count ?? 0,
+    views: rawPortfolio.views_count ?? 0,
+    publishedAt: formatDate(rawPortfolio.created_at),
+    items: (rawPortfolio.media || []).map((m) => ({
+      title: m.title,
+      description: "",
+      image: `${apiUrl}/${m.media_url}`,
+    })),
+  };
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000]/50 p-4 no-scrollbar">
