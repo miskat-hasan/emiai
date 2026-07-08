@@ -42,7 +42,7 @@ const EventCard = ({
           <span className="w-20 text-gray text-[12px] shrink-0">
             Location
           </span>
-          <span className="flex-1 text-black text-[12px] leading-snug">
+          <span className="flex-1 text-black text-[12px] leading-snug break-all">
             {location}
           </span>
         </div>

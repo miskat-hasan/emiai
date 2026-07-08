@@ -6,12 +6,12 @@ import {
   useSendEventInvitationMutation,
   useGetEventByIdQuery,
 } from "@/redux/api/services/eventApi";
-import { useLazySearchUsersQuery } from "@/redux/api/services/commonApi";
+import { useLazySearchUsersQuery, useGetAllUsersQuery } from "@/redux/api/services/commonApi";
 import MultiSelect from "@/components/ui/MultiSelect";
 import { X } from "lucide-react";
 
 export default function SendInvitationFlow({ eventId, open, onClose }) {
-  const [invitedUserId, setInvitedUserId] = useState([]); // Array for MultiSelect, but limit to 1
+  const [invitedUserId, setInvitedUserId] = useState([]);
   const [ticketId, setTicketId] = useState("");
   const [message, setMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,14 +20,17 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
     useSendEventInvitationMutation();
   const { data: eventResponse, isLoading: isEventLoading } =
     useGetEventByIdQuery(eventId, { skip: !eventId || !open });
-  const [searchUsers, { data: usersResponse, isLoading: isUsersLoading }] =
+    
+  const { data: allUsersResponse, isLoading: isAllUsersLoading } = 
+    useGetAllUsersQuery(undefined, { skip: !open });
+  const [searchUsers, { data: usersResponse, isLoading: isSearchLoading }] =
     useLazySearchUsersQuery();
 
   // Handle user search (debounced)
   useEffect(() => {
-    if (open) {
+    if (open && searchQuery) {
       const timeoutId = setTimeout(() => {
-        searchUsers(searchQuery || "");
+        searchUsers(searchQuery);
       }, 300);
       return () => clearTimeout(timeoutId);
     }
@@ -45,7 +48,12 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
 
   if (!open) return null;
 
-  const users = usersResponse?.data || usersResponse || [];
+  const allUsers = allUsersResponse?.data || allUsersResponse || [];
+  const searchResults = usersResponse?.data || usersResponse || [];
+  
+  const users = searchQuery ? searchResults : allUsers;
+  const isUsersLoading = searchQuery ? isSearchLoading : isAllUsersLoading;
+
   const tickets = eventResponse?.data?.tickets || [];
   const ticketOptions = tickets.map((t) => ({
     id: t.id,
@@ -59,7 +67,7 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
       return;
     }
     if (invitedUserId.length === 0) {
-      toast.error("Please select a user to invite.");
+      toast.error("Please select at least one user to invite.");
       return;
     }
     if (!ticketId) {
@@ -71,27 +79,27 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append("event_id", eventId);
-    formData.append("invited_user_id", invitedUserId[0]);
-    formData.append("ticket_id", ticketId);
-    formData.append("message", message);
-
     try {
+      const formData = new FormData();
+      formData.append("event_id", eventId);
+      
+      invitedUserId.forEach((userId) => {
+        formData.append("invited_user_ids[]", userId);
+      });
+      
+      formData.append("ticket_id", ticketId);
+      formData.append("message", message);
+      
       await sendInvitation(formData).unwrap();
-      toast.success("Invitation sent successfully!");
+      toast.success("Invitations sent successfully!");
       onClose();
     } catch (error) {
-      toast.error(error?.data?.message || "Failed to send invitation.");
+      toast.error(error?.data?.message || "Failed to send invitation(s).");
     }
   };
 
   const handleUserChange = (selected) => {
-    if (selected.length > 1) {
-      setInvitedUserId([selected[selected.length - 1]]);
-    } else {
-      setInvitedUserId(selected);
-    }
+    setInvitedUserId(selected);
   };
 
   return (
@@ -112,8 +120,8 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
           <div>
             <MultiSelect
               id="invitedUserId"
-              label="Select User"
-              placeholder="Search and select a user"
+              label="Select User(s)"
+              placeholder="Search and select users"
               options={users}
               value={invitedUserId}
               onChange={handleUserChange}
