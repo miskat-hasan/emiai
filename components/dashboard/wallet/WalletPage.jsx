@@ -18,7 +18,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import Pagination from "@/components/common/Pagination";
+import Pagination from "@/components/ui/Pagination";
 import Image from "next/image";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
