@@ -6,6 +6,18 @@ import baseQueryWithInterceptor from "@/redux/api/baseQueryWithInterceptor";
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithInterceptor,
-  tagTypes: ["User", "Contest", "Event", "Ad", "Voucher", "VoucherCategory", "Country", "Categories", "Bookmark", "Countries"],
+  tagTypes: [
+    "User",
+    "Contest",
+    "Event",
+    "Ad",
+    "Voucher",
+    "VoucherCategory",
+    "Country",
+    "Categories",
+    "Bookmark",
+    "Countries",
+    "Deals",
+  ],
   endpoints: () => ({}),
 });

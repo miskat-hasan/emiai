@@ -1,11 +1,8 @@
 "use client";
-
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Headphones, Flag } from "lucide-react";
 import StatusBadge from "@/components/common/StatusBadge";
-
-// ─── Mock — replace with real API/Redux fetch by `params.id` ─────────────────
 
 const MOCK_DEAL = {
   id: 1,
@@ -24,10 +21,9 @@ const MOCK_DEAL = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DealDetailPage({ params, role }) {
+export default function DealDetailPage({ role }) {
   const router = useRouter();
-
-  // In real usage: fetch deal by params.id
+  const { id } = useParams();
   const deal = MOCK_DEAL;
 
   return (
