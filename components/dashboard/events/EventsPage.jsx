@@ -11,8 +11,11 @@ import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { memo, useCallback, useState } from "react";
+import Pagination from "@/components/ui/Pagination";
 import EventCard from "./EventCard";
 import MyEventCard from "./MyEventCard";
+
+const DEFAULT_PER_PAGE = 12;
 
 // ── Dynamic imports for heavy modals (code-split, no SSR) ──────────────────
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
@@ -74,7 +77,7 @@ const UpcomingPanel = memo(function UpcomingPanel({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
       {events.map((event) => (
         <EventCard
           key={event.id}
@@ -106,7 +109,7 @@ const MyEventPanel = memo(function MyEventPanel({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
       {events.map((event) => (
         <MyEventCard
           key={event.id}
@@ -136,12 +139,12 @@ const MyTicketPanel = memo(function MyTicketPanel({ tickets }) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
       {tickets.map((ticket) => (
         <Ticket
           key={ticket.id}
-          title={ticket.title}
-          ticketNumber={ticket.ticketNumber}
+          title={ticket.event_title}
+          ticketNumber={ticket.ticket_code}
           qrCode={ticket.qrCode}
         />
       ))}
@@ -163,6 +166,18 @@ export default function EventsPage({ role }) {
   const [selectedEventId, setSelectedEventId] = useState(null);
   const router = useRouter();
 
+  const [pagination, setPagination] = useState({
+    upcoming: { page: 1, perPage: DEFAULT_PER_PAGE },
+    "my-event": { page: 1, perPage: DEFAULT_PER_PAGE },
+    "my-ticket": { page: 1, perPage: DEFAULT_PER_PAGE },
+  });
+
+  const setPage = (tab, page) =>
+    setPagination(prev => ({ ...prev, [tab]: { ...prev[tab], page } }));
+
+  const setPerPage = (tab, perPage) =>
+    setPagination(prev => ({ ...prev, [tab]: { page: 1, perPage } }));
+
   const handleCardClick = useCallback(
     (id) => {
       router.push(`/dashboard/${role}/events/${id}`);
@@ -182,15 +197,18 @@ export default function EventsPage({ role }) {
     setSendInviteModalOpen(true);
   }, []);
 
-  const upcomingQuery = useGetUpcomingEventsQuery(undefined, {
-    skip: activeTab !== "upcoming",
-  });
-  const myEventsQuery = useGetMyEventsQuery(undefined, {
-    skip: activeTab !== "my-event",
-  });
-  const myTicketsQuery = useGetMyTicketsQuery(undefined, {
-    skip: activeTab !== "my-ticket",
-  });
+  const upcomingQuery = useGetUpcomingEventsQuery(
+    { page: pagination.upcoming.page, per_page: pagination.upcoming.perPage },
+    { skip: activeTab !== "upcoming" }
+  );
+  const myEventsQuery = useGetMyEventsQuery(
+    { page: pagination["my-event"].page, per_page: pagination["my-event"].perPage },
+    { skip: activeTab !== "my-event" }
+  );
+  const myTicketsQuery = useGetMyTicketsQuery(
+    { page: pagination["my-ticket"].page, per_page: pagination["my-ticket"].perPage },
+    { skip: activeTab !== "my-ticket" }
+  );
 
   const formatEvent = (event) => ({
     id: event.id,
@@ -219,6 +237,19 @@ export default function EventsPage({ role }) {
   const upcomingEvents = getArrayData(upcomingQuery.data).map(formatEvent);
   const myEvents = getArrayData(myEventsQuery.data).map(formatEvent);
   const myTickets = getArrayData(myTicketsQuery.data);
+
+  const activeQuery =
+    activeTab === "upcoming"
+      ? upcomingQuery
+      : activeTab === "my-event"
+        ? myEventsQuery
+        : myTicketsQuery;
+
+  // Attempt to extract pagination meta from query data
+  const meta = activeQuery.data?.meta || activeQuery.data?.data;
+  const items = activeTab === "upcoming" ? upcomingEvents : activeTab === "my-event" ? myEvents : myTickets;
+  const totalPages = meta?.last_page ?? 1;
+  const totalResults = meta?.total ?? items.length;
 
   return (
     <>
@@ -259,7 +290,7 @@ export default function EventsPage({ role }) {
 
         {activeTab === "upcoming" &&
           (upcomingQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <EventCardSkeleton key={i} />
               ))}
@@ -274,7 +305,7 @@ export default function EventsPage({ role }) {
 
         {activeTab === "my-event" &&
           (myEventsQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
               {[1, 2, 3, 4].map((i) => (
                 <EventCardSkeleton key={i} />
               ))}
@@ -295,7 +326,7 @@ export default function EventsPage({ role }) {
 
         {activeTab === "my-ticket" &&
           (myTicketsQuery.isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
@@ -312,6 +343,18 @@ export default function EventsPage({ role }) {
           ) : (
             <MyTicketPanel tickets={myTickets} />
           ))}
+
+        {/* Pagination */}
+        {totalResults > 0 && (
+          <Pagination
+            currentPage={pagination[activeTab].page}
+            totalPages={totalPages}
+            perPage={pagination[activeTab].perPage}
+            totalResults={totalResults}
+            onPageChange={p => setPage(activeTab, p)}
+            onPerPageChange={pp => setPerPage(activeTab, pp)}
+          />
+        )}
       </div>
 
       {/* Create Event Modal — dynamically imported */}

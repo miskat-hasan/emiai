@@ -4,6 +4,7 @@ import { VoucherCard } from "@/components/common/VoucherCard";
 import { useGetVouchersQuery } from "@/redux/api/services/voucherApi";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import Pagination from "@/components/ui/Pagination";
 import { toast } from "react-toastify";
 
 const CreateVoucherModal = dynamic(
@@ -27,14 +28,24 @@ const formatDate = (dateString) => {
 };
 
 export default function VouchersPage({ role }) {
+  const DEFAULT_PER_PAGE = 12;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filters, setFilters] = useState({});
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
   // Fetch vouchers from backend
-  const { data: response, isLoading } = useGetVouchersQuery(filters);
+  const { data: response, isLoading } = useGetVouchersQuery({
+    ...filters,
+    page,
+    per_page: perPage,
+  });
 
   const vouchers = response?.data?.data || [];
+  const meta = response?.meta || response?.data;
+  const totalPages = meta?.last_page ?? 1;
+  const totalResults = meta?.total ?? vouchers.length;
 
   const handleCopy = (code) => {
     navigator.clipboard.writeText(code);
@@ -150,6 +161,21 @@ export default function VouchersPage({ role }) {
         </div>
       )}
 
+      {/* Pagination */}
+      {totalResults > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          perPage={perPage}
+          totalResults={totalResults}
+          onPageChange={p => setPage(p)}
+          onPerPageChange={pp => {
+            setPerPage(pp);
+            setPage(1);
+          }}
+        />
+      )}
+
       <CreateVoucherModal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -172,6 +198,7 @@ export default function VouchersPage({ role }) {
             }
           });
           setFilters(processedFilters);
+          setPage(1);
         }}
         role={role}
       />

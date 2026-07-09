@@ -32,12 +32,12 @@ export const eventApi = apiSlice.injectEndpoints({
     }),
 
     getUpcomingEvents: builder.query({
-      query: () => ({ url: "/api/events?type=upcoming", method: "GET" }),
+      query: (params) => ({ url: "/api/events", method: "GET", params: { type: "upcoming", ...params } }),
       providesTags: ["Event"],
     }),
 
     getMyEvents: builder.query({
-      query: () => ({ url: "/api/events?type=my", method: "GET" }),
+      query: (params) => ({ url: "/api/events", method: "GET", params: { type: "my", ...params } }),
       providesTags: ["Event"],
     }),
 
@@ -47,7 +47,7 @@ export const eventApi = apiSlice.injectEndpoints({
     }),
 
     getMyTickets: builder.query({
-      query: () => ({ url: "/api/event/my-tickets", method: "GET" }),
+      query: (params) => ({ url: "/api/events/get-user-tickets", method: "GET", params }),
       providesTags: ["Event"],
     }),
     registerTicket: builder.mutation({

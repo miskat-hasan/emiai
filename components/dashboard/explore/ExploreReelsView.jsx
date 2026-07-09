@@ -30,12 +30,16 @@ export default function ExploreReelsView({ ads }) {
 }
 
 function ReelCard({ ad }) {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(ad.is_liked);
   const [isBookmarked, setIsBookmarked] = useState(ad.isBookmarked || false);
   
   useEffect(() => {
     setIsBookmarked(ad.isBookmarked || ad.is_bookmarked || false);
   }, [ad.isBookmarked, ad.is_bookmarked]);
+
+  useEffect(() => {
+    setIsLiked(ad.is_liked || false);
+  }, [ad.is_liked]);
 
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);

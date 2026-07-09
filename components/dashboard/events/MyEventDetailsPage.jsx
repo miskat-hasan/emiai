@@ -89,8 +89,9 @@ export default function MyEventDetailsPage({ role, params }) {
     imageUrl: rawEvent.photo
       ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
       : null,
-    mapUrl:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14608.039575440334!2d90.3654215!3d23.746476!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b33534720f%3A0x867375a18357731a!2sDhanmondi%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1683921345678",
+    mapUrl: rawEvent.full_location?.includes("google.com/maps/embed")
+      ? rawEvent.full_location
+      : rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
 

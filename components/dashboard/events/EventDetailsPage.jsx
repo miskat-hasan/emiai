@@ -91,7 +91,11 @@ export default function EventDetailsPage({ role, params }) {
     imageUrl: rawEvent.photo
       ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
       : null,
-    mapUrl: rawEvent.full_location,
+    mapUrl: rawEvent.full_location?.includes("google.com/maps/embed")
+      ? rawEvent.full_location
+      : rawEvent.full_location
+        ? `https://maps.google.com/maps?q=${encodeURIComponent(rawEvent.full_location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+        : null,
     description: rawEvent.description || "No description provided.",
   };
 
