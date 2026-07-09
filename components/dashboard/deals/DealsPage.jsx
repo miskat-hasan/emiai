@@ -4,6 +4,7 @@ import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import DealCard from "@/components/cards/DealCard";
 import { useGetDealsQuery } from "@/redux/api/services/dealApi";
 import { DealCardSkeleton } from "@/components/common/Skeleton";
+import Pagination from "@/components/common/Pagination";
 
 const STATUS_FILTERS = [
   "All",
@@ -75,6 +76,9 @@ export default function DealsPage({ role }) {
     status: filter?.includes("All") ? "" : filter.toLocaleLowerCase(),
   });
 
+  const meta = dealData?.data;
+  const deals = meta?.data;
+
   return (
     <div className="space-y-6">
       {/* ── Page heading ── */}
@@ -116,9 +120,9 @@ export default function DealsPage({ role }) {
             <DealCardSkeleton key={idx} />
           ))}
         </div>
-      ) : dealData?.data?.data?.length > 0 ? (
+      ) : deals?.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {dealData?.data?.data?.map(deal => (
+          {deals?.map(deal => (
             <DealCard key={deal?.id} deal={deal} role={role} />
           ))}
         </div>
@@ -131,18 +135,16 @@ export default function DealsPage({ role }) {
         </div>
       )}
 
+      {/* ── Pagination ── */}
       {!isFetching && (
-        <div className="py-8 flex justify-center items-center gap-2 flex-wrap">
-          {dealData?.data?.links?.map((item, idx) => (
-            <button
-              key={idx}
-              disabled={!item.url}
-              dangerouslySetInnerHTML={{ __html: item.label }}
-              onClick={() => item.url && setPage(item.url.split("=")[1])}
-              className={`px-3 py-1 rounded border border-gray-200 transition-all duration-200 ${item.active ? "bg-primary text-white" : "bg-white text-gray-700"} ${!item.url ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-            />
-          ))}
-        </div>
+        <Pagination
+          currentPage={meta?.current_page}
+          lastPage={meta?.last_page}
+          total={meta?.total}
+          from={meta?.from}
+          to={meta?.to}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

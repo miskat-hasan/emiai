@@ -10,7 +10,7 @@ export const dealApi = apiSlice.injectEndpoints({
           page,
           status,
           search,
-          per_page: 1,
+          per_page: 9,
         },
       }),
       providesTags: ["Deals"],
