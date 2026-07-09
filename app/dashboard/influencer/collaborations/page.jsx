@@ -4,8 +4,10 @@ import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { incomingCollaborationRequests } from "../components/Data/collaborationIncomingData";
 import { sentCollaborationRequests } from "../components/Data/collaborationSentData";
+import { paymentRequests } from "../components/Data/collaborationPaymentData";
 import IncomingCollaborationCard from "../components/IncomingCollaborationCard";
 import SentCollaborationCard from "../components/SentCollaborationCard";
+import PaymentRequestCard from "../components/PaymentRequestCard";
 import CollaborationPaymentModal from "../components/CollaborationPaymentModal";
 
 
@@ -18,6 +20,10 @@ const collaborationTabs = [
         label: "Sent Requests",
         value: "sent",
     },
+    {
+        label: "Payment Requests",
+        value: "payment",
+    },
 ];
 
 export default function CollaborationsPage() {
@@ -25,6 +31,10 @@ export default function CollaborationsPage() {
     const [selectedCollaboration, setSelectedCollaboration] = useState(null);
 
     const collaborations = useMemo(() => {
+        if (activeTab === "payment") {
+            return paymentRequests;
+        }
+
         if (activeTab === "sent") {
             return sentCollaborationRequests;
         }
@@ -71,7 +81,14 @@ export default function CollaborationsPage() {
             {collaborations.length > 0 ? (
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                     {collaborations.map((item) =>
-                        activeTab === "sent" ? (
+                        activeTab === "payment" ? (
+                            <PaymentRequestCard
+                                key={item.id}
+                                item={item}
+                                onAccept={handleAccept}
+                                onReject={handleReject}
+                            />
+                        ) : activeTab === "sent" ? (
                             <SentCollaborationCard key={item.id} item={item} />
                         ) : (
                             <IncomingCollaborationCard
@@ -88,11 +105,17 @@ export default function CollaborationsPage() {
                 <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
                     <div>
                         <h3 className="mb-2 text-lg font-bold text-[#252525]">
-                            No collaborations found
+                            {activeTab === "payment"
+                                ? "No payment requests found"
+                                : "No collaborations found"}
                         </h3>
 
                         <p className="text-sm font-medium text-[#7a8582]">
-                            Your collaboration requests will appear here.
+                            {activeTab === "payment"
+                                ? "Your payment requests will appear here."
+                                : activeTab === "sent"
+                                    ? "Your sent requests will appear here."
+                                    : "Your collaboration requests will appear here."}
                         </p>
                     </div>
                 </div>

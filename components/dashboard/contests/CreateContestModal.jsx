@@ -13,7 +13,7 @@ import MultiSelect from "../../ui/MultiSelect";
 import MultiSelectKeyValue from "../../ui/MultiSelectKeyValue";
 import Input from "../../ui/Input";
 import Textarea from "../../ui/Textarea";
-import { useGetAllUsersQuery } from "@/redux/api/services/commonApi";
+import { useGetAllUsersQuery } from "@/redux/api/services/userApi";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

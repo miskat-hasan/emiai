@@ -8,7 +8,7 @@ import {
   useCreateEventMutation,
   useUpdateEventMutation,
 } from "@/redux/api/services/eventApi";
-import { useGetAllUsersQuery } from "@/redux/api/services/commonApi";
+import { useGetAllUsersQuery } from "@/redux/api/services/userApi";
 import MultiSelect from "@/components/ui/MultiSelect";
 import MultiSelectKeyValue from "@/components/ui/MultiSelectKeyValue";
 
