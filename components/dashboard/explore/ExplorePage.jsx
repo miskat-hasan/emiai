@@ -9,6 +9,9 @@ import ExploreReelsView from "./ExploreReelsView";
 import ExploreFilterModal from "./ExploreFilterModal";
 import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
 import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import Pagination from "@/components/ui/Pagination";
+
+const DEFAULT_PER_PAGE = 12;
 
 // Utility to calculate time ago
 function timeSince(dateString) {
@@ -67,10 +70,12 @@ const TABS = [
 
 export default function ExplorePage({ role }) {
   const [activeTab, setActiveTab] = useState("your-interests");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
   const queryType = activeTab === "explore" ? "all" : "all"; //we will later use explore, now for showing data we are using all
   const { data: exploreAdsResponse, isLoading } =
-    useGetGuestExploreAdsQuery(queryType);
+    useGetGuestExploreAdsQuery({ type: queryType, page, per_page: perPage });
 
   const [bookmarkedApiAds, setBookmarkedApiAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,6 +91,10 @@ export default function ExplorePage({ role }) {
     rawAds = exploreAdsResponse.data;
   else if (Array.isArray(exploreAdsResponse?.data?.data))
     rawAds = exploreAdsResponse.data.data;
+
+  const meta = exploreAdsResponse?.meta || exploreAdsResponse?.data;
+  const totalPages = meta?.last_page ?? 1;
+  const totalResults = meta?.total ?? rawAds.length;
 
   const mappedApiAds = rawAds.map((ad) => {
     const apiUrl =
@@ -109,11 +118,12 @@ export default function ExplorePage({ role }) {
       id: ad.id,
       imageUrl,
       mediaType,
-      userName: "Advertiser " + ad.advertiser_id,
-      userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
+      userName: ad.advertiser.name,
+      userAvatar: ad.advertiser.avatar||'/images/profile_photo_url.png',
       description: ad.description,
       timeAgo: timeSince(ad.publish_at || ad.created_at),
       isBookmarked: ad.is_bookmarked || false,
+      is_liked: ad.is_liked || false,
       targetCountries: ad.target_countries || [],
     };
   });
@@ -239,11 +249,26 @@ export default function ExplorePage({ role }) {
             ))}
           </div>
         ) : filteredAds.length > 0 ? (
-          <AdsGrid
-            ads={filteredAds}
-            onAdClick={handleAdClick}
-            onBookmarkToggle={handleBookmarkToggle}
-          />
+          <div>
+            <AdsGrid
+              ads={filteredAds}
+              onAdClick={handleAdClick}
+              onBookmarkToggle={handleBookmarkToggle}
+            />
+            {totalResults > 0 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                perPage={perPage}
+                totalResults={totalResults}
+                onPageChange={p => setPage(p)}
+                onPerPageChange={pp => {
+                  setPerPage(pp);
+                  setPage(1);
+                }}
+              />
+            )}
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 mt-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-500">
             <span className="text-lg font-medium">

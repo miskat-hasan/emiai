@@ -2,22 +2,15 @@ import React from "react";
 import Image from "next/image";
 
 const ROLE_COLORS = {
-  Influencer: "text-primary",
-  Advertiser: "text-teal-500",
-  Guest: "text-pink-500",
+  influencer: "text-primary",
+  advertiser: "text-teal-500",
+  guest: "text-pink-500",
+  agency: "text-purple-500",
 };
 
-const DEFAULT_PARTICIPANTS = [
-  { id: 1, name: "Jane Cooper", role: "Influencer", time: "2 hours ago" },
-  { id: 2, name: "Jane Cooper", role: "Influencer", time: "2 hours ago" },
-  { id: 3, name: "Jenny Wilson", role: "Advertiser", time: "2 hours ago" },
-  { id: 4, name: "Floyd Miles", role: "Guest", time: "3 hours ago" },
-  { id: 5, name: "Robert Fox", role: "Influencer", time: "5 hours ago" },
-  { id: 6, name: "Albert Flores", role: "Guest", time: "1 day ago" },
-];
 
 export default function EventParticipants({
-  participants = DEFAULT_PARTICIPANTS,
+  participants
 }) {
   return (
     <div className="bg-gray/5 rounded-3xl p-6 md:p-8 shadow-sm border border-gray/10 h-full">
@@ -55,7 +48,7 @@ export default function EventParticipants({
                     {participant.name}
                   </span>
                   <span
-                    className={`text-xs ${ROLE_COLORS[participant.role] || "text-gray"}`}
+                    className={`text-xs capitalize ${participant.role ? ROLE_COLORS[participant.role.toLowerCase()] || "text-gray" : "text-gray"}`}
                   >
                     ({participant.role})
                   </span>

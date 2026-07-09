@@ -3,20 +3,24 @@ import { apiSlice } from "../apiSlice";
 export const adApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getPublishedAds: builder.query({
-      query: () => ({ url: "/api/ads/my-ads", method: "GET" }),
+      query: (params) => ({ url: "/api/ads/my-ads", method: "GET", params }),
       providesTags: ["Ad"],
     }),
 
     getAllAds: builder.query({
-      query: () => ({ url: "/api/ads/list?type=active", method: "GET" }),
+      query: (params) => ({ url: "/api/ads/list", method: "GET", params: { type: "active", ...params } }),
       providesTags: ["Ad"],
     }),
 
     getGuestExploreAds: builder.query({
-      query: (type = "active") => ({
-        url: `/api/ads/list?type=${type}`,
-        method: "GET",
-      }),
+      query: (params = {}) => {
+        const { type = "active", ...restParams } = params;
+        return {
+          url: "/api/ads/list",
+          method: "GET",
+          params: { type, ...restParams },
+        };
+      },
       providesTags: ["Ad"],
     }),
 

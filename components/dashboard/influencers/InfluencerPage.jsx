@@ -92,7 +92,7 @@ export default function InfluencerPage({ role }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {filtered.map(inf => (
           <InfluencerCard
             key={inf.id}
