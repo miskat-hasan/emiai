@@ -7,7 +7,10 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import Pagination from "@/components/ui/Pagination";
 import { AdCardSkeleton, AdsGrid } from "./index";
+
+const DEFAULT_PER_PAGE = 12;
 
 // Dynamically import CreateAdFlow and PostPreview to avoid SSR issues
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
@@ -68,11 +71,22 @@ export default function AdsPage({ role }) {
   const [statusFilter, setStatusFilter] = useState("all");
   const [editingAd, setEditingAd] = useState(null);
 
+  const [pagination, setPagination] = useState({
+    "all-ads": { page: 1, perPage: DEFAULT_PER_PAGE },
+    "my-ads": { page: 1, perPage: DEFAULT_PER_PAGE },
+  });
+
+  const setPage = (tab, page) =>
+    setPagination(prev => ({ ...prev, [tab]: { ...prev[tab], page } }));
+
+  const setPerPage = (tab, perPage) =>
+    setPagination(prev => ({ ...prev, [tab]: { page: 1, perPage } }));
+
   // Always fetch all ads; only fetch my ads if not guest
   const { data: allAdsResponse, isLoading: isLoadingAllAds } =
-    useGetAllAdsQuery();
+    useGetAllAdsQuery({ page: pagination["all-ads"].page, per_page: pagination["all-ads"].perPage });
   const { data: myAdsResponse, isLoading: isLoadingMyAds } =
-    useGetPublishedAdsQuery(undefined, { skip: isGuest });
+    useGetPublishedAdsQuery({ page: pagination["my-ads"].page, per_page: pagination["my-ads"].perPage }, { skip: isGuest });
 
   // Select active data source
   const response =
@@ -99,6 +113,10 @@ export default function AdsPage({ role }) {
     }
   }
 
+  const meta = response?.meta || response?.data;
+  const totalPages = meta?.last_page ?? 1;
+  const totalResults = meta?.total ?? rawAds.length;
+
   const mappedAds = rawAds.map((ad) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const origin = new URL(apiUrl).origin;
@@ -120,13 +138,14 @@ export default function AdsPage({ role }) {
       id: ad.id,
       imageUrl,
       mediaType,
-      userName: "Advertiser " + ad.advertiser_id,
-      userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
+      userName: ad.advertiser.name,
+      userAvatar: ad.advertiser.avatar ,
       description: ad.description,
       timeAgo: timeSince(ad.publish_at || ad.created_at),
       status: ad.status || "active",
       publishAt: ad.publish_at || null,
       is_bookmarked: ad.is_bookmarked || false,
+      is_liked: ad.is_liked || false,
     };
   });
 
@@ -270,7 +289,7 @@ export default function AdsPage({ role }) {
 
       {/* Ads grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <AdCardSkeleton key={i} />
           ))}
@@ -285,6 +304,18 @@ export default function AdsPage({ role }) {
         />
       ) : (
         <div className="flex justify-center py-20 text-gray">No ads found.</div>
+      )}
+
+      {/* Pagination */}
+      {totalResults > 0 && (
+        <Pagination
+          currentPage={pagination[activeTab].page}
+          totalPages={totalPages}
+          perPage={pagination[activeTab].perPage}
+          totalResults={totalResults}
+          onPageChange={p => setPage(activeTab, p)}
+          onPerPageChange={pp => setPerPage(activeTab, pp)}
+        />
       )}
 
       {/* Create Ad Flow Modals */}

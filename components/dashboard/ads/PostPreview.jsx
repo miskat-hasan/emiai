@@ -14,6 +14,11 @@ export default function PostPreview() {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
   const options = useSelector((state) => state.adCreation.options);
+  const user = useSelector((state) => state.auth?.user);
+  
+  const userName = user?.name || (user?.first_name ? `${user.first_name} ${user.last_name || ""}`.trim() : "Jane Smith");
+  const userAvatar = user?.profile_photo_url || user?.avatar || "https://i.pravatar.cc/150?u=jane";
+
   const [createAd, { isLoading: isCreating }] = useCreateAdMutation();
   const [updateAd, { isLoading: isUpdating }] = useUpdateAdMutation();
   const isLoading = isCreating || isUpdating;
@@ -127,9 +132,9 @@ export default function PostPreview() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full overflow-hidden relative">
-                <Image src="https://i.pravatar.cc/150?u=jane" alt="User" fill className="object-cover" />
+                <Image src={userAvatar} alt="User" fill className="object-cover" />
               </div>
-              <h3 className="font-bold text-black text-lg">Jane Smith</h3>
+              <h3 className="font-bold text-black text-lg">{userName}</h3>
             </div>
 
             <div className="flex items-center gap-5 text-sm text-gray font-medium">
@@ -154,18 +159,72 @@ export default function PostPreview() {
 
           <div className="flex flex-col gap-5 text-sm">
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Ads Create</span>
-              <span className="font-semibold text-black">Jane Smith</span>
+              <span className="text-gray-500">Ads Creator</span>
+              <span className="font-semibold text-black">{userName}</span>
             </div>
             <div className="w-full h-[1px] bg-gray-200" />
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Prize Number</span>
-              <span className="font-semibold text-black">
-                {String(draft.prizes?.length || 0).padStart(2, "0")}
-              </span>
-            </div>
+            {draft.countries && draft.countries.length > 0 && (
+              <>
+                <div className="flex justify-between items-start gap-4">
+                  <span className="text-gray-500 whitespace-nowrap">Target Countries</span>
+                  <span className="font-semibold text-black text-right line-clamp-2">
+                    {draft.countries.map(c => c.name || c.code || c).join(", ")}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
 
+            {draft.prizeType && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Prize Type</span>
+                  <span className="font-semibold text-black capitalize">
+                    {draft.prizeType}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
+
+            {draft.prizeType === "cash" && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Prize Number</span>
+                  <span className="font-semibold text-black">
+                    {String(draft.prizes?.length || 0).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
+
+            {draft.prizeType === "coupon" && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Promo Code</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCode || "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Discount</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCodeDiscount ? `${draft.promoCodeDiscount}%` : "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Expiry Date</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCodeExpiry || "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
           </div>
         </div>
       </div>
