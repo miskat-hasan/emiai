@@ -5,19 +5,19 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import {
   useGetCategoriesQuery,
-  useUpdateOnboardingCategoryMutation,
 } from "@/redux/api/services/commonApi";
 import { getStoredUser, getStoredToken } from "@/lib/auth-storage";
 import AuthButton from "@/components/ui/AuthButton";
+import { useUpdateUserMutation } from "@/redux/api/services/userApi";
 
 export default function OnboardingCategoryPage() {
   const router = useRouter();
 
   const { data, isLoading, isError } = useGetCategoriesQuery();
   const [updateCategory, { isLoading: isSaving }] =
-    useUpdateOnboardingCategoryMutation();
+    useUpdateUserMutation();
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useState([]);
 
   useEffect(() => {
     if (!getStoredToken()) {
@@ -25,7 +25,7 @@ export default function OnboardingCategoryPage() {
       return;
     }
     const user = getStoredUser();
-    if (user?.category_id) setSelectedId(user.category_id);
+    if (user?.category_id) setSelectedId([user.category_id]);
   }, [router]);
 
   const categories = data?.data ?? [];
@@ -33,7 +33,7 @@ export default function OnboardingCategoryPage() {
   const goNext = () => router.push("/onboarding/social");
 
   const handleNext = async () => {
-    if (!selectedId) {
+    if (!selectedId || selectedId.length === 0) {
       toast.error("Please choose a category to continue");
       return;
     }
@@ -74,16 +74,22 @@ export default function OnboardingCategoryPage() {
       ) : (
         <div className="flex flex-wrap justify-center gap-2.5">
           {categories.map(cat => {
-            const active = selectedId === cat.id;
+            const active = selectedId.includes(cat.id);
             return (
               <button
                 key={cat.id}
                 type="button"
-                onClick={() => setSelectedId(cat.id)}
+                onClick={() => {
+                  if (selectedId.includes(cat.id)) {
+                    setSelectedId(selectedId.filter(id => id !== cat.id));
+                  } else {
+                    setSelectedId([...selectedId, cat.id]);
+                  }
+                }}
                 className={`px-4 py-2 rounded-full text-sm font-medium border transition-all cursor-pointer
                   ${
                     active
-                      ? "bg-[#de4385] text-white border-transparent shadow-sm shadow-primary/30"
+                      ? "bg-[#f57802] text-white border-transparent shadow-sm shadow-primary/30"
                       : "bg-gray-100 text-black border-transparent hover:bg-gray-200"
                   }`}
               >

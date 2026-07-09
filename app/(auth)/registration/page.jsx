@@ -15,12 +15,6 @@ const ROLES = [
     color: "#125896",
   },
   { key: "agency", label: "Agency", icon: Handshake, color: "#DE4385" },
-  {
-    key: "business_manager",
-    label: "Business Manager",
-    icon: Settings,
-    color: "#B05EE0",
-  },
   { key: "guest", label: "Guest", icon: Eye, color: "#D20061" },
 ];
 

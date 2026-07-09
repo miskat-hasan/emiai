@@ -37,19 +37,16 @@ export default function AgencyCard({
       {/* Bookmark */}
       <button
         onClick={onBookmark}
-        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:border-primary/40 transition-colors shadow-sm"
+        className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center hover:border-primary/40 transition-colors shadow-sm cursor-pointer"
       >
         <Bookmark
-          size={13}
-          className={
-            bookmarked ? "fill-primary text-primary" : "text-[#63716E]"
-          }
+          className={`size-4 ${bookmarked ? "fill-primary text-primary" : "text-[#63716E]"}`}
         />
       </button>
 
       {/* Avatar */}
       <div className="flex flex-col items-center pt-6 pb-4 px-4">
-        <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm">
+        <div className="w-24 h-24 xl:size-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm">
           {avatar ? (
             <Image src={avatar} alt={name} fill className="object-cover" />
           ) : (
@@ -58,27 +55,25 @@ export default function AgencyCard({
             </div>
           )}
         </div>
-        <h3 className="mt-3 text-base font-bold text-[#203430]">{name}</h3>
+        <h3 className="mt-3 text-base lg:text-lg xl:text-xl font-bold text-[#203430]">
+          {name}
+        </h3>
 
         {/* Star rating */}
-        <div className="flex items-center gap-1 mt-1.5">
+        <div className="flex items-center gap-1 mt-1.5 xl:mt-2">
           {Array.from({ length: fullStars }).map((_, i) => (
             <Star
               key={`f${i}`}
-              size={14}
-              className="fill-yellow-400 text-yellow-400"
+              className="fill-yellow-400 text-yellow-400 size-5"
             />
           ))}
           {hasHalf && (
-            <Star
-              size={14}
-              className="fill-yellow-400 text-yellow-400 opacity-60"
-            />
+            <Star className="fill-yellow-400 text-yellow-400 opacity-60 size-5" />
           )}
           {Array.from({ length: emptyStars }).map((_, i) => (
             <Star key={`e${i}`} size={14} className="text-gray-300" />
           ))}
-          <span className="text-xs text-[#63716E] ml-1">
+          <span className="text-xs sm:text-sm text-[#63716E] ml-1">
             ({rating.toFixed(1)})
           </span>
         </div>
@@ -97,18 +92,20 @@ export default function AgencyCard({
       </div>
 
       {/* Stats */}
-      <div className="mx-4 mb-4 border-t border-gray-100 pt-3 grid grid-cols-2 gap-2 text-center">
+      <div className="mx-4 mb-4 py-3 grid grid-cols-2 gap-2 text-center bg-[#F7F7F7] rounded-xl">
         <div>
-          <p className="text-xs font-semibold text-[#203430]">Commission</p>
-          <p className="text-lg font-bold text-[#203430] mt-0.5">
+          <p className="text-xs sm:text-base font-medium text-[#203430]">
+            Commission
+          </p>
+          <p className="text-lg sm:text-xl font-semibold text-[#203430] mt-0.5">
             {commission}
           </p>
         </div>
         <div className="border-l border-gray-100">
-          <p className="text-xs font-semibold text-[#203430]">
+          <p className="text-xs sm:text-base font-medium text-[#203430]">
             Successful Deals
           </p>
-          <p className="text-lg font-bold text-[#203430] mt-0.5">
+          <p className="text-lg sm:text-xl font-semibold text-[#203430] mt-0.5">
             {successfulDeals}
           </p>
         </div>
@@ -118,7 +115,7 @@ export default function AgencyCard({
       <div className="px-4 pb-4">
         <button
           onClick={onContact}
-          className="w-full py-2.5 rounded-xl bg-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
+          className="w-full py-2.5 rounded-xl bg-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm cursor-pointer"
         >
           Contact
         </button>

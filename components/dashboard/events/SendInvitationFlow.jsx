@@ -6,9 +6,9 @@ import {
   useSendEventInvitationMutation,
   useGetEventByIdQuery,
 } from "@/redux/api/services/eventApi";
-import { useLazySearchUsersQuery, useGetAllUsersQuery } from "@/redux/api/services/commonApi";
 import MultiSelect from "@/components/ui/MultiSelect";
 import { X } from "lucide-react";
+import { useGetAllUsersQuery, useLazySearchUsersQuery } from "@/redux/api/services/userApi";
 
 export default function SendInvitationFlow({ eventId, open, onClose }) {
   const [invitedUserId, setInvitedUserId] = useState([]);

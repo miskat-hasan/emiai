@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { ChevronRight, Check } from "lucide-react";
-import { useConnectSocialAccountMutation } from "@/redux/api/services/commonApi";
+import { useConnectSocialAccountMutation } from "@/redux/api/services/userApi";
 import { openSocialOAuthPopup, SOCIAL_PLATFORMS } from "@/lib/socialAuth";
 import { getStoredToken, getStoredUser } from "@/lib/auth-storage";
 import { getRoleHomeRoute } from "@/lib/roleRoutes";
