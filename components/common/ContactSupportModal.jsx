@@ -1,9 +1,8 @@
 "use client";
 
+import { useSubmitSupportTicketMutation } from "@/redux/api/services/commonApi";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
-import { useSubmitSupportTicketMutation } from "@/redux/api/services/commonApi";
 import { toast } from "react-toastify";
 
 export default function ContactSupportModal({ open, onClose, collapsed, role = "advertiser" }) {

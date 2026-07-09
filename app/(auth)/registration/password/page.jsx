@@ -43,7 +43,7 @@ export default function RegistrationPasswordPage() {
         agree_to_terms: 1,
       }).unwrap();
 
-      if (res?.status) {
+      if (res?.success) {
         toast.success(
           res.message ?? "Account created! Please verify your email.",
         );
