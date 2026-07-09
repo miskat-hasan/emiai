@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import PortfolioCard from "./components/PortfolioCard";
-import PageLoader from "@/components/common/PageLoader";
+import PortfolioSkeleton from "./components/PortfolioSkeleton";
 import AddPortfolioModal from "./components/AddPortfolioModal";
 import PortfolioDetailsModal from "./components/PortfolioDetailsModal";
 import AgencyPortfolioDetailsModal from "./components/AgencyPortfolioDetailsModal";
@@ -127,9 +127,7 @@ export default function PortfolioPage() {
     setEditingPortfolio(null);
   };
 
-  if (isLoading || isLoadingInfluencer) {
-    return <PageLoader />;
-  }
+  const showLoading = isLoading || isLoadingInfluencer;
 
   return (
     <section className="w-full">
@@ -165,7 +163,9 @@ export default function PortfolioPage() {
       </div>
 
       {/* Portfolio Cards */}
-      {filteredPortfolioItems.length > 0 ? (
+      {showLoading ? (
+        <PortfolioSkeleton />
+      ) : filteredPortfolioItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredPortfolioItems.map((item) => (
             <PortfolioCard

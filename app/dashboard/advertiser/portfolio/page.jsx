@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import PageLoader from "@/components/common/PageLoader";
 import PortfolioCard from "@/app/dashboard/influencer/portfolio/components/PortfolioCard";
+import PortfolioSkeleton from "@/app/dashboard/influencer/portfolio/components/PortfolioSkeleton";
 import AddPortfolioModal from "@/app/dashboard/influencer/portfolio/components/AddPortfolioModal";
 import PortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/PortfolioDetailsModal";
 import { useGetPortfoliosQuery, useGetInfluencerPortfoliosQuery } from "@/redux/api/services/portfolioApi";
@@ -23,6 +23,7 @@ export default function PortfolioPage() {
   const { data: influencerPortfoliosRes, isLoading: isLoadingInfluencer } = useGetInfluencerPortfoliosQuery(undefined, {
     skip: !(user?.role === "influencer" || user?.role === "advertiser" || user?.role === "agency" || user?.role === "business_manager"),
   });
+  
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
 
   const myPortfolios = useMemo(() => {
@@ -120,9 +121,7 @@ export default function PortfolioPage() {
     setEditingPortfolio(null);
   };
 
-  if (isLoading || isLoadingInfluencer) {
-    return <PageLoader />;
-  }
+  const showLoading = isLoading || isLoadingInfluencer;
 
   return (
     <section className="w-full">
@@ -154,7 +153,9 @@ export default function PortfolioPage() {
         </button>
       </div>
 
-      {filteredPortfolioItems.length > 0 ? (
+      {showLoading ? (
+        <PortfolioSkeleton />
+      ) : filteredPortfolioItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {filteredPortfolioItems.map(item => (
             <PortfolioCard
