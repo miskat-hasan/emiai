@@ -1,18 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import PortfolioCard from "./components/PortfolioCard";
+import PageLoader from "@/components/common/PageLoader";
 import AddPortfolioModal from "./components/AddPortfolioModal";
 import PortfolioDetailsModal from "./components/PortfolioDetailsModal";
 import AgencyPortfolioDetailsModal from "./components/AgencyPortfolioDetailsModal";
-import { useGetPortfoliosQuery, useGetInfluencerPortfoliosQuery } from "@/redux/api/services/portfolioApi";
-import { useSelector } from "react-redux";
-import PageLoader from "@/components/common/PageLoader";
+import { useGetInfluencerPortfoliosQuery, useGetPortfoliosQuery } from "@/redux/api/services/portfolioApi";
 
 // Tabs
 export const portfolioTabs = [
   { label: "My Portfolio", value: "my_portfolio" },
-  { label: "Influencer Portfolio", value: "influencer_portfolio" },
+  { label: "Agency Portfolio", value: "agency_portfolio" },
 ];
 
 // Portfolio Page
@@ -25,6 +25,7 @@ export default function PortfolioPage() {
   const { data: influencerPortfoliosRes, isLoading: isLoadingInfluencer } = useGetInfluencerPortfoliosQuery(undefined, {
     skip: !(user?.role === "influencer" || user?.role === "advertiser" || user?.role === "agency" || user?.role === "business_manager"),
   });
+
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
 
   // Transform API data for card display
@@ -143,8 +144,8 @@ export default function PortfolioPage() {
                 type="button"
                 onClick={() => setActiveTab(tab.value)}
                 className={`h-[34px] rounded-[10px] px-5 text-xs font-semibold transition-all duration-300 ${isActive
-                    ? "bg-primary text-white"
-                    : "bg-[#f6ded5] text-[#202626] hover:bg-primary hover:text-white"
+                  ? "bg-primary text-white"
+                  : "bg-[#f6ded5] text-[#202626] hover:bg-primary hover:text-white"
                   }`}
               >
                 {tab.label}

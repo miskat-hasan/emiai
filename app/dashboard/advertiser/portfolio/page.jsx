@@ -11,7 +11,7 @@ import AgencyPortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/co
 
 export const portfolioTabs = [
   { label: "My Portfolio", value: "my_portfolio" },
-  { label: "Influencer Portfolio", value: "influencer_portfolio" },
+  // { label: "Influencer Portfolio", value: "influencer_portfolio" },
 ];
 
 export default function PortfolioPage() {
