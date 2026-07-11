@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { incomingCollaborationRequests } from "../components/Data/collaborationIncomingData";
-import { sentCollaborationRequests } from "../components/Data/collaborationSentData";
-import { paymentRequests } from "../components/Data/collaborationPaymentData";
-import IncomingCollaborationCard from "../components/IncomingCollaborationCard";
-import SentCollaborationCard from "../components/SentCollaborationCard";
+import { useMemo, useState } from "react";
 import PaymentRequestCard from "../components/PaymentRequestCard";
+import SentCollaborationCard from "../components/SentCollaborationCard";
+import { paymentRequests } from "../components/Data/collaborationPaymentData";
 import CollaborationPaymentModal from "../components/CollaborationPaymentModal";
+import IncomingCollaborationCard from "../components/IncomingCollaborationCard";
+import { sentCollaborationRequests } from "../components/Data/collaborationSentData";
+import { incomingCollaborationRequests } from "../components/Data/collaborationIncomingData";
 
 
 const collaborationTabs = [
@@ -47,12 +47,10 @@ export default function CollaborationsPage() {
     };
 
     const handleAccept = (item) => {
-        console.log("Accepted collaboration:", item);
         toast.success("Collaboration request accepted");
     };
 
     const handleReject = (item) => {
-        console.log("Rejected collaboration:", item);
         toast.info("Collaboration request rejected");
     };
 
