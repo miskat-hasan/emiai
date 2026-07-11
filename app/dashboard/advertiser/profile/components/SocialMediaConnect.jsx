@@ -1,4 +1,6 @@
 "use client";
+//To Dynamically handling image url
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState } from "react";
 import Image from "next/image";
@@ -87,7 +89,7 @@ export default function SocialMediaConnect() {
             <div className="flex items-center gap-4 min-w-[180px]">
               <div className="relative w-12 h-12 flex-shrink-0 bg-gray-50 rounded-full flex items-center justify-center overflow-hidden">
                 <Image
-                  src={platform.icon}
+                  src={getImageUrl(platform.icon)}
                   alt={platform.name}
                   width={38}
                   height={38}

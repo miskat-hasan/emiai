@@ -1,7 +1,8 @@
 'use client';
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState } from 'react';
-import Image from 'next/image';
+import Image from "next/image";
 import { cn } from '@/lib/utils';
 import { TicketSVG, StarSVG, DownloadIconSVG } from './Svg';
 
@@ -82,7 +83,7 @@ export const Ticket = ({ title, qrCode, ticketNumber, className }) => {
               <div className="w-[22cqw] h-[22cqw] relative bg-transparent flex items-center justify-center">
                 {qrCode ? (
                   <Image
-                    src={qrCode}
+                    src={getImageUrl(qrCode)}
                     alt="QR Code"
                     fill
                     className="object-contain"

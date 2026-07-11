@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React from "react";
 import Image from "next/image";
@@ -19,7 +20,7 @@ export default function AdUserBar({
           {
             userAvatar && userAvatar !== "null" ? (
               <Image
-                src={userAvatar}
+                src={getImageUrl(userAvatar)}
                 alt={userName}
                 fill
                 className="object-cover"

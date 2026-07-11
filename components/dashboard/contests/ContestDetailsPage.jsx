@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 // components/dashboard/contests/ContestDetailsPage.jsx
 "use client";
 
@@ -62,7 +63,7 @@ function UserAvatar({ avatar, name, size = 10 }) {
     >
       {avatar ? (
         <Image
-          src={avatar}
+          src={getImageUrl(avatar)}
           alt={name}
           width={40}
           height={40}

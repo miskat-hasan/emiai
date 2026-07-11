@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React, { useState } from "react";
 import Image from "next/image";
@@ -72,7 +73,7 @@ export default function AddMemberModal({ isOpen, onClose }) {
                   <div className="flex items-center gap-4">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden shadow-sm border border-gray-100/50">
                       <Image
-                        src={user.avatar}
+                        src={getImageUrl(user.avatar)}
                         alt={user.name}
                         fill
                         className="object-cover"

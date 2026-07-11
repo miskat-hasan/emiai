@@ -1,24 +1,14 @@
 "use client";
 
-import {
-  Bell,
-  Search,
-  ChevronDown,
-  Menu,
-  LogOut,
-  Settings,
-  User,
-  Coins,
-  Zap,
-} from "lucide-react";
-import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import { toast } from "react-toastify";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
+import { Bell, ChevronDown, LogOut, Menu, User, Zap } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
@@ -181,7 +171,11 @@ export default function Topbar({ onToggleSidebar }) {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
                 <Image
-                  src={user.avatar}
+                  src={
+                    user?.avatar?.startsWith("http")
+                      ? user.avatar
+                      : `${process.env.NEXT_PUBLIC_API_URL}/${user?.avatar?.replace(/^\//, "")}`
+                  }
                   alt={user.name}
                   width={32}
                   height={32}

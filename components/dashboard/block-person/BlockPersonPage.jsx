@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -318,7 +319,7 @@ export default function BlockPersonPage({ role }) {
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
                           {p.avatar ? (
                             <Image
-                              src={p.avatar}
+                              src={getImageUrl(p.avatar)}
                               alt={p.name}
                               width={36}
                               height={36}

@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React, { memo } from "react";
 import Image from "next/image";
@@ -20,7 +21,7 @@ const ChatItem = memo(({ chat, isSelected, onClick }) => {
         {user.avatar.length > 2 ? (
           <div className="w-10 h-10 rounded-full overflow-hidden relative border border-gray-100">
             <Image
-              src={user.avatar}
+              src={getImageUrl(user.avatar)}
               alt={user.name}
               fill
               className="object-cover"

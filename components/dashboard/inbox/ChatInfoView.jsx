@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React, { useState } from "react";
 import Image from "next/image";
@@ -103,7 +104,7 @@ export default function ChatInfoView({ chat, onBack }) {
                     <div className="flex items-center gap-3">
                       <div className="relative w-11 h-11 rounded-full overflow-hidden border border-gray-100 shadow-sm">
                         <Image
-                          src={member.avatar}
+                          src={getImageUrl(member.avatar)}
                           alt={member.name}
                           fill
                           className="object-cover"
@@ -161,7 +162,7 @@ export default function ChatInfoView({ chat, onBack }) {
           <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-[24px] overflow-hidden mb-4 shadow-sm">
             {user.avatar.length > 2 ? (
               <Image
-                src={user.avatar}
+                src={getImageUrl(user.avatar)}
                 alt={user.name}
                 fill
                 className="object-cover"
@@ -262,7 +263,7 @@ export default function ChatInfoView({ chat, onBack }) {
               {gallery.map((imgUrl, i) => (
                 <div key={i} className="aspect-square relative rounded-xl overflow-hidden bg-gray-100">
                   <Image
-                    src={imgUrl}
+                    src={getImageUrl(imgUrl)}
                     alt={`Gallery item ${i}`}
                     fill
                     className="object-cover"

@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import Image from "next/image";
 import { Eye, Heart, Pencil } from "lucide-react";
@@ -28,7 +29,7 @@ export default function PortfolioCard({ item, onClick, onUpdate }) {
       <div className="overflow-hidden bg-white">
         <div className="h-70 w-full overflow-hidden">
           <Image
-            src={item.image}
+            src={getImageUrl(item.image)}
             alt={item.title}
             className="h-full w-full rounded-[14px] object-center transition-all duration-500 hover:scale-105"
             width={400}

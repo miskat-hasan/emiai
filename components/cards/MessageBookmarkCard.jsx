@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { Bookmark } from "lucide-react";
 import Image from "next/image";
@@ -21,7 +22,7 @@ export default function MessageBookmarkCard({
         {avatar ? (
           <div className="w-10 h-10 rounded-full overflow-hidden relative">
             <Image
-              src={avatar}
+              src={getImageUrl(avatar)}
               alt={senderName}
               fill
               className="object-cover"
