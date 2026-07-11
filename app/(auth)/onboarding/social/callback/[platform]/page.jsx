@@ -1,3 +1,4 @@
+// app/(auth)/onboarding/social/callback/[platform]/page.jsx
 "use client";
 
 import { useEffect } from "react";
