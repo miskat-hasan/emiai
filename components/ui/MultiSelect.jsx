@@ -68,13 +68,15 @@ const MultiSelect = ({
     opt.title ??
     `${opt.first_name ?? ""} ${opt.last_name ?? ""}`.trim();
 
-  const filteredOptions = options.filter(opt =>
+  const safeOptions = Array.isArray(options) ? options : [];
+
+  const filteredOptions = safeOptions.filter(opt =>
     getLabel(opt).toLowerCase().includes(search.toLowerCase()),
   );
 
-  const selectedOptions = options.filter(o => selected.includes(String(o.id)));
+  const selectedOptions = safeOptions.filter(o => selected.includes(String(o.id)));
   const allSelected =
-    options.length > 0 && selectedOptions.length === options.length;
+    safeOptions.length > 0 && selectedOptions.length === safeOptions.length;
 
   return (
     <div
@@ -193,7 +195,7 @@ const MultiSelect = ({
               </div>
 
               {/* Footer */}
-              {options.length > 0 && (
+              {safeOptions.length > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-white">
                   <span className="text-xs text-gray">
                     {selected.length} selected
@@ -204,7 +206,7 @@ const MultiSelect = ({
                       type="button"
                       onClick={e => {
                         e.stopPropagation();
-                        onChange(options.map(o => String(o.id)));
+                        onChange(safeOptions.map(o => String(o.id)));
                       }}
                       className="text-xs font-medium text-black hover:text-primary transition cursor-pointer"
                     >

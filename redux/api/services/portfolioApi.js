@@ -62,10 +62,17 @@ const portfolioApi = apiSlice.injectEndpoints({
           fd.append("user_id", data.user_id);
         }
 
-        (data.mediaFiles || []).forEach((item, index) => {
-          fd.append(`media[${index}][media_type]`, item.media_type);
-          fd.append(`media[${index}][title]`, item.title);
-          fd.append(`media[${index}][file]`, item.file);
+        // Add update_media (existing items that are being updated)
+        (data.update_media || []).forEach((item, index) => {
+          fd.append(`update_media[${index}][id]`, item.id);
+          fd.append(`update_media[${index}][title]`, item.title);
+        });
+
+        // Add new_media (newly added files)
+        (data.new_media || []).forEach((item, index) => {
+          fd.append(`new_media[${index}][media_type]`, item.media_type);
+          fd.append(`new_media[${index}][title]`, item.title);
+          fd.append(`new_media[${index}][file]`, item.file);
         });
 
         return {

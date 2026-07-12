@@ -7,8 +7,8 @@ import SentCollaborationCard from "../components/SentCollaborationCard";
 import { paymentRequests } from "../components/Data/collaborationPaymentData";
 import CollaborationPaymentModal from "../components/CollaborationPaymentModal";
 import IncomingCollaborationCard from "../components/IncomingCollaborationCard";
-import { sentCollaborationRequests } from "../components/Data/collaborationSentData";
 import { incomingCollaborationRequests } from "../components/Data/collaborationIncomingData";
+import { useGetMySentInvitationsQuery } from "@/redux/api/services/eventApi";
 
 
 const collaborationTabs = [
@@ -30,17 +30,35 @@ export default function CollaborationsPage() {
     const [activeTab, setActiveTab] = useState("incoming");
     const [selectedCollaboration, setSelectedCollaboration] = useState(null);
 
+    const { data: sentInvitationsResponse, isLoading: isLoadingSent } = useGetMySentInvitationsQuery();
+
+    const sentInvitationsData = useMemo(() => {
+        const rawData = sentInvitationsResponse?.data || [];
+        return rawData.map(item => ({
+            id: item.id,
+            title: item.event?.title || "Unknown Event",
+            host: item.invited_user?.name || "Unknown User",
+            status: item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Pending",
+            statusTone: item.status || "pending",
+            amount: item.ticket?.price || 0,
+            
+            currency: "$", // Default currency
+            requestedLabel: "Ticket Price",
+            avatar: item.invited_user?.profile_photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face",
+        }));
+    }, [sentInvitationsResponse]);
+
     const collaborations = useMemo(() => {
         if (activeTab === "payment") {
             return paymentRequests;
         }
 
         if (activeTab === "sent") {
-            return sentCollaborationRequests;
+            return sentInvitationsData;
         }
 
         return incomingCollaborationRequests;
-    }, [activeTab]);
+    }, [activeTab, sentInvitationsData]);
 
     const handleRequestPayment = (item) => {
         setSelectedCollaboration(item);
@@ -76,7 +94,11 @@ export default function CollaborationsPage() {
                 })}
             </div>
 
-            {collaborations.length > 0 ? (
+            {activeTab === "sent" && isLoadingSent ? (
+                <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
+                    <p className="text-sm font-medium text-[#7a8582]">Loading sent invitations...</p>
+                </div>
+            ) : collaborations.length > 0 ? (
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                     {collaborations.map((item) =>
                         activeTab === "payment" ? (

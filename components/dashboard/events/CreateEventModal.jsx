@@ -105,7 +105,14 @@ export default function CreateEventModal({
 
   const { data: usersResponse, isLoading: isUsersLoading } =
     useGetAllUsersQuery(undefined, { skip: !open });
-  const allUsers = usersResponse?.data || usersResponse || [];
+  const getArrayData = (queryData) => {
+    if (Array.isArray(queryData)) return queryData;
+    if (Array.isArray(queryData?.data)) return queryData.data;
+    if (Array.isArray(queryData?.data?.data)) return queryData.data.data;
+    return [];
+  };
+
+  const allUsers = getArrayData(usersResponse);
 
   const {
     register,

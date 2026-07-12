@@ -58,6 +58,11 @@ export const eventApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Event"],
     }),
+    
+    getMySentInvitations: builder.query({
+      query: (params) => ({ url: "/api/events/my-sent-invitations", method: "GET", params }),
+      providesTags: ["Event"],
+    }),
   }),
 });
 
@@ -70,4 +75,5 @@ export const {
   useGetEventByIdQuery,
   useGetMyTicketsQuery,
   useRegisterTicketMutation,
+  useGetMySentInvitationsQuery,
 } = eventApi;
