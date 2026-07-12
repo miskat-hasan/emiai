@@ -1,6 +1,5 @@
-import { getImageUrl } from "@/helper/getImageUrl";
-// components/dashboard/contests/ContestDetailsPage.jsx
 "use client";
+// components/dashboard/contests/ContestDetailsPage.jsx
 
 import { use, useState } from "react";
 import Image from "next/image";
@@ -8,6 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { Bookmark, QrCode, Share2, Pencil } from "lucide-react";
+import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetSingleContestQuery,
   useAnnounceWinnerMutation,

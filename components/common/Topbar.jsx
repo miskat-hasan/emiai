@@ -1,14 +1,14 @@
 "use client";
 
-import { useLogoutUserMutation } from "@/redux/api/authApi";
-import { removeUser } from "@/redux/slices/authSlice";
-import { Bell, ChevronDown, LogOut, Menu, User, Zap } from "lucide-react";
+import { Bell, ChevronDown, Menu, LogOut, User, Zap } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useLogoutUserMutation } from "@/redux/api/authApi";
+import { removeUser } from "@/redux/slices/authSlice";
+import Link from "next/link";
 
 export default function Topbar({ onToggleSidebar }) {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function Topbar({ onToggleSidebar }) {
   const isShareAppPage =
     pathname?.includes("/share-app") || pathname?.includes("/share");
 
-  const user = useSelector((state) => state.auth?.user);
+  const user = useSelector(state => state.auth?.user);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function Topbar({ onToggleSidebar }) {
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if (notifRef.current && !notifRef.current.contains(e.target))
         setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target))
@@ -163,7 +163,7 @@ export default function Topbar({ onToggleSidebar }) {
         <div ref={profileRef} className="relative">
           <button
             onClick={() => {
-              setProfileOpen((v) => !v);
+              setProfileOpen(v => !v);
               setNotifOpen(false);
             }}
             className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"
@@ -171,11 +171,7 @@ export default function Topbar({ onToggleSidebar }) {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
                 <Image
-                  src={
-                    user?.avatar?.startsWith("http")
-                      ? user.avatar
-                      : `${process.env.NEXT_PUBLIC_API_URL}/${user?.avatar?.replace(/^\//, "")}`
-                  }
+                  src={process.env.NEXT_PUBLIC_API_URL + "/" + user.avatar}
                   alt={user.name}
                   width={32}
                   height={32}
