@@ -152,7 +152,7 @@ export default function SocialMediaConnect({ variant = "profile" }) {
                 type="button"
                 onClick={() => !connected && !busy && handleConnect(key)}
                 disabled={connected || busy}
-                className="flex-1 min-w-0 text-left disabled:cursor-default"
+                className="flex-1 min-w-0 text-left disabled:cursor-default cursor-pointer"
               >
                 <p className="text-sm font-semibold text-black truncate">
                   {label}

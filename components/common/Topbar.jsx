@@ -74,6 +74,8 @@ export default function Topbar({ onToggleSidebar }) {
     { label: "Sign out", icon: LogOut, action: handleLogout, danger: true },
   ];
 
+
+  console.log(user?.avatar);
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-primary/10 px-5 py-3.5">
       {/* ── Left — hamburger + greeting ── */}
@@ -171,7 +173,7 @@ export default function Topbar({ onToggleSidebar }) {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 flex items-center justify-center">
               {user?.avatar ? (
                 <Image
-                  src={process.env.NEXT_PUBLIC_API_URL + "/" + user.avatar}
+                  src={user.avatar}
                   alt={user.name}
                   width={32}
                   height={32}

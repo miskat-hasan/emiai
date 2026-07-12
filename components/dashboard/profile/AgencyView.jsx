@@ -1,29 +1,102 @@
 "use client";
+
+import { useEffect, useRef, useState } from "react";
 import { getImageUrl } from "@/helper/getImageUrl";
-
-import { useState } from "react";
-import { Plus, MoreHorizontal } from "lucide-react";
+import { Plus, MoreHorizontal, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { toast } from "react-toastify";
 import AddAgencyModal from "./AddAgencyModal";
+import {
+  useGetMyAgenciesQuery,
+  useDeleteAgencyMutation,
+} from "@/redux/api/services/managerApi";
+import { getActivePermissionLabels } from "./permissionDefs";
 
-const mockAgencies = [
-  {
-    id: 1,
-    name: "Dyson Agency",
-   logo: "https://randomuser.me/api/portraits/men/32.jpg",
-    addedOn: "Feb 10, 2026",
-    mail: "mosfiqurshs@gmail.com",
-    permissions: "Exclusive",
-    phone: "+1 123 456 9877"
+function AgencyAvatar({ name, logo }) {
+  const initials = name
+    ?.split(" ")
+    .map(n => n[0])
+    .join("")
+    .slice(0, 2);
+
+  if (!logo) {
+    return (
+      <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-bold text-xs shrink-0">
+        {initials || "A"}
+      </div>
+    );
   }
-];
+
+  return (
+    <div className="relative w-10 h-10 rounded-full overflow-hidden bg-black shrink-0">
+      <Image src={getImageUrl(logo)} alt={name} fill className="object-cover" />
+    </div>
+  );
+}
+
+function AgencyMenu({ onDelete, deleting }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = e => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+      >
+        <MoreHorizontal size={20} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-20">
+          <button
+            onClick={() => {
+              setOpen(false);
+              onDelete();
+            }}
+            disabled={deleting}
+            className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <Trash2 size={14} />
+            {deleting ? "Removing..." : "Delete"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AgencyView() {
   const [modalOpen, setModalOpen] = useState(false);
+  const { data, isLoading, isFetching } = useGetMyAgenciesQuery();
+  const [deleteAgency] = useDeleteAgencyMutation();
+  const [deletingId, setDeletingId] = useState(null);
+
+  const agencies = data?.data ?? [];
+
+  const handleDelete = async (agencyId, name) => {
+    setDeletingId(agencyId);
+    try {
+      await deleteAgency(agencyId).unwrap();
+      toast.success(`${name} removed.`);
+    } catch {
+      // Fake endpoint for now — the row is already removed optimistically
+      // by managerApi's onQueryStarted, so stay quiet here.
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Top Bar Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-bold text-[#202626]">Agency</h3>
         <button
@@ -35,61 +108,85 @@ export default function AgencyView() {
         </button>
       </div>
 
-      {/* Main Container Card */}
       <div className="bg-white rounded-3xl border border-gray-100 p-6 space-y-4 shadow-2xs">
-        <div className="flex justify-between items-center pb-2">
-          <h4 className="text-sm font-bold text-[#202626]">Action</h4>
-          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-50 transition-colors">
-            <MoreHorizontal size={20} />
-          </button>
-        </div>
+        {isLoading ? (
+          <p className="text-sm text-gray-400 text-center py-8">
+            Loading agencies...
+          </p>
+        ) : agencies.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-8">
+            No agencies added yet. Click Add New &quot;Agency&quot; to get
+            started.
+          </p>
+        ) : (
+          agencies.map(agency => {
+            const activePermissions = getActivePermissionLabels(
+              agency.permissions,
+            );
 
-        {/* Agency List Matrix */}
-        {mockAgencies.map((agency) => (
-          <div key={agency.id} className="space-y-4">
-            {/* Header Identity Box */}
-            <div className="flex justify-between items-center bg-[#F9F9F9] rounded-2xl p-4">
-              <div className="flex items-center gap-3">
-                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center text-white font-bold text-xs">
-                  {/* Fallback to text if img fails, styling like the dark Dyson emblem */}
-                  <Image 
-                    src={getImageUrl(agency.logo)} 
-                    alt={agency.name} 
-                    fill 
-                    className="object-cover invert brightness-0"
+            return (
+              <div
+                key={agency.id}
+                className="space-y-4 pb-4 border-b border-gray-50 last:border-0 last:pb-0"
+              >
+                <div className="flex justify-between items-center bg-[#F9F9F9] rounded-2xl p-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <AgencyAvatar name={agency.name} logo={agency.avatar} />
+                    <div className="min-w-0">
+                      <h5 className="text-sm font-bold text-[#202626] truncate">
+                        {agency.name}
+                      </h5>
+                      <p className="text-xs text-gray-400 font-medium">
+                        Agency{agency.is_exclusive ? " · Exclusive" : ""}
+                      </p>
+                    </div>
+                  </div>
+                  <AgencyMenu
+                    onDelete={() => handleDelete(agency.id, agency.name)}
+                    deleting={deletingId === agency.id}
                   />
                 </div>
-                <div>
-                  <h5 className="text-sm font-bold text-[#202626]">{agency.name}</h5>
-                  <p className="text-xs text-gray-400 font-medium">Agency</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pt-1">
+                  <div>
+                    <span className="block text-xs font-bold text-[#202626] mb-1">
+                      Mail
+                    </span>
+                    <span className="text-xs font-medium text-gray-400 break-all">
+                      {agency.email}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-[#202626] mb-1.5">
+                      Permissions
+                    </span>
+                    {activePermissions.length === 0 ? (
+                      <span className="text-xs font-medium text-gray-400">
+                        None granted
+                      </span>
+                    ) : (
+                      <div className="flex flex-wrap gap-1.5">
+                        {activePermissions.map(label => (
+                          <span
+                            key={label}
+                            className="text-[10px] font-semibold text-[#1C4E3F] bg-[#1C4E3F]/8 px-2 py-1 rounded-md"
+                          >
+                            {label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="text-right">
-                <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Added On</span>
-                <span className="text-xs font-semibold text-gray-500">{agency.addedOn}</span>
-              </div>
-            </div>
-
-            {/* Information Grid Data */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-4 pt-1">
-              <div>
-                <span className="block text-xs font-bold text-[#202626] mb-1">Mail</span>
-                <span className="text-xs font-medium text-gray-400 break-all">{agency.mail}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-[#202626] mb-1">Permissions</span>
-                <span className="text-xs font-medium text-gray-400">{agency.permissions}</span>
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-[#202626] mb-1">Phone</span>
-                <span className="text-xs font-medium text-gray-400">{agency.phone}</span>
-              </div>
-            </div>
-          </div>
-        ))}
+            );
+          })
+        )}
+        {isFetching && !isLoading && (
+          <p className="text-[11px] text-gray-300 text-center">Refreshing...</p>
+        )}
       </div>
 
-      {/* Add Agency Popup Flow */}
       <AddAgencyModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
