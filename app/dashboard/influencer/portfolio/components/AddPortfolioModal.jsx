@@ -50,6 +50,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
 
       // Populate existing media as readonly previews + one empty slot for new media
       const existingItems = (editData.media || []).map((m) => ({
+        id: m.id,
         photo: null,
         preview: `${apiUrl}/${m.media_url}`,
         details: m.title || "",
@@ -81,16 +82,24 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
       return;
     }
 
-    // Filter only new media files (not existing ones)
-    const mediaFiles = (data.items || [])
-      .filter((item) => item.photo instanceof File)
+    // Filter existing media updates
+    const updateMedia = (data.items || [])
+      .filter((item) => item.isExisting && item.id)
+      .map((item) => ({
+        id: item.id,
+        title: item.details || "",
+      }));
+
+    // Filter only new media files
+    const newMedia = (data.items || [])
+      .filter((item) => !item.isExisting && item.photo instanceof File)
       .map((item) => ({
         file: item.photo,
         title: item.details || "",
         media_type: item.photo.type.startsWith("video/") ? "video" : "photo",
       }));
 
-    if (!isEditMode && mediaFiles.length === 0) {
+    if (!isEditMode && newMedia.length === 0) {
       toast.error("Please add at least one media file.");
       return;
     }
@@ -103,7 +112,8 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
           description: data.portfolioDescription,
         };
         if (userId) payload.user_id = userId;
-        if (mediaFiles.length > 0) payload.mediaFiles = mediaFiles;
+        if (updateMedia.length > 0) payload.update_media = updateMedia;
+        if (newMedia.length > 0) payload.new_media = newMedia;
 
         const res = await updatePortfolio(payload).unwrap();
 
@@ -117,7 +127,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
           user_id: userId,
           title: data.portfolioTitle,
           description: data.portfolioDescription,
-          mediaFiles,
+          mediaFiles: newMedia,
         }).unwrap();
 
         if (res?.success || res?.code === 201 || res?.code === 200) {
@@ -300,18 +310,12 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                 <label className="mt-3 mb-2 block text-sm font-medium text-[#737D7A]">
                   Photo Details
                 </label>
-                {isExisting ? (
-                  <p className="w-full rounded-lg border border-gray-200 bg-gray-100 px-4 py-2 text-sm font-medium text-[#202626]">
-                    {watch(`items.${idx}.details`) || "No details"}
-                  </p>
-                ) : (
-                  <textarea
-                    {...register(`items.${idx}.details`)}
-                    placeholder="Describe this photo..."
-                    rows={2}
-                    className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#202626] outline-none"
-                  />
-                )}
+                <textarea
+                  {...register(`items.${idx}.details`)}
+                  placeholder="Describe this photo..."
+                  rows={2}
+                  className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#202626] outline-none"
+                />
               </div>
             );
           })}

@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import {
-  useSendEventInvitationMutation,
-  useGetEventByIdQuery,
-} from "@/redux/api/services/eventApi";
 import MultiSelect from "@/components/ui/MultiSelect";
+import {
+  useGetEventByIdQuery,
+  useSendEventInvitationMutation,
+} from "@/redux/api/services/eventApi";
+import {
+  useGetAllUsersQuery,
+  useLazySearchUsersQuery,
+} from "@/redux/api/services/userApi";
 import { X } from "lucide-react";
-import { useGetAllUsersQuery, useLazySearchUsersQuery } from "@/redux/api/services/userApi";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 export default function SendInvitationFlow({ eventId, open, onClose }) {
   const [invitedUserId, setInvitedUserId] = useState([]);
@@ -20,8 +23,8 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
     useSendEventInvitationMutation();
   const { data: eventResponse, isLoading: isEventLoading } =
     useGetEventByIdQuery(eventId, { skip: !eventId || !open });
-    
-  const { data: allUsersResponse, isLoading: isAllUsersLoading } = 
+
+  const { data: allUsersResponse, isLoading: isAllUsersLoading } =
     useGetAllUsersQuery(undefined, { skip: !open });
   const [searchUsers, { data: usersResponse, isLoading: isSearchLoading }] =
     useLazySearchUsersQuery();
@@ -57,7 +60,7 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
 
   const allUsers = getArrayData(allUsersResponse);
   const searchResults = getArrayData(usersResponse);
-  
+
   const users = searchQuery ? searchResults : allUsers;
   const isUsersLoading = searchQuery ? isSearchLoading : isAllUsersLoading;
 
@@ -89,14 +92,14 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
     try {
       const formData = new FormData();
       formData.append("event_id", eventId);
-      
+
       invitedUserId.forEach((userId) => {
         formData.append("invited_user_ids[]", userId);
       });
-      
+
       formData.append("ticket_id", ticketId);
       formData.append("message", message);
-      
+
       await sendInvitation(formData).unwrap();
       toast.success("Invitations sent successfully!");
       onClose();
