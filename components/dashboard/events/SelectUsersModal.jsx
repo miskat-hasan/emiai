@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 import { Plus, SlidersHorizontal } from "lucide-react";
@@ -47,7 +48,7 @@ export default function SelectUsersModal({
               <div className="flex items-center gap-3">
                 <div className="relative w-12 h-12 rounded-full overflow-hidden">
                   <Image
-                    src={user.avatar}
+                    src={getImageUrl(user.avatar)}
                     alt={user.name}
                     fill
                     className="object-cover"

@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 
@@ -26,7 +27,7 @@ export default function EventParticipants({
               <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gray/20">
                 {participant.avatar ? (
                   <Image
-                    src={participant.avatar}
+                    src={getImageUrl(participant.avatar)}
                     alt={participant.name}
                     fill
                     className="object-cover"

@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 
@@ -26,7 +27,7 @@ export default function AdTopRanking({ rankings = DEFAULT_RANKINGS, title = "Top
             <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gray-200">
               {user.avatar ? (
                 <Image
-                  src={user.avatar}
+                  src={getImageUrl(user.avatar)}
                   alt={user.name}
                   fill
                   className="object-cover"

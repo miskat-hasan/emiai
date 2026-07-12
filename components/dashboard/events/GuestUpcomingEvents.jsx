@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback } from "react";
-import { useRouter } from "next/navigation";
-import MyEventCard from "./MyEventCard";
 import { useGetUpcomingEventsQuery } from "@/redux/api/services/eventApi";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
+import MyEventCard from "./MyEventCard";
 
 export default function GuestUpcomingEvents() {
   const router = useRouter();
@@ -14,7 +14,7 @@ export default function GuestUpcomingEvents() {
   else if (Array.isArray(response?.data?.data)) rawEvents = response.data.data;
 
   const handleCardClick = useCallback(
-    id => {
+    (id) => {
       router.push(`/dashboard/guest/events/${id}`);
     },
     [router],
@@ -47,25 +47,29 @@ export default function GuestUpcomingEvents() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {rawEvents.map(event => {
-            const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
-            const origin = new URL(apiUrl).origin;
-            let imageUrl = event.photo || event.banner || event.thumbnail || "";
-            if (imageUrl && !imageUrl.startsWith('http')) {
-              imageUrl = `${origin}${imageUrl}`;
-            }
+          {rawEvents.map((event) => {
+            let imageUrl = event.photo;
             if (!imageUrl) {
-              imageUrl = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60";
+              imageUrl =
+                "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&auto=format&fit=crop&q=60";
             }
 
             return (
               <MyEventCard
                 key={event.id}
                 imageUrl={imageUrl}
-                title={event.title || event.name}
+                title={event.title}
                 description={event.description || event.location}
-                organizer={event.organizer || event.sponsor || "Event CO."}
-                date={event.start_date || event.date || "TBD"}
+                organizer={event.event_sponsorships?.[0]?.sponsor?.name || "Event CO."}
+                date={
+                  event.date
+                    ? new Date(event.date).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "TBD"
+                }
                 onClick={() => handleCardClick(event.id)}
               />
             );

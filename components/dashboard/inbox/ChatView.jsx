@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -45,7 +46,7 @@ export default function ChatView({ chat, messages, onBack, onOpenInfo }) {
             {user.avatar.length > 2 ? (
               <div className="w-10 h-10 rounded-full overflow-hidden relative">
                 <Image 
-                  src={user.avatar} 
+                  src={getImageUrl(user.avatar)} 
                   alt={user.name} 
                   fill 
                   className="object-cover"
@@ -91,7 +92,7 @@ export default function ChatView({ chat, messages, onBack, onOpenInfo }) {
                       {(msg.senderAvatar || user.avatar).length > 2 ? (
                         <div className="w-10 h-10 rounded-full overflow-hidden relative shadow-sm">
                           <Image 
-                            src={msg.senderAvatar || user.avatar} 
+                            src={getImageUrl(msg.senderAvatar || user.avatar)} 
                             alt={msg.senderId || user.name} 
                             fill
                             className="object-cover"

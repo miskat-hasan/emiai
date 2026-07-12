@@ -27,6 +27,7 @@ const AdsGrid = memo(function AdsGrid({ ads, activeTab, onAdClick, onBookmarkTog
           isBookmarked={ad.isBookmarked}
           status={ad.status}
           publishAt={ad.publishAt}
+          prizeWindowEndsAt={ad.prizeWindowEndsAt}
           tabType={activeTab}
           onClick={() => onAdClick?.(ad.id)}
           onBookmarkToggle={() => onBookmarkToggle?.(ad.id)}

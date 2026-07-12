@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -154,7 +155,7 @@ const InvitationCard = ({ invitation, onRequestPayment }) => {
                     <div className="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-primary to-secondary">
                         {invitation.from.avatar ? (
                             <Image
-                                src={invitation.from.avatar}
+                                src={getImageUrl(invitation.from.avatar)}
                                 alt={invitation.from.name}
                                 className="h-full w-full object-cover"
                                 height={36}

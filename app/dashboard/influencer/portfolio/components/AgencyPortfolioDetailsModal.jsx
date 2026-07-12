@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import {
   BookmarkFilledSVG2,
@@ -47,7 +48,7 @@ export default function AgencyPortfolioDetailsModal({
     );
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ;
   const rawPortfolio = res?.data;
   if (!rawPortfolio) return null;
 
@@ -73,7 +74,7 @@ export default function AgencyPortfolioDetailsModal({
           <div className="w-10 h-10 rounded-full overflow-hidden">
             {user?.avatar ? (
               <Image
-                src={user.avatar}
+                src={getImageUrl(user.avatar)}
                 alt={user.name}
                 width={40}
                 height={40}
@@ -122,7 +123,7 @@ export default function AgencyPortfolioDetailsModal({
               <div key={index}>
                 <div className="mb-4 h-[350px] w-full overflow-hidden bg-gray-100">
                   <Image
-                    src={item.image}
+                    src={getImageUrl(item.image)}
                     alt={item.title}
                     className="h-full w-full object-cover transition-transform duration-300"
                     width={700}
@@ -169,7 +170,7 @@ export default function AgencyPortfolioDetailsModal({
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0">
                   {gallery.avatar ? (
                     <Image
-                      src={gallery.avatar}
+                      src={getImageUrl(gallery.avatar)}
                       alt={gallery.name}
                       width={32}
                       height={32}
@@ -195,7 +196,7 @@ export default function AgencyPortfolioDetailsModal({
                 {gallery.images.map((img, i) => (
                   <Image
                     key={i}
-                    src={img}
+                    src={getImageUrl(img)}
                     alt={`Gallery ${i}`}
                     width={100}
                     height={200}

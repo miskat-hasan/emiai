@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import MultiSelect from "@/components/ui/MultiSelect";
 import {
@@ -99,7 +100,7 @@ function UploadBox({
             />
           ) : (
             <Image
-              src={previewUrl}
+              src={getImageUrl(previewUrl)}
               alt="Preview"
               fill
               className="object-cover"
@@ -174,7 +175,9 @@ export default function CreateNewAdModal({
         publishAt: editingAd.publishAt || "",
         countries: editingAd.countries || [],
         prizeType: editingAd.prizeType || "cash",
-        prizes: editingAd.prizes?.length ? editingAd.prizes : [{ rank: 1, value: "" }],
+        prizes: editingAd.prizes?.length
+          ? editingAd.prizes
+          : [{ rank: 1, value: "" }],
         promoCode: editingAd.promoCode || "",
         promoCodeDiscount: editingAd.promoCodeDiscount || "",
         promoCodeExpiry: editingAd.promoCodeExpiry || "",

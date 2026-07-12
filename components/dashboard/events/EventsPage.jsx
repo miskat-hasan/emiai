@@ -214,17 +214,17 @@ export default function EventsPage({ role }) {
     id: event.id,
     title: event.title,
     location: event.full_location || event.location,
-    sponsor: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
-    organizer: event.event_sponsorships?.[0]?.sponsor?.name || "Event CO.",
+    sponsor: event.event_sponsorships?.[0]?.sponsor?.name,
+    organizer: event.event_sponsorships?.[0]?.sponsor?.name,
     date: new Date(event.date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     }),
     imageUrl: event.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${event.photo}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/${event.photo}`
       : null,
-    description: event.description || "Hello this is about my portfolio",
+    description: event.description,
   });
 
   const getArrayData = (queryData) => {

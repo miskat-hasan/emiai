@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import Image from "next/image";
 
@@ -24,7 +25,7 @@ export default function PaymentRequestCard({ item, onAccept, onReject }) {
                 <div className="flex items-start gap-3">
                     <div className="h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-primary to-secondary">
                         <Image
-                            src={item.avatar}
+                            src={getImageUrl(item.avatar)}
                             alt={item.title}
                             className="h-full w-full object-cover"
                             width={40}
