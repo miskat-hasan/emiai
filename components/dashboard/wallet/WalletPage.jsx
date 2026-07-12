@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState } from "react";
 import {
@@ -768,7 +769,7 @@ export default function WalletPage({ role }) {
                   </p>
                   <div className="w-[50px]">
                     <Image
-                      src={"/glove.png"}
+                      src={getImageUrl("/glove.png")}
                       alt="card"
                       width={44}
                       height={30}

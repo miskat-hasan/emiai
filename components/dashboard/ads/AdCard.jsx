@@ -88,7 +88,7 @@ const AdCard = ({
           {/* User avatar */}
           <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/30">
             <Image
-              src={userAvatar}
+              src={process.env.NEXT_PUBLIC_API_URL + "/" + userAvatar}
               alt={userName}
               fill
               className="object-cover"

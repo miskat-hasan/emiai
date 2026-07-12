@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState } from "react";
 import { Plus, MoreHorizontal } from "lucide-react";
@@ -52,7 +53,7 @@ export default function AgencyView() {
                 <div className="relative w-10 h-10 rounded-full overflow-hidden bg-black flex items-center justify-center text-white font-bold text-xs">
                   {/* Fallback to text if img fails, styling like the dark Dyson emblem */}
                   <Image 
-                    src={agency.logo} 
+                    src={getImageUrl(agency.logo)} 
                     alt={agency.name} 
                     fill 
                     className="object-cover invert brightness-0"

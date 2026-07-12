@@ -1,3 +1,4 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 
@@ -14,7 +15,7 @@ export default function AdDetailHero({ imageUrl, mediaType, alt = "Ad Banner" })
         />
       ) : (
         <Image
-          src={imageUrl}
+          src={getImageUrl(imageUrl)}
           alt={alt}
           fill
           className="object-cover"

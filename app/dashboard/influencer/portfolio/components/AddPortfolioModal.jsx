@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useForm, useFieldArray } from "react-hook-form";
 import Image from "next/image";
@@ -22,7 +23,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
   const influencers = clientsRes?.data || [];
   const [portfolioType, setPortfolioType] = useState("personal");
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   const { register, control, handleSubmit, watch, setValue, reset } = useForm({
     defaultValues: {
@@ -258,7 +259,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                 {isExisting ? (
                   <div className="relative">
                     <Image
-                      src={photoPreview}
+                      src={getImageUrl(photoPreview)}
                       alt="Existing media"
                       width={560}
                       height={200}
@@ -288,7 +289,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
 
                 {photoPreview && !isExisting && (
                   <Image
-                    src={photoPreview}
+                    src={getImageUrl(photoPreview)}
                     alt="Preview"
                     width={560}
                     height={200}

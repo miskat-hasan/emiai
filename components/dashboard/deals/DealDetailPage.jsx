@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Headphones, Flag } from "lucide-react";
@@ -154,7 +155,7 @@ export default function DealDetailPage({ role }) {
         <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white border border-gray-100 flex items-center justify-center">
           {deal.sponsor.logo ? (
             <Image
-              src={deal.sponsor.logo}
+              src={getImageUrl(deal.sponsor.logo)}
               alt={deal.sponsor.name}
               width={56}
               height={56}

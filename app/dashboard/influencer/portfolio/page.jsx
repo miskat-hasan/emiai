@@ -26,7 +26,7 @@ export default function PortfolioPage() {
     skip: !(user?.role === "influencer" || user?.role === "advertiser" || user?.role === "agency" || user?.role === "business_manager"),
   });
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // Transform API data for card display
   const myPortfolios = useMemo(() => {

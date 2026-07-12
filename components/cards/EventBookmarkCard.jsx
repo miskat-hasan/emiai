@@ -1,14 +1,15 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import Image from "next/image";
 import { BookmarkSVG } from "../common/Svg";
 
 export default function EventBookmarkCard({
   image,
-  title = "Digital Marketing Forum 2025",
-  description = "Hello this is about my portfolio",
-  organizer = "Event CO.",
-  date = "Feb 17, 2026",
+  title,
+  description,
+  organizer,
+  date,
   bookmarked = true,
   onBookmark,
 }) {
@@ -17,10 +18,10 @@ export default function EventBookmarkCard({
       {/* Background image */}
       {/* {image ? ( */}
       <Image
-        src={
+        src={getImageUrl(
           image ??
           "https://images.unsplash.com/photo-1670028514318-0ac718c0590d?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-        }
+        )}
         alt={title}
         fill
         className="object-cover"
