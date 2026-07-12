@@ -137,7 +137,15 @@ export default function CreateContestModal({
     undefined,
     { skip: !open },
   );
-  const userOptions = usersData?.data ?? [];
+  
+  const getArrayData = (queryData) => {
+    if (Array.isArray(queryData)) return queryData;
+    if (Array.isArray(queryData?.data)) return queryData.data;
+    if (Array.isArray(queryData?.data?.data)) return queryData.data.data;
+    return [];
+  };
+
+  const userOptions = getArrayData(usersData);
 
   const {
     register,

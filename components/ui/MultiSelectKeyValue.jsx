@@ -82,13 +82,15 @@ const MultiSelectKeyValue = ({
     opt.title ??
     `${opt.first_name ?? ""} ${opt.last_name ?? ""}`.trim();
 
-  const filteredOptions = options.filter(opt =>
+  const safeOptions = Array.isArray(options) ? options : [];
+
+  const filteredOptions = safeOptions.filter(opt =>
     getLabel(opt).toLowerCase().includes(search.toLowerCase()),
   );
 
-  const selectedOptions = options.filter(o => selectedIds.includes(String(o.id)));
+  const selectedOptions = safeOptions.filter(o => selectedIds.includes(String(o.id)));
   const allSelected =
-    options.length > 0 && selectedOptions.length === options.length;
+    safeOptions.length > 0 && selectedOptions.length === safeOptions.length;
 
   return (
     <div
@@ -207,7 +209,7 @@ const MultiSelectKeyValue = ({
               </div>
 
               {/* Footer */}
-              {options.length > 0 && (
+              {safeOptions.length > 0 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 bg-white">
                   <span className="text-xs text-gray">
                     {selectedIds.length} selected
@@ -219,7 +221,7 @@ const MultiSelectKeyValue = ({
                       onClick={e => {
                         e.stopPropagation();
                         const currentIds = selectedIds;
-                        const newItems = options
+                        const newItems = safeOptions
                           .filter(o => !currentIds.includes(String(o.id)))
                           .map(o => {
                             const isHidden = hideValueForIds.includes(String(o.id));
