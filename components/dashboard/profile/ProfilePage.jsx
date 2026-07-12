@@ -77,7 +77,7 @@ export default function ProfilePage() {
 
   const displayAvatar =
     avatarPreview ||
-    (user?.avatar ? `${process.env.NEXT_PUBLIC_API_URL}/${user.avatar}` : null);
+    (user?.avatar ? `${user.avatar}` : null);
 
   return (
     <div className="space-y-8 pb-16">

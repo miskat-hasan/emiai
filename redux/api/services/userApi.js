@@ -8,7 +8,18 @@ export const commonApi = apiSlice.injectEndpoints({
       providesTags: ["Users"],
     }),
     getAllUsers: builder.query({
-      query: () => ({ url: "/api/user/all-users", method: "GET" }),
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        if (params.role) searchParams.set("role", params.role);
+        // if (params.per_page) searchParams.set("per_page", params.per_page);
+        // if (params.page) searchParams.set("page", params.page);
+        // if (params.type) searchParams.set("type", params.type);
+        const qs = searchParams.toString();
+        return {
+          url: `/api/user/all-users${qs ? `?${qs}` : ""}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Users"],
     }),
     updateUser: builder.mutation({
