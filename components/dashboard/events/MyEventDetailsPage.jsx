@@ -84,14 +84,12 @@ export default function MyEventDetailsPage({ role, params }) {
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
     date: rawEvent.start_date,
-    eventType: rawEvent.event_type || "Offline(Check Backend Response)",
+    eventType: rawEvent.type,
     participants: rawEvent.total_participants || 0,
     imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
       : null,
-    mapUrl: rawEvent.full_location?.includes("google.com/maps/embed")
-      ? rawEvent.full_location
-      : rawEvent.full_location,
+    mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
 

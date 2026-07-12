@@ -26,7 +26,8 @@ export default function PortfolioPage() {
   const { data: influencerPortfoliosRes, isLoading: isLoadingInfluencer } = useGetInfluencerPortfoliosQuery(undefined, {
     skip: !(user?.role === "influencer" || user?.role === "advertiser" || user?.role === "agency" || user?.role === "business_manager"),
   });
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+  //removed hardcoded backend url
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   // Transform API data for card display
   const myPortfolios = useMemo(() => {

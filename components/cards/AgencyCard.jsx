@@ -48,7 +48,7 @@ export default function AgencyCard({
       <div className="flex flex-col items-center pt-6 pb-4 px-4">
         <div className="w-24 h-24 xl:size-32 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm">
           {avatar ? (
-            <Image src={avatar} alt={name} fill className="object-cover" />
+            <Image src={avatar?.startsWith("http") ? avatar : `${process.env.NEXT_PUBLIC_API_URL}/${avatar?.startsWith('/') ? avatar.slice(1) : avatar}`} alt={name} fill className="object-cover" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
               <span className="text-white text-2xl font-bold">{name[0]}</span>

@@ -13,22 +13,27 @@ import Pagination from "@/components/ui/Pagination";
 
 const DEFAULT_PER_PAGE = 12;
 
-// Utility to calculate time ago
+// Utility to calculate time ago or time until
 function timeSince(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
-  const seconds = Math.floor((new Date() - date) / 1000);
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + " years ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + " months ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + " days ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + " hrs ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + " mins ago";
-  return Math.floor(seconds) + " secs ago";
+  const diff = Math.floor((new Date() - date) / 1000);
+  const absDiff = Math.abs(diff);
+  const isFuture = diff < 0;
+  const suffix = isFuture ? "" : " ago";
+  const prefix = isFuture ? "in " : "";
+
+  let interval = absDiff / 31536000;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " year" : " years") + suffix;
+  interval = absDiff / 2592000;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " month" : " months") + suffix;
+  interval = absDiff / 86400;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " day" : " days") + suffix;
+  interval = absDiff / 3600;
+  if (interval > 1) return prefix + Math.floor(interval) + " hrs" + suffix;
+  interval = absDiff / 60;
+  if (interval > 1) return prefix + Math.floor(interval) + " mins" + suffix;
+  return isFuture ? "in a moment" : "just now";
 }
 
 const AdCardSkeleton = () => (
@@ -98,7 +103,7 @@ export default function ExplorePage({ role }) {
 
   const mappedApiAds = rawAds.map((ad) => {
     const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+      process.env.NEXT_PUBLIC_API_URL;
     const origin = new URL(apiUrl).origin;
     let imageUrl = ad.media_url;
     if (imageUrl && !imageUrl.startsWith("http")) {
@@ -114,6 +119,12 @@ export default function ExplorePage({ role }) {
       }
     }
 
+    // Find the first active prize window (ascending by rank/index)
+    const activePrize = ad.prizes
+      ?.slice()
+      .sort((a, b) => (a.rank ?? a.queue_order ?? 0) - (b.rank ?? b.queue_order ?? 0))
+      .find((p) => p.window_status === "active" && p.window_ends_at);
+
     return {
       id: ad.id,
       imageUrl,
@@ -125,6 +136,7 @@ export default function ExplorePage({ role }) {
       isBookmarked: ad.is_bookmarked || false,
       is_liked: ad.is_liked || false,
       targetCountries: ad.target_countries || [],
+      prizeWindowEndsAt: activePrize?.window_ends_at || null,
     };
   });
 

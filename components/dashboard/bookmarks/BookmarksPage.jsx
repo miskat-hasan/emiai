@@ -83,7 +83,7 @@ function PortfolioGrid({ items, onToggle }) {
         const pf = item.bookmarkable || item;
 
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = pf.image || pf.photo || pf.imageUrl || pf.media_url;
         if (imageUrl && !imageUrl.startsWith("http")) {
@@ -121,7 +121,7 @@ function EventGrid({ items, onToggle }) {
         const ev = item.bookmarkable || item;
 
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = ev.photo || ev.image || ev.imageUrl || ev.media_url;
         if (imageUrl && !imageUrl.startsWith("http")) {
@@ -163,7 +163,7 @@ function AdGrid({ items, onToggle, onAdClick }) {
         const ad = item.bookmarkable || item;
 
         const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = ad.media_url || ad.imageUrl;
         if (imageUrl && !imageUrl.startsWith("http")) {

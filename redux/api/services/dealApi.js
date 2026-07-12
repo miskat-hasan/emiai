@@ -22,7 +22,19 @@ export const dealApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Deals"],
     }),
+    createDeal: builder.mutation({
+      query: data => ({
+        method: "POST",
+        url: "/api/deals/store",
+        body: data,
+      }),
+      invalidatesTags: ["Deals"],
+    }),
   }),
 });
 
-export const { useGetDealsQuery, useGetDealDetailsQuery } = dealApi;
+export const {
+  useGetDealsQuery,
+  useGetDealDetailsQuery,
+  useCreateDealMutation,
+} = dealApi;

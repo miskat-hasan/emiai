@@ -48,8 +48,15 @@ export default function SendInvitationFlow({ eventId, open, onClose }) {
 
   if (!open) return null;
 
-  const allUsers = allUsersResponse?.data || allUsersResponse || [];
-  const searchResults = usersResponse?.data || usersResponse || [];
+  const getArrayData = (queryData) => {
+    if (Array.isArray(queryData)) return queryData;
+    if (Array.isArray(queryData?.data)) return queryData.data;
+    if (Array.isArray(queryData?.data?.data)) return queryData.data.data;
+    return [];
+  };
+
+  const allUsers = getArrayData(allUsersResponse);
+  const searchResults = getArrayData(usersResponse);
   
   const users = searchQuery ? searchResults : allUsers;
   const isUsersLoading = searchQuery ? isSearchLoading : isAllUsersLoading;

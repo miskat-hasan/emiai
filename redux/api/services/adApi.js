@@ -37,8 +37,11 @@ export const adApi = apiSlice.injectEndpoints({
     updateAd: builder.mutation({
       query: (data) => {
         const id = data instanceof FormData ? data.get("id") : data.id;
-        if (data instanceof FormData && !data.has("_method")) {
-          data.append("_method", "PUT");
+        if (data instanceof FormData) {
+          if (!data.has("_method")) {
+            data.append("_method", "PUT");
+          }
+          data.delete("id");
         }
         return {
           url: `/api/ads/update/${id}`,

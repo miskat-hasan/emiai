@@ -86,16 +86,12 @@ export default function EventDetailsPage({ role, params }) {
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
     date: rawEvent.start_date,
-    eventType: rawEvent.event_type || "Offline(Check Backend Response)",
+    eventType: rawEvent.type,
     participants: rawEvent.participants.length || 0,
     imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
+      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
       : null,
-    mapUrl: rawEvent.full_location?.includes("google.com/maps/embed")
-      ? rawEvent.full_location
-      : rawEvent.full_location
-        ? `https://maps.google.com/maps?q=${encodeURIComponent(rawEvent.full_location)}&t=&z=13&ie=UTF8&iwloc=&output=embed`
-        : null,
+    mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
 
@@ -171,8 +167,8 @@ export default function EventDetailsPage({ role, params }) {
 
       {/* Bottom Grid*/}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <EventLocation mapUrl={event.mapUrl} />
+        <div className="md:col-span-2 lg:col-span-2">
+          <EventLocation mapUrl={event.mapUrl} locationName={event.location} />
         </div>
         <div className="lg:col-span-1">
           <EventParticipants participants={formattedParticipants} />

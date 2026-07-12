@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -202,7 +203,7 @@ export default function ImageGenerationPage({ role }) {
                     ) : (
                       <>
                         <Image
-                          src={msg.imageUrl}
+                          src={getImageUrl(msg.imageUrl)}
                           alt={msg.prompt}
                           width={800}
                           height={500}

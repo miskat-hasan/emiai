@@ -1,12 +1,13 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 
 const EventCard = ({
   imageUrl,
-  title = "Digital Marketing Forum 2025",
-  location = "Hello this is about my portfolio",
-  sponsor = "Event CO.",
-  date = "Feb 17, 2026",
+  title,
+  location,
+  sponsor,
+  date,
   buttonText = "Create Invite",
   onCardClick,
   onButtonClick,
@@ -20,7 +21,7 @@ const EventCard = ({
       <div className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden">
         {imageUrl ? (
           <Image
-            src={imageUrl}
+            src={getImageUrl(imageUrl)}
             alt={title}
             fill
             className="object-cover"
