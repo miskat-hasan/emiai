@@ -35,27 +35,20 @@ export default function ImageGenerationPage({ role }) {
 
   const requestImage = async prompt => {
     try {
-      const res = await fetch(
-        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
-          prompt,
-        )}&per_page=1`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Client-ID ${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`,
-          },
-        },
-      );
+      const sanitizedPrompt = encodeURIComponent(prompt.trim());
 
-      if (!res.ok) {
-        throw new Error("Failed to fetch image");
+      const randomSeed = Math.floor(Math.random() * 1000000);
+
+      const pollinationsUrl = `https://image.pollinations.ai/p/${sanitizedPrompt}?seed=${randomSeed}&enhance=true`;
+
+      const testRes = await fetch(pollinationsUrl, { method: "HEAD" });
+      if (!testRes.ok) {
+        throw new Error("Pollinations server is temporarily busy");
       }
 
-      const data = await res.json();
-
-      return data.results?.[0]?.urls?.regular ?? null;
+      return pollinationsUrl;
     } catch (error) {
-      console.error(error);
+      console.error("Pollinations Integration Error: ", error);
       return null;
     }
   };
@@ -72,7 +65,7 @@ export default function ImageGenerationPage({ role }) {
               : {
                   ...m,
                   status: "error",
-                  error: "No matching image found. Try a different prompt.",
+                  error: "Failed to generate image. Please try again.",
                 }
             : m,
         ),

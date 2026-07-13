@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
+import { teardownEcho } from "@/lib/echo";
 import Link from "next/link";
 
 export default function Topbar({ onToggleSidebar }) {
@@ -53,6 +54,7 @@ export default function Topbar({ onToggleSidebar }) {
       // fail silently
     } finally {
       dispatch(removeUser());
+      teardownEcho();
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
       document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
       toast.success("Logged out successfully");
@@ -74,8 +76,6 @@ export default function Topbar({ onToggleSidebar }) {
     { label: "Sign out", icon: LogOut, action: handleLogout, danger: true },
   ];
 
-
-  console.log(user?.avatar);
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between gap-4 bg-white/90 backdrop-blur-md border-b border-primary/10 px-5 py-3.5">
       {/* ── Left — hamburger + greeting ── */}

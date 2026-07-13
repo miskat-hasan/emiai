@@ -1,3 +1,4 @@
+// components/dashboard/inbox/ChatItem.jsx
 "use client";
 import { getImageUrl } from "@/helper/getImageUrl";
 
