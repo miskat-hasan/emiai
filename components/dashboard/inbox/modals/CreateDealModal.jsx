@@ -1,3 +1,4 @@
+// components/dashboard/inbox/modals/CreateDealModal.jsx
 import { useForm } from "react-hook-form";
 import { useCreateDealMutation } from "@/redux/api/services/dealApi";
 import { toast } from "react-toastify";
