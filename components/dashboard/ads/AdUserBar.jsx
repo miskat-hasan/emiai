@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React from "react";
 import Image from "next/image";
@@ -16,12 +17,20 @@ export default function AdUserBar({
       {/* Avatar + Name */}
       <div className="flex items-center gap-3">
         <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-gray-200">
-          <Image
-            src={userAvatar}
-            alt={userName}
-            fill
-            className="object-cover"
-          />
+          {
+            userAvatar && userAvatar !== "null" ? (
+              <Image
+                src={getImageUrl(userAvatar)}
+                alt={userName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray flex items-center justify-center">
+                <span className="text-white font-bold">{userName}</span>
+              </div>
+            )
+          }
         </div>
         <span className="text-base font-semibold text-black">{userName}</span>
       </div>

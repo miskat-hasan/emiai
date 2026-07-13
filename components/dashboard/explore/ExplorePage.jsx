@@ -9,23 +9,31 @@ import ExploreReelsView from "./ExploreReelsView";
 import ExploreFilterModal from "./ExploreFilterModal";
 import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
 import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import Pagination from "@/components/ui/Pagination";
 
-// Utility to calculate time ago
+const DEFAULT_PER_PAGE = 12;
+
+// Utility to calculate time ago or time until
 function timeSince(dateString) {
   if (!dateString) return "";
   const date = new Date(dateString);
-  const seconds = Math.floor((new Date() - date) / 1000);
-  let interval = seconds / 31536000;
-  if (interval > 1) return Math.floor(interval) + " years ago";
-  interval = seconds / 2592000;
-  if (interval > 1) return Math.floor(interval) + " months ago";
-  interval = seconds / 86400;
-  if (interval > 1) return Math.floor(interval) + " days ago";
-  interval = seconds / 3600;
-  if (interval > 1) return Math.floor(interval) + " hrs ago";
-  interval = seconds / 60;
-  if (interval > 1) return Math.floor(interval) + " mins ago";
-  return Math.floor(seconds) + " secs ago";
+  const diff = Math.floor((new Date() - date) / 1000);
+  const absDiff = Math.abs(diff);
+  const isFuture = diff < 0;
+  const suffix = isFuture ? "" : " ago";
+  const prefix = isFuture ? "in " : "";
+
+  let interval = absDiff / 31536000;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " year" : " years") + suffix;
+  interval = absDiff / 2592000;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " month" : " months") + suffix;
+  interval = absDiff / 86400;
+  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " day" : " days") + suffix;
+  interval = absDiff / 3600;
+  if (interval > 1) return prefix + Math.floor(interval) + " hrs" + suffix;
+  interval = absDiff / 60;
+  if (interval > 1) return prefix + Math.floor(interval) + " mins" + suffix;
+  return isFuture ? "in a moment" : "just now";
 }
 
 const AdCardSkeleton = () => (
@@ -67,10 +75,12 @@ const TABS = [
 
 export default function ExplorePage({ role }) {
   const [activeTab, setActiveTab] = useState("your-interests");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
   const queryType = activeTab === "explore" ? "all" : "all"; //we will later use explore, now for showing data we are using all
   const { data: exploreAdsResponse, isLoading } =
-    useGetGuestExploreAdsQuery(queryType);
+    useGetGuestExploreAdsQuery({ type: queryType, page, per_page: perPage });
 
   const [bookmarkedApiAds, setBookmarkedApiAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -87,9 +97,13 @@ export default function ExplorePage({ role }) {
   else if (Array.isArray(exploreAdsResponse?.data?.data))
     rawAds = exploreAdsResponse.data.data;
 
+  const meta = exploreAdsResponse?.meta || exploreAdsResponse?.data;
+  const totalPages = meta?.last_page ?? 1;
+  const totalResults = meta?.total ?? rawAds.length;
+
   const mappedApiAds = rawAds.map((ad) => {
     const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+      process.env.NEXT_PUBLIC_API_URL;
     const origin = new URL(apiUrl).origin;
     let imageUrl = ad.media_url;
     if (imageUrl && !imageUrl.startsWith("http")) {
@@ -105,16 +119,24 @@ export default function ExplorePage({ role }) {
       }
     }
 
+    // Find the first active prize window (ascending by rank/index)
+    const activePrize = ad.prizes
+      ?.slice()
+      .sort((a, b) => (a.rank ?? a.queue_order ?? 0) - (b.rank ?? b.queue_order ?? 0))
+      .find((p) => p.window_status === "active" && p.window_ends_at);
+
     return {
       id: ad.id,
       imageUrl,
       mediaType,
-      userName: "Advertiser " + ad.advertiser_id,
-      userAvatar: "https://i.pravatar.cc/150?u=" + ad.advertiser_id,
+      userName: ad.advertiser.name,
+      userAvatar: ad.advertiser.avatar||'/images/profile_photo_url.png',
       description: ad.description,
       timeAgo: timeSince(ad.publish_at || ad.created_at),
       isBookmarked: ad.is_bookmarked || false,
+      is_liked: ad.is_liked || false,
       targetCountries: ad.target_countries || [],
+      prizeWindowEndsAt: activePrize?.window_ends_at || null,
     };
   });
 
@@ -239,11 +261,26 @@ export default function ExplorePage({ role }) {
             ))}
           </div>
         ) : filteredAds.length > 0 ? (
-          <AdsGrid
-            ads={filteredAds}
-            onAdClick={handleAdClick}
-            onBookmarkToggle={handleBookmarkToggle}
-          />
+          <div>
+            <AdsGrid
+              ads={filteredAds}
+              onAdClick={handleAdClick}
+              onBookmarkToggle={handleBookmarkToggle}
+            />
+            {totalResults > 0 && (
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                perPage={perPage}
+                totalResults={totalResults}
+                onPageChange={p => setPage(p)}
+                onPerPageChange={pp => {
+                  setPerPage(pp);
+                  setPage(1);
+                }}
+              />
+            )}
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 mt-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200 text-gray-500">
             <span className="text-lg font-medium">

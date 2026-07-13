@@ -1,12 +1,13 @@
+import { getImageUrl } from "@/helper/getImageUrl";
 import React from "react";
 import Image from "next/image";
 
 const EventCard = ({
-  imageUrl = "/images/demo-event-photo.png",
-  title = "Digital Marketing Forum 2025",
-  location = "Hello this is about my portfolio",
-  sponsor = "Event CO.",
-  date = "Feb 17, 2026",
+  imageUrl,
+  title,
+  location,
+  sponsor,
+  date,
   buttonText = "Create Invite",
   onCardClick,
   onButtonClick,
@@ -18,13 +19,17 @@ const EventCard = ({
     >
       {/* Image Section */}
       <div className="relative w-full h-[220px] rounded-[1.5rem] overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 400px"
-        />
+        {imageUrl ? (
+          <Image
+            src={getImageUrl(imageUrl)}
+            alt={title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 400px"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gray-200" />
+        )}
       </div>
 
       {/* Details Section */}
@@ -42,7 +47,7 @@ const EventCard = ({
           <span className="w-20 text-gray text-[12px] shrink-0">
             Location
           </span>
-          <span className="flex-1 text-black text-[12px] leading-snug">
+          <span className="flex-1 text-black text-[12px] leading-snug break-all">
             {location}
           </span>
         </div>

@@ -1,97 +1,21 @@
 "use client";
-
 import { useState, useRef, useEffect } from "react";
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
 import DealCard from "@/components/cards/DealCard";
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const ALL_DEALS = [
-  {
-    id: 1,
-    status: "Pending",
-    person: "Lina Armand",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 2,
-    status: "In Progress",
-    person: "Arlene McCoy",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 3,
-    status: "Delivery",
-    person: "Cameron Williamson",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 4,
-    status: "Extension",
-    person: "Darrell Steward",
-    extensionDate: "Feb 24, 2026",
-    extensionMessage: "Here will be the message...",
-    duration: "21 days",
-  },
-  {
-    id: 5,
-    status: "Completed",
-    person: "Jerome Bell",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 6,
-    status: "Delivery",
-    person: "Leslie Alexander",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 7,
-    status: "Completed",
-    person: "Jerome Bell",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-  },
-  {
-    id: 8,
-    status: "Extension",
-    person: "Marvin McKinney",
-    extensionDate: "May 24, 2026",
-    extensionMessage: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    duration: "21 days",
-  },
-  {
-    id: 9,
-    status: "Completed",
-    person: "Jerome Bell",
-    date: "Feb 24, 2026",
-    description: "I need a video Ads for my Cyberpunk 2077 Game lunching",
-    netPayout: "SAR 4500",
-    isRatingGiven: true,
-  },
-];
+import { useGetDealsQuery } from "@/redux/api/services/dealApi";
+import { DealCardSkeleton } from "@/components/common/Skeleton";
+import Pagination from "@/components/common/Pagination";
 
 const STATUS_FILTERS = [
   "All",
   "Pending",
-  "In Progress",
-  "Delivery",
+  "Active",
   "Completed",
+  "Rejected",
+  "Delivered",
 ];
 
 // ─── Filter dropdown ──────────────────────────────────────────────────────────
-
 function FilterDropdown({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -108,7 +32,7 @@ function FilterDropdown({ value, onChange }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 pl-3 pr-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-black hover:border-primary/40 transition-colors"
+        className="flex items-center gap-2 pl-3 pr-3 py-2 rounded-xl border border-gray-200 bg-white text-sm font-medium text-black hover:border-primary/40 transition-colors cursor-pointer"
       >
         <SlidersHorizontal size={14} className="text-gray" />
         {value}
@@ -124,7 +48,7 @@ function FilterDropdown({ value, onChange }) {
                 onChange(f);
                 setOpen(false);
               }}
-              className={`w-full text-left px-4 py-2 text-sm transition-colors
+              className={`w-full text-left px-4 py-2 cursor-pointer text-sm transition-colors
                 ${
                   value === f
                     ? "text-primary font-semibold bg-primary/5"
@@ -144,13 +68,16 @@ function FilterDropdown({ value, onChange }) {
 
 export default function DealsPage({ role }) {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState("");
   const [filter, setFilter] = useState("All");
-
-  const filtered = ALL_DEALS.filter(d => {
-    const matchSearch = d.person.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" || d.status === filter;
-    return matchSearch && matchFilter;
+  const { data: dealData, isFetching } = useGetDealsQuery({
+    page,
+    search,
+    status: filter?.includes("All") ? "" : filter.toLocaleLowerCase(),
   });
+
+  const meta = dealData?.data;
+  const deals = meta?.data;
 
   return (
     <div className="space-y-6">
@@ -187,10 +114,16 @@ export default function DealsPage({ role }) {
       </div>
 
       {/* ── Grid ── */}
-      {filtered.length > 0 ? (
+      {isFetching ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {filtered.map(deal => (
-            <DealCard key={deal.id} {...deal} role={role} />
+          {Array.from({ length: 6 })?.map((_, idx) => (
+            <DealCardSkeleton key={idx} />
+          ))}
+        </div>
+      ) : deals?.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {deals?.map(deal => (
+            <DealCard key={deal?.id} deal={deal} role={role} />
           ))}
         </div>
       ) : (
@@ -200,6 +133,18 @@ export default function DealsPage({ role }) {
             Try adjusting your search or filter
           </p>
         </div>
+      )}
+
+      {/* ── Pagination ── */}
+      {!isFetching && (
+        <Pagination
+          currentPage={meta?.current_page}
+          lastPage={meta?.last_page}
+          total={meta?.total}
+          from={meta?.from}
+          to={meta?.to}
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

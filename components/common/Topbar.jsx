@@ -1,16 +1,6 @@
 "use client";
 
-import {
-  Bell,
-  Search,
-  ChevronDown,
-  Menu,
-  LogOut,
-  Settings,
-  User,
-  Coins,
-  Zap,
-} from "lucide-react";
+import { Bell, ChevronDown, Menu, LogOut, User, Zap } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
@@ -18,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
+import { teardownEcho } from "@/lib/echo";
 import Link from "next/link";
 
 export default function Topbar({ onToggleSidebar }) {
@@ -28,7 +19,7 @@ export default function Topbar({ onToggleSidebar }) {
   const isShareAppPage =
     pathname?.includes("/share-app") || pathname?.includes("/share");
 
-  const user = useSelector((state) => state.auth?.user);
+  const user = useSelector(state => state.auth?.user);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -39,7 +30,7 @@ export default function Topbar({ onToggleSidebar }) {
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
 
   useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       if (notifRef.current && !notifRef.current.contains(e.target))
         setNotifOpen(false);
       if (profileRef.current && !profileRef.current.contains(e.target))
@@ -63,6 +54,7 @@ export default function Topbar({ onToggleSidebar }) {
       // fail silently
     } finally {
       dispatch(removeUser());
+      teardownEcho();
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
       document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
       toast.success("Logged out successfully");
@@ -173,7 +165,7 @@ export default function Topbar({ onToggleSidebar }) {
         <div ref={profileRef} className="relative">
           <button
             onClick={() => {
-              setProfileOpen((v) => !v);
+              setProfileOpen(v => !v);
               setNotifOpen(false);
             }}
             className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-primary/10 transition-colors cursor-pointer"

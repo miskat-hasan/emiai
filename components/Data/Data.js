@@ -44,6 +44,11 @@ export const NAV_ITEMS = {
       href: "/dashboard/influencer/peer-invitations",
     },
     {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/influencer/agencies",
+    },
+    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/influencer/collaborations",
@@ -71,7 +76,11 @@ export const NAV_ITEMS = {
     },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/influencer/vouchers" },
     { label: "Ads", icon: AdsSVG, href: "/dashboard/influencer/ads" },
-    { label: "Block Person", icon: UserX, href: "/dashboard/influencer/block-person" },
+    {
+      label: "Block Person",
+      icon: UserX,
+      href: "/dashboard/influencer/block-person",
+    },
     {
       label: "Contact Support",
       icon: HeadphonesIcon,
@@ -141,7 +150,11 @@ export const NAV_ITEMS = {
       icon: HeadphonesIcon,
       href: "/dashboard/advertiser/support",
     },
-    { label: "Share app", icon: ShareAppSVG, href: "/dashboard/advertiser/share" },
+    {
+      label: "Share app",
+      icon: ShareAppSVG,
+      href: "/dashboard/advertiser/share",
+    },
   ],
   agency: [
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard/agency" },
@@ -233,21 +246,14 @@ export const NAV_ITEMS = {
     { label: "Inbox", icon: Inbox, href: "/dashboard/guest/inbox" },
     { label: "Wallet", icon: Wallet, href: "/dashboard/guest/wallet" },
     { label: "Influencers", icon: Users, href: "/dashboard/guest/influencers" },
-    {
-      label: "Image Generation",
-      icon: Wand2,
-      href: "/dashboard/guest/image-generation",
-    },
+    { label: "Image Generation", icon: Wand2, href: "/dashboard/guest/image-generation" },
     { label: "Contests", icon: Trophy, href: "/dashboard/guest/contests" },
     { label: "Events", icon: CalendarDays, href: "/dashboard/guest/events" },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/guest/vouchers" },
     { label: "Ads", icon: Megaphone, href: "/dashboard/guest/ads" },
     { label: "Tickets", icon: Ticket, href: "/dashboard/guest/tickets" },
     { label: "Share app", icon: ShareAppSVG, href: "/dashboard/guest/share" },
-    {
-      label: "Contact Support",
-      icon: HeadphonesIcon,
-      href: "/dashboard/guest/support",
+    { label: "Contact Support", icon: HeadphonesIcon, href: "/dashboard/guest/support",
     },
   ],
 };

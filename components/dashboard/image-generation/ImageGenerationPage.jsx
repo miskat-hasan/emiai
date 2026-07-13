@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
@@ -33,13 +34,23 @@ export default function ImageGenerationPage({ role }) {
   }, [messages]);
 
   const requestImage = async prompt => {
-    const res = await fetch("/api/generate-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-    const { imageUrl } = await res.json();
-    return imageUrl || null;
+    try {
+      const sanitizedPrompt = encodeURIComponent(prompt.trim());
+
+      const randomSeed = Math.floor(Math.random() * 1000000);
+
+      const pollinationsUrl = `https://image.pollinations.ai/p/${sanitizedPrompt}?seed=${randomSeed}&enhance=true`;
+
+      const testRes = await fetch(pollinationsUrl, { method: "HEAD" });
+      if (!testRes.ok) {
+        throw new Error("Pollinations server is temporarily busy");
+      }
+
+      return pollinationsUrl;
+    } catch (error) {
+      console.error("Pollinations Integration Error: ", error);
+      return null;
+    }
   };
 
   const runGeneration = async (prompt, assistantId) => {
@@ -54,7 +65,7 @@ export default function ImageGenerationPage({ role }) {
               : {
                   ...m,
                   status: "error",
-                  error: "No matching image found. Try a different prompt.",
+                  error: "Failed to generate image. Please try again.",
                 }
             : m,
         ),
@@ -185,7 +196,7 @@ export default function ImageGenerationPage({ role }) {
                     ) : (
                       <>
                         <Image
-                          src={msg.imageUrl}
+                          src={getImageUrl(msg.imageUrl)}
                           alt={msg.prompt}
                           width={800}
                           height={500}

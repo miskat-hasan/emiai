@@ -22,7 +22,7 @@ export default function UpComingEventsActionButton({
     setIsBookmarked((v) => !v);
     if (eventId) {
       try {
-        await toggleBookmark({ id: eventId, type: "event" }).unwrap();
+        await toggleBookmark({ id: eventId, event_id: eventId, item_id: eventId, type: "event" }).unwrap();
       } catch (err) {
         setIsBookmarked((v) => !v);
       }
@@ -60,7 +60,10 @@ export default function UpComingEventsActionButton({
 
         {/* Join Event */}
         {onJoin && (
-          <button className="px-5 py-2 rounded-full bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer">
+          <button 
+            onClick={onJoin}
+            className="px-5 py-2 rounded-full bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+          >
             Join This Event
           </button>
         )}

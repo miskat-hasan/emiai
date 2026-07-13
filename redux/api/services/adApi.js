@@ -3,20 +3,24 @@ import { apiSlice } from "../apiSlice";
 export const adApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getPublishedAds: builder.query({
-      query: () => ({ url: "/api/ads/my-ads", method: "GET" }),
+      query: (params) => ({ url: "/api/ads/my-ads", method: "GET", params }),
       providesTags: ["Ad"],
     }),
 
     getAllAds: builder.query({
-      query: () => ({ url: "/api/ads/list?type=all", method: "GET" }),
+      query: (params) => ({ url: "/api/ads/list", method: "GET", params: { type: "active", ...params } }),
       providesTags: ["Ad"],
     }),
 
     getGuestExploreAds: builder.query({
-      query: (type = "all") => ({
-        url: `/api/ads/list?type=${type}`,
-        method: "GET",
-      }),
+      query: (params = {}) => {
+        const { type = "active", ...restParams } = params;
+        return {
+          url: "/api/ads/list",
+          method: "GET",
+          params: { type, ...restParams },
+        };
+      },
       providesTags: ["Ad"],
     }),
 
@@ -31,7 +35,20 @@ export const adApi = apiSlice.injectEndpoints({
     }),
 
     updateAd: builder.mutation({
-      query: (body) => ({ url: "/api/ads/update", method: "POST", body }),
+      query: (data) => {
+        const id = data instanceof FormData ? data.get("id") : data.id;
+        if (data instanceof FormData) {
+          if (!data.has("_method")) {
+            data.append("_method", "PUT");
+          }
+          data.delete("id");
+        }
+        return {
+          url: `/api/ads/update/${id}`,
+          method: "POST",
+          body: data,
+        };
+      },
       invalidatesTags: ["Ad"],
     }),
   }),

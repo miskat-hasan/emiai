@@ -11,6 +11,7 @@ import MyEventActionButtons from "./MyEventActionButtons";
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
 import dynamic from "next/dynamic";
 
+import SendInvitationFlow from "./SendInvitationFlow";
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), { ssr: false });
 
 const EventDetailsSkeleton = () => (
@@ -57,6 +58,7 @@ const EventDetailsSkeleton = () => (
 export default function MyEventDetailsPage({ role, params }) {
   const { id } = use(params);
   const [modalOpen, setModalOpen] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
 
   const { data: response, isLoading } = useGetEventByIdQuery(id);
@@ -76,19 +78,18 @@ export default function MyEventDetailsPage({ role, params }) {
   }
 
   const event = {
-    id: rawEvent.id,
+    id: rawEvent.event_id || rawEvent.id || id,
     is_bookmarked: rawEvent.is_bookmarked,
     title: rawEvent.name || "Event Title",
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
     date: rawEvent.start_date,
-    eventType: "Offline", // Assuming offline if no type is given
+    eventType: rawEvent.type,
     participants: rawEvent.total_participants || 0,
     imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
-      : "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1200&auto=format&fit=crop&q=80",
-    mapUrl:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14608.039575440334!2d90.3654215!3d23.746476!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b33534720f%3A0x867375a18357731a!2sDhanmondi%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1683921345678",
+      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
+      : null,
+    mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
 
@@ -99,8 +100,8 @@ export default function MyEventDetailsPage({ role, params }) {
     })) || [];
 
   const infoItems = [
-    { label: "Event Type", value: event.eventType || "Offline" },
-    { label: "Participants", value: String(event.participants || 213) },
+    { label: "Event Type", value: event.eventType  },
+    { label: "Participants", value: String(event.participants.length || 0) },
     { label: "Sponsored", value: event.sponsor },
     { label: "Location", value: event.location },
     { label: "Event Start", value: event.date },
@@ -139,15 +140,18 @@ export default function MyEventDetailsPage({ role, params }) {
         <MyEventActionButtons
           eventId={event.id}
           initialBookmarked={event.is_bookmarked}
+          onCreateInvite={() => setInviteModalOpen(true)}
           onEdit={() => {
-            setEditingEvent(rawEvent);
+            setEditingEvent({ ...rawEvent, id: event.id });
             setModalOpen(true);
           }}
         />
       </div>
 
       {/* Hero Image */}
-      <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      {event.imageUrl && (
+        <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -179,6 +183,11 @@ export default function MyEventDetailsPage({ role, params }) {
           setEditingEvent(null);
         }}
         editingEvent={editingEvent}
+      />
+      <SendInvitationFlow
+        open={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+        eventId={event.id}
       />
     </div>
   );

@@ -1,3 +1,4 @@
+// app/(auth)/login/page.jsx
 "use client";
 
 import Link from "next/link";
@@ -10,14 +11,8 @@ import { setUser } from "@/redux/slices/authSlice";
 import AuthInput from "@/components/ui/AuthInput";
 import AuthButton from "@/components/ui/AuthButton";
 import { AppleIcon, GoogleIcon } from "@/components/common/Svg";
-
-const ROLE_ROUTES = {
-  influencer: "/dashboard/influencer",
-  advertiser: "/dashboard/advertiser",
-  agency: "/dashboard/agency",
-  business_manager: "/dashboard/business_manager",
-  guest: "/dashboard/guest/explore",
-};
+import { getRoleHomeRoute } from "@/lib/roleRoutes";
+import { rebuildEcho } from "@/lib/echo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,10 +36,11 @@ export default function LoginPage() {
 
         document.cookie = `token=${userData.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
         document.cookie = `role=${userData.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        
+        rebuildEcho();
 
         toast.success("Welcome back!");
-
-        const route = ROLE_ROUTES[userData.role] ?? "/dashboard";
+        const route = getRoleHomeRoute(userData.role);
         router.push(route);
       }
     } catch (err) {

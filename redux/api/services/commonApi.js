@@ -1,7 +1,8 @@
+// redux/api/services/commonApi.js
 import { apiSlice } from "@/redux/api/apiSlice";
 
 export const commonApi = apiSlice.injectEndpoints({
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     getCountries: builder.query({
       query: () => "/api/countries",
       providesTags: ["Countries"],
@@ -10,12 +11,9 @@ export const commonApi = apiSlice.injectEndpoints({
       query: () => "/api/categories",
       providesTags: ["Categories"],
     }),
-    searchUsers: builder.query({
-      query: (query) => `/api/user/search?query=${query}`,
-      providesTags: ["Users"],
-    }),
+
     submitSupportTicket: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: "/api/support/ticket/store",
         method: "POST",
         body: data,
@@ -27,6 +25,5 @@ export const commonApi = apiSlice.injectEndpoints({
 export const {
   useGetCountriesQuery,
   useGetCategoriesQuery,
-  useLazySearchUsersQuery,
   useSubmitSupportTicketMutation,
 } = commonApi;

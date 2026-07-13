@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Heart, Bookmark, Share, VolumeX, Volume2 } from "lucide-react";
+import { Heart, Bookmark, Share2, VolumeX, Volume2 } from "lucide-react";
 import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
 import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
 
@@ -30,12 +30,16 @@ export default function ExploreReelsView({ ads }) {
 }
 
 function ReelCard({ ad }) {
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(ad.is_liked);
   const [isBookmarked, setIsBookmarked] = useState(ad.isBookmarked || false);
   
   useEffect(() => {
     setIsBookmarked(ad.isBookmarked || ad.is_bookmarked || false);
   }, [ad.isBookmarked, ad.is_bookmarked]);
+
+  useEffect(() => {
+    setIsLiked(ad.is_liked || false);
+  }, [ad.is_liked]);
 
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
@@ -176,7 +180,7 @@ function ReelCard({ ad }) {
         </button>
         {/* Share */}
         <button className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer">
-          <Share size={22} className="text-gray-600" />
+          <Share2 size={22} className="text-gray-600" />
         </button>
       </div>
 

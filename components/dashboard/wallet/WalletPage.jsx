@@ -1,4 +1,5 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import { useState } from "react";
 import {
@@ -18,7 +19,7 @@ import {
   CheckCircle2,
   XCircle,
 } from "lucide-react";
-import Pagination from "@/components/common/Pagination";
+import Pagination from "@/components/ui/Pagination";
 import Image from "next/image";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
@@ -768,7 +769,7 @@ export default function WalletPage({ role }) {
                   </p>
                   <div className="w-[50px]">
                     <Image
-                      src={"/glove.png"}
+                      src={getImageUrl("/glove.png")}
                       alt="card"
                       width={44}
                       height={30}

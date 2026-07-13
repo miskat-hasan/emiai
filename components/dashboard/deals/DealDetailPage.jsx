@@ -1,11 +1,11 @@
 "use client";
-
-import { useRouter } from "next/navigation";
+import { getImageUrl } from "@/helper/getImageUrl";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Headphones, Flag } from "lucide-react";
 import StatusBadge from "@/components/common/StatusBadge";
-
-// ─── Mock — replace with real API/Redux fetch by `params.id` ─────────────────
+import { useGetDealDetailsQuery } from "@/redux/api/services/dealApi";
+import { formatDate } from "@/helper/formatDate";
 
 const MOCK_DEAL = {
   id: 1,
@@ -24,10 +24,11 @@ const MOCK_DEAL = {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-export default function DealDetailPage({ params, role }) {
+export default function DealDetailPage({ role }) {
   const router = useRouter();
-
-  // In real usage: fetch deal by params.id
+  const { id } = useParams();
+  const { data: dealDetails, isLoading } = useGetDealDetailsQuery(id);
+  console.log(dealDetails);
   const deal = MOCK_DEAL;
 
   return (
@@ -58,7 +59,7 @@ export default function DealDetailPage({ params, role }) {
       <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
         {/* Card header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <span className="text-sm font-semibold text-black">Statas</span>
+          <span className="text-sm font-semibold text-black">Status</span>
           <div className="flex items-center gap-3">
             {/* Support icon */}
             <button
@@ -68,6 +69,7 @@ export default function DealDetailPage({ params, role }) {
               <Headphones size={18} />
               <span className="text-[10px] leading-none">Support</span>
             </button>
+
             {/* Flag icon */}
             <button
               className="text-gray hover:text-red-500 transition-colors"
@@ -75,7 +77,7 @@ export default function DealDetailPage({ params, role }) {
             >
               <Flag size={18} />
             </button>
-            <StatusBadge status={deal.status} />
+            <StatusBadge status={dealDetails?.data?.status} />
           </div>
         </div>
 
@@ -83,27 +85,29 @@ export default function DealDetailPage({ params, role }) {
         <div className="flex items-center justify-between px-6 py-4 bg-gray-50/60 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-gradient-to-br from-primary to-secondary">
-              {deal.avatar ? (
+              {deal?.partner?.avatar ? (
                 <Image
-                  src={deal.avatar}
-                  alt={deal.person}
+                  src={`${process.env.NEXT_PUBLIC_API_URL}/${dealDetails?.data?.partner?.avatar}`}
+                  alt={dealDetails?.data?.partner?.name}
                   width={40}
                   height={40}
                   className="object-cover w-full h-full"
                 />
               ) : (
                 <span className="w-full h-full flex items-center justify-center text-white text-sm font-bold">
-                  {deal.person?.[0] ?? "?"}
+                  {dealDetails?.data?.partner?.name?.at(0)}
                 </span>
               )}
             </div>
             <span className="text-base font-semibold text-black">
-              {deal.person}
+              {dealDetails?.data?.partner?.name}
             </span>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray">Date</p>
-            <p className="text-sm font-semibold text-black">{deal.date}</p>
+            <p className="text-sm font-semibold text-black">
+              {formatDate(dealDetails?.data?.created_at)}
+            </p>
           </div>
         </div>
 
@@ -114,13 +118,13 @@ export default function DealDetailPage({ params, role }) {
               Offer Description
             </p>
             <p className="text-sm text-gray leading-relaxed">
-              {deal.description}
+              {dealDetails?.data?.description}
             </p>
           </div>
           <div className="text-right shrink-0">
             <p className="text-sm font-semibold text-black">Net Payout</p>
             <p className="text-sm font-bold text-black mt-0.5">
-              {deal.netPayout}
+              {dealDetails?.data?.amount}
             </p>
           </div>
         </div>
@@ -135,7 +139,7 @@ export default function DealDetailPage({ params, role }) {
           </button>
           <button
             onClick={() => console.log("accept", deal.id)}
-            className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
+            className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
           >
             Accept
           </button>
@@ -151,7 +155,7 @@ export default function DealDetailPage({ params, role }) {
         <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white border border-gray-100 flex items-center justify-center">
           {deal.sponsor.logo ? (
             <Image
-              src={deal.sponsor.logo}
+              src={getImageUrl(deal.sponsor.logo)}
               alt={deal.sponsor.name}
               width={56}
               height={56}

@@ -1,17 +1,17 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
-import { useState, useRef, useEffect, forwardRef } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { toast } from "react-toastify";
-import { X, Upload, Plus, ChevronDown, Check } from "lucide-react";
-import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
-import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
+import MultiSelect from "@/components/ui/MultiSelect";
 import {
   useGetCategoriesQuery,
   useGetCountriesQuery,
 } from "@/redux/api/services/commonApi";
-import MultiSelect from "@/components/ui/MultiSelect";
+import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
+import { ChevronDown, Minus, Plus, Upload, X } from "lucide-react";
+import Image from "next/image";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 
 // Sub-components
 
@@ -100,7 +100,7 @@ function UploadBox({
             />
           ) : (
             <Image
-              src={previewUrl}
+              src={getImageUrl(previewUrl)}
               alt="Preview"
               fill
               className="object-cover"
@@ -120,7 +120,12 @@ const getOrdinalNumber = (n) => {
 
 // Main modal
 
-export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }) {
+export default function CreateNewAdModal({
+  open,
+  onClose,
+  onSuccess,
+  editingAd,
+}) {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
 
@@ -144,6 +149,7 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
     reset,
     watch,
     control,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: draft,
@@ -166,16 +172,32 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
         id: editingAd.id,
         adsDescription: editingAd.description || "",
         adsCategory: editingAd.category_id || "",
-        publishAt: editingAd.publishAt ? new Date(editingAd.publishAt).toISOString().slice(0,16) : "",
-        // Other fields like countries/prizes can be populated if available from backend
+        publishAt: editingAd.publishAt || "",
+        countries: editingAd.countries || [],
+        prizeType: editingAd.prizeType || "cash",
+        prizes: editingAd.prizes?.length
+          ? editingAd.prizes
+          : [{ rank: 1, value: "" }],
+        promoCode: editingAd.promoCode || "",
+        promoCodeDiscount: editingAd.promoCodeDiscount || "",
+        promoCodeExpiry: editingAd.promoCodeExpiry || "",
       });
       if (editingAd.imageUrl) {
         setPreviewUrl(editingAd.imageUrl);
       }
+      setPrizesCount(Math.max(1, editingAd.prizes?.length || 1));
     }
   }, [open, editingAd, reset, draft]);
 
-
+  const removePrize = (indexToRemove) => {
+    const currentPrizesCount = prizesCount;
+    for (let i = indexToRemove; i < currentPrizesCount - 1; i++) {
+      const nextValue = getValues(`prizes.${i + 1}.value`);
+      setValue(`prizes.${i}.value`, nextValue || "");
+    }
+    setValue(`prizes.${currentPrizesCount - 1}.value`, "");
+    setPrizesCount((prev) => prev - 1);
+  };
 
   const onSubmit = async (data) => {
     // Save draft and move to next step
@@ -200,7 +222,9 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent">
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-black">{editingAd ? "Edit Ad" : "Create New Ads"}</h2>
+          <h2 className="text-base font-bold text-black">
+            {editingAd ? "Edit Ad" : "Create New Ads"}
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray transition-colors cursor-pointer"
@@ -312,6 +336,15 @@ export default function CreateNewAdModal({ open, onClose, onSuccess, editingAd }
                     placeholder="Write prize value..."
                     {...register(`prizes.${index}.value`)}
                   />
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => removePrize(index)}
+                      className="shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm"
+                    >
+                      <Minus size={20} />
+                    </button>
+                  )}
                   {index === prizesCount - 1 && (
                     <button
                       type="button"

@@ -1,120 +1,116 @@
 "use client";
-
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+function getPageList(current, last) {
+  const maxVisible = 5;
+
+  if (last <= maxVisible + 1) {
+    return Array.from({ length: last }, (_, i) => i + 1);
+  }
+
+  if (current <= maxVisible - 1) {
+    return [1, 2, 3, 4, 5, "...", last];
+  }
+
+  if (current >= last - (maxVisible - 2)) {
+    return [1, "...", last - 4, last - 3, last - 2, last - 1, last];
+  }
+  return [1, "...", current - 1, current, current + 1, "...", last];
+}
+
 /**
- * Pagination
  * Props:
- *  - currentPage: number
- *  - totalPages: number
- *  - onPageChange: (page: number) => void
- *  - perPage: number
- *  - onPerPageChange: (n: number) => void
- *  - totalResults: number
+ * - currentPage: number
+ * - lastPage: number
+ * - total: number (optional, used for "Showing X–Y of Z")
+ * - from: number (optional)
+ * - to: number (optional)
+ * - onPageChange: (page: number) => void
+ * - showSummary: boolean (default true) — set false to hide the "Showing..." text
+ * - className: string (optional) — extra classes for the outer wrapper
  */
 export default function Pagination({
-  currentPage = 1,
-  totalPages = 8,
+  currentPage,
+  lastPage,
+  total,
+  from,
+  to,
   onPageChange,
-  perPage = 10,
-  onPerPageChange,
-  totalResults = 80,
+  showSummary = true,
+  className = "",
 }) {
-  const pages = buildPageList(currentPage, totalPages);
+  if (!lastPage || lastPage <= 1) return null;
+
+  const pages = getPageList(currentPage, lastPage);
+  const hasSummary = showSummary && from != null && to != null && total != null;
 
   return (
-    <div className="flex items-center justify-between pt-4 mt-2 border-t border-gray-100">
-      {/* Per-page selector */}
-      <div className="flex items-center gap-2 text-sm text-gray">
-        <span>Show</span>
-        <div className="relative">
-          <select
-            value={perPage}
-            onChange={e => onPerPageChange?.(Number(e.target.value))}
-            className="appearance-none bg-white border border-gray-200 rounded-lg pl-3 pr-7 py-1.5 text-sm text-black font-medium focus:outline-none focus:border-primary/40 cursor-pointer"
-          >
-            {[10, 20, 50].map(n => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray text-xs">
-            ▾
-          </span>
-        </div>
-        <span>of {totalResults} results</span>
-      </div>
+    <div
+      className={`flex items-center py-8 flex-wrap gap-4 ${
+        hasSummary ? "justify-between" : "justify-center"
+      } ${className}`}
+    >
+      {hasSummary && (
+        <p className="text-sm text-gray">
+          Showing <span className="font-medium text-black">{from}</span>
+          {"–"}
+          <span className="font-medium text-black">{to}</span> of{" "}
+          <span className="font-medium text-black">{total}</span> results
+        </p>
+      )}
 
-      {/* Page buttons */}
       <div className="flex items-center gap-1">
-        <PageBtn
-          onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
+        {/* Prev */}
+        <button
+          disabled={currentPage <= 1}
+          onClick={() => onPageChange(currentPage - 1)}
+          aria-label="Previous page"
+          className={`flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 transition-colors ${
+            currentPage > 1
+              ? "text-black bg-white hover:border-primary/40 hover:text-primary cursor-pointer"
+              : "text-gray/40 bg-gray-50 cursor-not-allowed"
+          }`}
         >
-          <ChevronLeft size={14} />
-        </PageBtn>
+          <ChevronLeft size={15} />
+        </button>
 
-        {pages.map((p, i) =>
+        {pages.map((p, idx) =>
           p === "..." ? (
             <span
-              key={`ellipsis-${i}`}
-              className="w-8 text-center text-sm text-gray"
+              key={`dots-${idx}`}
+              className="w-8 h-8 flex items-center justify-center text-gray text-sm select-none"
             >
-              …
+              ⋯
             </span>
           ) : (
-            <PageBtn
+            <button
               key={p}
-              active={p === currentPage}
-              onClick={() => onPageChange?.(p)}
+              onClick={() => onPageChange(p)}
+              className={`min-w-8 h-8 px-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                p === currentPage
+                  ? "bg-primary text-white"
+                  : "text-black bg-white border border-gray-200 hover:border-primary/40 hover:text-primary"
+              }`}
             >
               {p}
-            </PageBtn>
+            </button>
           ),
         )}
 
-        <PageBtn
-          onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
+        {/* Next */}
+        <button
+          disabled={currentPage >= lastPage}
+          onClick={() => onPageChange(currentPage + 1)}
+          aria-label="Next page"
+          className={`flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 transition-colors ${
+            currentPage < lastPage
+              ? "text-black bg-white hover:border-primary/40 hover:text-primary cursor-pointer"
+              : "text-gray/40 bg-gray-50 cursor-not-allowed"
+          }`}
         >
-          <ChevronRight size={14} />
-        </PageBtn>
+          <ChevronRight size={15} />
+        </button>
       </div>
     </div>
   );
-}
-
-function PageBtn({ children, active, disabled, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`
-        w-8 h-8 rounded-lg text-sm font-medium flex items-center justify-center transition-colors
-        ${active ? "bg-primary text-white shadow-sm shadow-primary/30" : ""}
-        ${!active && !disabled ? "text-gray hover:bg-gray-100" : ""}
-        ${disabled ? "text-gray-300 cursor-not-allowed" : ""}
-      `}
-    >
-      {children}
-    </button>
-  );
-}
-
-function buildPageList(current, total) {
-  if (total <= 6) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages = [];
-  pages.push(1);
-  if (current > 3) pages.push("...");
-  for (
-    let p = Math.max(2, current - 1);
-    p <= Math.min(total - 1, current + 1);
-    p++
-  ) {
-    pages.push(p);
-  }
-  if (current < total - 2) pages.push("...");
-  pages.push(total);
-  return pages;
 }

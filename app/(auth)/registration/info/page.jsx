@@ -3,9 +3,11 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import AuthInput from "@/components/ui/AuthInput";
 import AuthButton from "@/components/ui/AuthButton";
+import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 export default function RegistrationInfoPage() {
   const router = useRouter();
@@ -17,9 +19,15 @@ export default function RegistrationInfoPage() {
     }
   }, [router]);
 
+  const { data: countriesData, isLoading: isCountriesLoading } =
+    useGetCountriesQuery();
+
+  const countries = countriesData?.data ?? [];
+
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm();
 
@@ -74,14 +82,25 @@ export default function RegistrationInfoPage() {
             required: "Phone number is required",
           })}
         />
-        <AuthInput
-          label="Country"
-          type="text"
-          placeholder="Country"
-          error={errors.country?.message}
-          registration={register("country", {
-            required: "Country is required",
-          })}
+
+        <Controller
+          name="country"
+          control={control}
+          rules={{ required: "Country is required" }}
+          render={({ field }) => (
+            <CustomSelect
+              label="Country"
+              placeholder="Select your country"
+              options={countries}
+              valueKey="code"
+              labelKey="name"
+              search
+              isLoading={isCountriesLoading}
+              value={field.value}
+              onChange={field.onChange}
+              error={errors.country?.message}
+            />
+          )}
         />
 
         <div className="mt-2">

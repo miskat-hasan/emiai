@@ -70,7 +70,7 @@ export default function ContestCard({
             src={process.env.NEXT_PUBLIC_API_URL + "/" + prizePhotoUrl}
             alt={title ?? "Contest"}
             fill
-            className="object-cover"
+            className="object-cover border"
           />
         ) : isMoneyPrize ? (
           <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-lg">

@@ -2,12 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import PortfolioBookmarkCard from "@/components/cards/PortfolioBookmarkCard";
 import EventBookmarkCard from "@/components/cards/EventBookmarkCard";
 import AdCard from "@/components/dashboard/ads/AdCard";
 import AdCardSkeleton from "@/components/dashboard/ads/AdCardSkeleton";
-import Pagination from "@/components/common/Pagination";
-import { useToggleBookmarkMutation, useGetBookmarksQuery } from "@/redux/api/services/bookmarkApi";
+import Pagination from "@/components/ui/Pagination";
+import {
+  useToggleBookmarkMutation,
+  useGetBookmarksQuery,
+} from "@/redux/api/services/bookmarkApi";
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 
@@ -67,20 +71,25 @@ function FilterDropdown({ value, onChange }) {
 
 function PortfolioGrid({ items, onToggle }) {
   if (!items || items.length === 0) {
-    return <div className="text-gray text-sm py-10 text-center w-full">No portfolio bookmarks found.</div>;
+    return (
+      <div className="text-gray text-sm py-10 text-center w-full">
+        No portfolio bookmarks found.
+      </div>
+    );
   }
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {items.map(item => {
         const pf = item.bookmarkable || item;
-        
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = pf.image || pf.photo || pf.imageUrl || pf.media_url;
-        if (imageUrl && !imageUrl.startsWith('http')) {
+        if (imageUrl && !imageUrl.startsWith("http")) {
           imageUrl = `${origin}${imageUrl}`;
         }
-        
+
         return (
           <PortfolioBookmarkCard
             key={pf.id}
@@ -100,27 +109,36 @@ function PortfolioGrid({ items, onToggle }) {
 
 function EventGrid({ items, onToggle }) {
   if (!items || items.length === 0) {
-    return <div className="text-gray text-sm py-10 text-center w-full">No event bookmarks found.</div>;
+    return (
+      <div className="text-gray text-sm py-10 text-center w-full">
+        No event bookmarks found.
+      </div>
+    );
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {items.map(item => {
         const ev = item.bookmarkable || item;
-        
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = ev.photo || ev.image || ev.imageUrl || ev.media_url;
-        if (imageUrl && !imageUrl.startsWith('http')) {
+        if (imageUrl && !imageUrl.startsWith("http")) {
           imageUrl = `${origin}${imageUrl}`;
         }
-        
+
         return (
           <EventBookmarkCard
             key={ev.id}
             image={imageUrl}
             title={ev.title || "Event Title"}
             description={ev.description || "Event Description"}
-            organizer={ev.organizer || ev.event_sponsorships?.[0]?.sponsor?.name || "Event CO."}
+            organizer={
+              ev.organizer ||
+              ev.event_sponsorships?.[0]?.sponsor?.name ||
+              "Event CO."
+            }
             date={ev.date || ev.start_date || "Event Date"}
             bookmarked={true}
             onBookmark={() => onToggle(ev.id)}
@@ -131,19 +149,24 @@ function EventGrid({ items, onToggle }) {
   );
 }
 
-function AdGrid({ items, onToggle }) {
+function AdGrid({ items, onToggle, onAdClick }) {
   if (!items || items.length === 0) {
-    return <div className="text-gray text-sm py-10 text-center w-full">No ad bookmarks found.</div>;
+    return (
+      <div className="text-gray text-sm py-10 text-center w-full">
+        No ad bookmarks found.
+      </div>
+    );
   }
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
       {items.map(item => {
         const ad = item.bookmarkable || item;
-        
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team";
+
+        const apiUrl =
+          process.env.NEXT_PUBLIC_API_URL;
         const origin = new URL(apiUrl).origin;
         let imageUrl = ad.media_url || ad.imageUrl;
-        if (imageUrl && !imageUrl.startsWith('http')) {
+        if (imageUrl && !imageUrl.startsWith("http")) {
           imageUrl = `${origin}${imageUrl}`;
         }
         let mediaType = ad.media_type || ad.mediaType;
@@ -162,13 +185,17 @@ function AdGrid({ items, onToggle }) {
             imageUrl={imageUrl}
             mediaType={mediaType}
             userName={ad.userName || "Advertiser " + (ad.advertiser_id || "1")}
-            userAvatar={ad.userAvatar || "https://i.pravatar.cc/150?u=" + (ad.advertiser_id || "1")}
+            userAvatar={
+              ad.userAvatar ||
+              "https://i.pravatar.cc/150?u=" + (ad.advertiser_id || "1")
+            }
             description={ad.description}
             timeAgo={ad.timeAgo || ""}
             isBookmarked={true}
             status={ad.status || "active"}
             publishAt={ad.publish_at || ad.publishAt}
             onBookmarkToggle={() => onToggle(ad.id)}
+            onClick={() => onAdClick(ad)}
           />
         );
       })}
@@ -179,6 +206,7 @@ function AdGrid({ items, onToggle }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function BookmarksPage({ role }) {
+  const router = useRouter();
   const [filter, setFilter] = useState("Ads");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -190,13 +218,18 @@ export default function BookmarksPage({ role }) {
     Ads: "ad",
   };
 
-  const { data: responseData, isLoading, isError } = useGetBookmarksQuery(typeMap[filter]);
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+  } = useGetBookmarksQuery(typeMap[filter]);
   const [toggleBookmark] = useToggleBookmarkMutation();
 
   let rawItems = [];
   if (Array.isArray(responseData)) rawItems = responseData;
   else if (Array.isArray(responseData?.data)) rawItems = responseData.data;
-  else if (Array.isArray(responseData?.data?.data)) rawItems = responseData.data.data;
+  else if (Array.isArray(responseData?.data?.data))
+    rawItems = responseData.data.data;
 
   // Optimistic tracking for unbookmarked items
   const [unbookmarkedIds, setUnbookmarkedIds] = useState([]);
@@ -205,7 +238,7 @@ export default function BookmarksPage({ role }) {
   const visibleItems = rawItems.filter(item => {
     const id = item.bookmarkable?.id || item.id;
     if (unbookmarkedIds.includes(id)) return false;
-    
+
     // basic search filtering
     if (search) {
       const title = item.bookmarkable?.title || item.title || "";
@@ -235,6 +268,12 @@ export default function BookmarksPage({ role }) {
     setPage(1);
     setSearch("");
     setUnbookmarkedIds([]);
+  };
+
+  const handleAdClick = ad => {
+    if (ad.status !== "scheduled") {
+      router.push(`/dashboard/${role}/ads/${ad.id}`);
+    }
   };
 
   return (
@@ -275,25 +314,39 @@ export default function BookmarksPage({ role }) {
       {isLoading ? (
         filter === "Ads" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <AdCardSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div className="py-10 text-center text-gray animate-pulse">Loading bookmarks...</div>
+          <div className="py-10 text-center text-gray animate-pulse">
+            Loading bookmarks...
+          </div>
         )
       ) : isError ? (
-        <div className="py-10 text-center text-red-500">Failed to load bookmarks.</div>
+        <div className="py-10 text-center text-red-500">
+          Failed to load bookmarks.
+        </div>
       ) : (
         <>
           {filter === "Portfolio" && (
-            <PortfolioGrid items={visibleItems} onToggle={(id) => handleToggle(id, "portfolio")} />
+            <PortfolioGrid
+              items={visibleItems}
+              onToggle={id => handleToggle(id, "portfolio")}
+            />
           )}
           {filter === "Events" && (
-            <EventGrid items={visibleItems} onToggle={(id) => handleToggle(id, "event")} />
+            <EventGrid
+              items={visibleItems}
+              onToggle={id => handleToggle(id, "event")}
+            />
           )}
           {filter === "Ads" && (
-            <AdGrid items={visibleItems} onToggle={(id) => handleToggle(id, "ad")} />
+            <AdGrid
+              items={visibleItems}
+              onToggle={id => handleToggle(id, "ad")}
+              onAdClick={handleAdClick}
+            />
           )}
         </>
       )}

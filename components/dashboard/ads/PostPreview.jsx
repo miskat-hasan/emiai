@@ -1,19 +1,32 @@
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
-import React from "react";
+import {
+  useCreateAdMutation,
+  useUpdateAdMutation,
+} from "@/redux/api/services/adApi";
+import { clearDraft, setStep } from "@/redux/slices/adCreationSlice";
+import { Eye, Heart } from "lucide-react";
 import Image from "next/image";
-import { Heart, Eye } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { setStep, clearDraft } from "@/redux/slices/adCreationSlice";
-import { useCreateAdMutation, useUpdateAdMutation } from "@/redux/api/services/adApi";
 import { toast } from "react-toastify";
-
-
 
 export default function PostPreview() {
   const dispatch = useDispatch();
   const draft = useSelector((state) => state.adCreation.draft);
   const options = useSelector((state) => state.adCreation.options);
+  const user = useSelector((state) => state.auth?.user);
+
+  const userName =
+    user?.name ||
+    (user?.first_name
+      ? `${user.first_name} ${user.last_name || ""}`.trim()
+      : "Jane Smith");
+  const userAvatar =
+    user?.profile_photo_url ||
+    user?.avatar ||
+    "https://i.pravatar.cc/150?u=jane";
+
   const [createAd, { isLoading: isCreating }] = useCreateAdMutation();
   const [updateAd, { isLoading: isUpdating }] = useUpdateAdMutation();
   const isLoading = isCreating || isUpdating;
@@ -26,7 +39,7 @@ export default function PostPreview() {
     const fd = new FormData();
     fd.append("description", draft.adsDescription);
     fd.append("category_id", draft.adsCategory);
-    
+
     // Add countries
     if (draft.countries && draft.countries.length > 0) {
       draft.countries.forEach((country, index) => {
@@ -40,18 +53,24 @@ export default function PostPreview() {
       fd.append("media_type", isVideo ? "video" : "image");
     }
 
-
+    if (draft.publishAt) {
+      let formattedDate = draft.publishAt.replace("T", " ");
+      if (formattedDate.length === 16) {
+        formattedDate += ":00";
+      }
+      fd.append("publish_at", formattedDate);
+    }
 
     fd.append("prize_type", draft.prizeType);
-    
-    if (draft.prizes && draft.prizes.length > 0) {
+
+    if (draft.prizeType === "cash" && draft.prizes && draft.prizes.length > 0) {
       draft.prizes.forEach((prize, index) => {
         fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
         fd.append(`prizes[${index}][value]`, prize.value);
       });
     }
 
-    if (draft.promoCode) {
+    if (draft.prizeType === "coupon" && draft.promoCode) {
       fd.append("promo_code[code]", draft.promoCode);
       if (draft.promoCodeDiscount) {
         fd.append("promo_code[discount_percentage]", draft.promoCodeDiscount);
@@ -81,7 +100,10 @@ export default function PostPreview() {
       }
       dispatch(clearDraft());
     } catch (err) {
-      toast.error(err?.data?.message || `Failed to ${draft.id ? "update" : "publish"} ads.`);
+      toast.error(
+        err?.data?.message ||
+          `Failed to ${draft.id ? "update" : "publish"} ads.`,
+      );
     }
   };
 
@@ -92,18 +114,30 @@ export default function PostPreview() {
       {/* Main Image */}
       <div className="relative w-full h-[350px] md:h-[450px] rounded-[2rem] overflow-hidden shadow-sm bg-black">
         {draft.previewUrl ? (
-          draft.mediaFile?.type?.startsWith('video/') || draft.mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i) ? (
+          draft.mediaFile?.type?.startsWith("video/") ||
+          draft.mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i) ? (
             <video
               src={draft.previewUrl}
               controls
               className="w-full h-full object-cover"
             />
           ) : (
-            <Image src={draft.previewUrl} alt="Ad Preview" fill className="object-cover" />
+            <Image
+              src={getImageUrl(draft.previewUrl)}
+              alt="Ad Preview"
+              fill
+              className="object-cover"
+            />
           )
         ) : (
           <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center text-gray-400">
-            <Image src="/images/placeholder.png" alt="No image" width={100} height={100} className="opacity-20" />
+            <Image
+              src="/images/placeholder.png"
+              alt="No image"
+              width={100}
+              height={100}
+              className="opacity-20"
+            />
             <span className="mt-4">No Image Uploaded</span>
           </div>
         )}
@@ -115,9 +149,14 @@ export default function PostPreview() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full overflow-hidden relative">
-                <Image src="https://i.pravatar.cc/150?u=jane" alt="User" fill className="object-cover" />
+                <Image
+                  src={getImageUrl(userAvatar)}
+                  alt="User"
+                  fill
+                  className="object-cover"
+                />
               </div>
-              <h3 className="font-bold text-black text-lg">Jane Smith</h3>
+              <h3 className="font-bold text-black text-lg">{userName}</h3>
             </div>
 
             <div className="flex items-center gap-5 text-sm text-gray font-medium">
@@ -127,12 +166,15 @@ export default function PostPreview() {
               <div className="flex items-center gap-2">
                 <Eye size={20} /> 24
               </div>
-              <span className="underline underline-offset-2 cursor-pointer ml-2">Boost Credited</span>
+              <span className="underline underline-offset-2 cursor-pointer ml-2">
+                Boost Credited
+              </span>
             </div>
           </div>
 
           <div className="text-sm text-black leading-[1.8] whitespace-pre-wrap">
-            {draft.adsDescription || "Step into a night of unparalleled elegance at the Black Diamond Ball, a collaboration between Lumina Moda and renowned designer, Seraphina Dubois!\n\nExperience an evening where fashion transcends artistry, with a showcase of exclusive designs and breathtaking displays."}
+            {draft.adsDescription ||
+              "Step into a night of unparalleled elegance at the Black Diamond Ball, a collaboration between Lumina Moda and renowned designer, Seraphina Dubois!\n\nExperience an evening where fashion transcends artistry, with a showcase of exclusive designs and breathtaking displays."}
           </div>
         </div>
 
@@ -142,18 +184,78 @@ export default function PostPreview() {
 
           <div className="flex flex-col gap-5 text-sm">
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Ads Create</span>
-              <span className="font-semibold text-black">Jane Smith</span>
+              <span className="text-gray-500">Ads Creator</span>
+              <span className="font-semibold text-black">{userName}</span>
             </div>
             <div className="w-full h-[1px] bg-gray-200" />
 
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Prize Number</span>
-              <span className="font-semibold text-black">
-                {String(draft.prizes?.length || 0).padStart(2, "0")}
-              </span>
-            </div>
+            {draft.countries && draft.countries.length > 0 && (
+              <>
+                <div className="flex justify-between items-start gap-4">
+                  <span className="text-gray-500 whitespace-nowrap">
+                    Target Countries
+                  </span>
+                  <span className="font-semibold text-black text-right line-clamp-2">
+                    {draft.countries
+                      .map((c) => c.name || c.code || c)
+                      .join(", ")}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
 
+            {draft.prizeType && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Prize Type</span>
+                  <span className="font-semibold text-black capitalize">
+                    {draft.prizeType}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
+
+            {draft.prizeType === "cash" && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Prize Number</span>
+                  <span className="font-semibold text-black">
+                    {String(draft.prizes?.length || 0).padStart(2, "0")}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
+
+            {draft.prizeType === "coupon" && (
+              <>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Promo Code</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCode || "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Discount</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCodeDiscount
+                      ? `${draft.promoCodeDiscount}%`
+                      : "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500">Expiry Date</span>
+                  <span className="font-semibold text-black">
+                    {draft.promoCodeExpiry || "N/A"}
+                  </span>
+                </div>
+                <div className="w-full h-[1px] bg-gray-200" />
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -172,7 +274,13 @@ export default function PostPreview() {
           disabled={isLoading}
           className="bg-primary text-white px-8 py-3 rounded-full font-bold text-sm hover:opacity-90 hover:cursor-pointer transition-all shadow-md disabled:opacity-60"
         >
-          {isLoading ? (draft.id ? "Saving..." : "Publishing...") : (draft.id ? "Save Changes" : "Publish Ads")}
+          {isLoading
+            ? draft.id
+              ? "Saving..."
+              : "Publishing..."
+            : draft.id
+              ? "Save Changes"
+              : "Publish Ads"}
         </button>
       </div>
     </div>

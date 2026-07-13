@@ -11,6 +11,7 @@ import MyEventActionButtons from "./MyEventActionButtons";
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
 import dynamic from "next/dynamic";
 import UpComingEventsActionButton from "./UpComingEventsActionButton";
+import BuyTicketModal from "./BuyTicketModal";
 const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
   ssr: false,
 });
@@ -59,6 +60,7 @@ const EventDetailsSkeleton = () => (
 export default function EventDetailsPage({ role, params }) {
   const { id } = use(params);
   const [modalOpen, setModalOpen] = useState(false);
+  const [buyModalOpen, setBuyModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
 
   const { data: response, isLoading } = useGetEventByIdQuery(id);
@@ -78,19 +80,18 @@ export default function EventDetailsPage({ role, params }) {
   }
 
   const event = {
-    id: rawEvent.id,
+    id: rawEvent.event_id || rawEvent.id || id,
     is_bookmarked: rawEvent.is_bookmarked,
     title: rawEvent.name || "Event Title",
     location: rawEvent.location,
     sponsor: rawEvent.sponsors?.[0]?.sponsor?.name || "N/A",
     date: rawEvent.start_date,
-    eventType: "Offline", // Assuming offline if no type is given in this API response example
-    participants: rawEvent.total_participants || 0,
+    eventType: rawEvent.type,
+    participants: rawEvent.participants.length || 0,
     imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL || "https://oddeven.thewarriors.team"}/${rawEvent.photo}`
-      : "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&auto=format&fit=crop&q=80",
-    mapUrl:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14608.039575440334!2d90.3654215!3d23.746476!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b33534720f%3A0x867375a18357731a!2sDhanmondi%2C%20Dhaka!5e0!3m2!1sen!2sbd!4v1683921345678",
+      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
+      : null,
+    mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };
 
@@ -101,8 +102,8 @@ export default function EventDetailsPage({ role, params }) {
     })) || [];
 
   const infoItems = [
-    { label: "Event Type", value: event.eventType || "Offline" },
-    { label: "Participants", value: String(event.participants || 213) },
+    { label: "Event Type", value: event.eventType },
+    { label: "Participants", value: String(event.participants) },
     { label: "Sponsored", value: event.sponsor },
     { label: "Location", value: event.location },
     { label: "Event Start", value: event.date },
@@ -141,14 +142,15 @@ export default function EventDetailsPage({ role, params }) {
           eventId={event.id}
           initialBookmarked={event.is_bookmarked}
           onJoin={() => {
-            setEditingEvent(rawEvent);
-            setModalOpen(true);
+            setBuyModalOpen(true);
           }}
         />
       </div>
 
       {/* Hero Image */}
-      <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      {event.imageUrl && (
+        <EventHeroImage imageUrl={event.imageUrl} alt={event.title} />
+      )}
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -165,8 +167,8 @@ export default function EventDetailsPage({ role, params }) {
 
       {/* Bottom Grid*/}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <EventLocation mapUrl={event.mapUrl} />
+        <div className="md:col-span-2 lg:col-span-2">
+          <EventLocation mapUrl={event.mapUrl} locationName={event.location} />
         </div>
         <div className="lg:col-span-1">
           <EventParticipants participants={formattedParticipants} />
@@ -180,6 +182,11 @@ export default function EventDetailsPage({ role, params }) {
           setEditingEvent(null);
         }}
         editingEvent={editingEvent}
+      />
+      <BuyTicketModal
+        open={buyModalOpen}
+        onClose={() => setBuyModalOpen(false)}
+        event={rawEvent}
       />
     </div>
   );

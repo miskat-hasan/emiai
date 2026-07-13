@@ -40,6 +40,7 @@ export default function RegistrationPasswordPage() {
         country: info.country,
         password,
         password_confirmation,
+        agree_to_terms: 1,
       }).unwrap();
 
       if (res?.success) {

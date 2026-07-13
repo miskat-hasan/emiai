@@ -1,10 +1,19 @@
+// components/dashboard/inbox/ChatInfoView.jsx
 "use client";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 import React, { useState } from "react";
 import Image from "next/image";
 import {
-  ArrowLeft, Bookmark, Share2, Video,
-  Calendar, ChevronDown, UserPlus, LogOut, MoreVertical
+  ArrowLeft,
+  Bookmark,
+  Share2,
+  Video,
+  Calendar,
+  ChevronDown,
+  UserPlus,
+  LogOut,
+  MoreVertical,
 } from "lucide-react";
 import { MinusCircleSVG, ExclamationCircleSVG } from "@/components/common/Svg";
 import BlockModal from "./modals/BlockModal";
@@ -14,7 +23,8 @@ import ExtensionDeliveryModal from "./modals/ExtensionDeliveryModal";
 import LeaveGroupModal from "./modals/LeaveGroupModal";
 import AddMemberModal from "./modals/AddMemberModal";
 
-export default function ChatInfoView({ chat, onBack }) {
+export default function ChatInfoView({ chat, currentUserId, onBack }) {
+  // console.log(chat);
   const { user, deliveryDate, gallery } = chat;
   const [activeTab, setActiveTab] = useState("gallery");
 
@@ -44,7 +54,6 @@ export default function ChatInfoView({ chat, onBack }) {
 
         <div className="flex-1 overflow-y-auto pb-8">
           <div className="flex flex-col items-center px-6 lg:px-10 mt-2">
-
             <div className="relative w-full flex justify-end">
               <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer">
                 <Bookmark size={22} className="fill-gray-500 text-gray-500" />
@@ -62,9 +71,12 @@ export default function ChatInfoView({ chat, onBack }) {
               />
             </div>
 
-            <h2 className="text-[22px] font-bold text-gray-900 mb-3">{user.name}</h2>
+            <h2 className="text-[22px] font-bold text-gray-900 mb-3">
+              {user.name}
+            </h2>
             <p className="text-sm text-gray-500 text-center max-w-[280px] mb-8 leading-relaxed font-medium">
-              You can check the offer. You can check the offer. You can check the offer.
+              You can check the offer. You can check the offer. You can check
+              the offer.
             </p>
 
             <div className="flex items-center gap-7 mb-10">
@@ -93,17 +105,25 @@ export default function ChatInfoView({ chat, onBack }) {
             {/* Members List */}
             <div className="w-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-gray-900 text-[15px]">All Member ({chat.members?.length || 0})</h3>
-                <ChevronDown size={20} className="text-gray-500 cursor-pointer hover:text-gray-800 transition-colors" />
+                <h3 className="font-bold text-gray-900 text-[15px]">
+                  All Member ({chat.members?.length || 0})
+                </h3>
+                <ChevronDown
+                  size={20}
+                  className="text-gray-500 cursor-pointer hover:text-gray-800 transition-colors"
+                />
               </div>
 
               <div className="flex flex-col gap-6">
-                {chat.members?.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between group">
+                {chat.members?.map(member => (
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between group"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="relative w-11 h-11 rounded-full overflow-hidden border border-gray-100 shadow-sm">
                         <Image
-                          src={member.avatar}
+                          src={getImageUrl(member.avatar)}
                           alt={member.name}
                           fill
                           className="object-cover"
@@ -111,8 +131,14 @@ export default function ChatInfoView({ chat, onBack }) {
                         />
                       </div>
                       <div className="flex flex-row items-center gap-1.5 mt-0.5">
-                        <span className="font-semibold text-[15px] text-gray-800">{member.name}</span>
-                        <span className={`text-[13px] font-medium ${member.roleColor}`}>({member.role})</span>
+                        <span className="font-semibold text-[15px] text-gray-800">
+                          {member.name}
+                        </span>
+                        <span
+                          className={`text-[13px] font-medium ${member.roleColor}`}
+                        >
+                          ({member.role})
+                        </span>
                       </div>
                     </div>
                     <button className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer p-1">
@@ -155,13 +181,12 @@ export default function ChatInfoView({ chat, onBack }) {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-8">
-
         {/* Profile Section */}
         <div className="flex flex-col items-center mt-2 mb-8">
           <div className="relative w-24 h-24 lg:w-32 lg:h-32 rounded-[24px] overflow-hidden mb-4 shadow-sm">
             {user.avatar.length > 2 ? (
               <Image
-                src={user.avatar}
+                src={getImageUrl(user.avatar)}
                 alt={user.name}
                 fill
                 className="object-cover"
@@ -204,7 +229,9 @@ export default function ChatInfoView({ chat, onBack }) {
           <div className="mb-8 flex flex-col gap-4">
             <div className="bg-gray-50 rounded-2xl p-4 flex items-center justify-between border border-gray-100/50">
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-medium text-gray-800">Delivery Date</span>
+                <span className="text-sm font-medium text-gray-800">
+                  Delivery Date
+                </span>
                 <span className="text-xs text-gray-500">{deliveryDate}</span>
               </div>
               <div className="flex items-center gap-3">
@@ -230,7 +257,9 @@ export default function ChatInfoView({ chat, onBack }) {
         {/* Gallery / Tabs Section */}
         <div className="flex flex-col gap-5">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-gray-900 text-sm">Gallery, Document, Link</h3>
+            <h3 className="font-semibold text-gray-900 text-sm">
+              Gallery, Document, Link
+            </h3>
             <ChevronDown size={18} className="text-gray-400" />
           </div>
 
@@ -244,9 +273,10 @@ export default function ChatInfoView({ chat, onBack }) {
                   onClick={() => setActiveTab(tabId)}
                   className={`
                     px-4 py-2 rounded-full text-xs font-medium transition-colors shrink-0 cursor-pointer
-                    ${isActive
-                      ? 'bg-primary text-white shadow-sm shadow-primary/20'
-                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                    ${
+                      isActive
+                        ? "bg-primary text-white shadow-sm shadow-primary/20"
+                        : "bg-gray-50 text-gray-600 hover:bg-gray-100"
                     }
                   `}
                 >
@@ -260,9 +290,12 @@ export default function ChatInfoView({ chat, onBack }) {
           {activeTab === "gallery" && gallery && gallery.length > 0 && (
             <div className="grid grid-cols-4 gap-2.5 mt-2">
               {gallery.map((imgUrl, i) => (
-                <div key={i} className="aspect-square relative rounded-xl overflow-hidden bg-gray-100">
+                <div
+                  key={i}
+                  className="aspect-square relative rounded-xl overflow-hidden bg-gray-100"
+                >
                   <Image
-                    src={imgUrl}
+                    src={getImageUrl(imgUrl)}
                     alt={`Gallery item ${i}`}
                     fill
                     className="object-cover"
@@ -279,13 +312,13 @@ export default function ChatInfoView({ chat, onBack }) {
             </div>
           )}
         </div>
-
       </div>
 
       {/* Modals */}
       <BlockModal
         isOpen={isBlockModalOpen}
         onClose={() => setIsBlockModalOpen(false)}
+        userId={user.id}
         userName={user.name}
       />
 
@@ -306,11 +339,14 @@ export default function ChatInfoView({ chat, onBack }) {
 
       <LeaveGroupModal
         isOpen={isLeaveModalOpen}
+        groupId={chat.id}
         onClose={() => setIsLeaveModalOpen(false)}
       />
 
       <AddMemberModal
         isOpen={isAddMemberModalOpen}
+        groupId={chat.id}
+        existingMemberIds={chat.members?.map(m => m.id) ?? []}
         onClose={() => setIsAddMemberModalOpen(false)}
       />
     </div>

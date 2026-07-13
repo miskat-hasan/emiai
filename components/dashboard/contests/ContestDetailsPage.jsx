@@ -1,13 +1,13 @@
-// components/dashboard/contests/ContestDetailsPage.jsx
 "use client";
+// components/dashboard/contests/ContestDetailsPage.jsx
 
 import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { Bookmark, QrCode, Share2, Pencil } from "lucide-react";
+import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetSingleContestQuery,
   useAnnounceWinnerMutation,
@@ -15,6 +15,7 @@ import {
 } from "@/redux/api/services/contestApi";
 import AnnounceWinnerModal from "./AnnounceWinnerModal";
 import JoinContestModal from "./JoinContestModal";
+import CreateContestModal from "./CreateContestModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,24 @@ function formatDate(dateStr) {
   });
 }
 
+const getDaysAgo = dateString => {
+  const created = new Date(dateString);
+  const now = new Date();
+
+  // Reset hours to compare calendar days, or keep them to compare exact 24-hour periods
+  const diffTime = now - created;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 1) {
+    // Optional: Handle if it was created just hours ago
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    if (diffHours < 1) return "Just now";
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  }
+
+  return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+};
+
 // ─── Avatar with initials fallback ───────────────────────────────────────────
 
 function UserAvatar({ avatar, name, size = 10 }) {
@@ -44,7 +63,7 @@ function UserAvatar({ avatar, name, size = 10 }) {
     >
       {avatar ? (
         <Image
-          src={avatar}
+          src={getImageUrl(avatar)}
           alt={name}
           width={40}
           height={40}
@@ -56,17 +75,6 @@ function UserAvatar({ avatar, name, size = 10 }) {
     </div>
   );
 }
-
-// ─── Role badge color ─────────────────────────────────────────────────────────
-
-const ROLE_COLORS = {
-  influencer: "text-[#F57802]",
-  advertiser: "text-[#125896]",
-  agency: "text-[#DE4385]",
-  business_manager: "text-[#B05EE0]",
-  guest: "text-[#D20061]",
-  admin: "text-gray-400",
-};
 
 // ─── Icon action buttons (top-right) ─────────────────────────────────────────
 
@@ -91,11 +99,9 @@ export default function ContestDetailsPage({ params, role }) {
   const [winnerModalOpen, setWinnerModalOpen] = useState(false);
   const [winnerIds, setWinnerIds] = useState([]);
   const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
-  // variant comes from the card's href: /contests/[id]?v=my|contest|participated
   const variant = searchParams.get("v") ?? "contest";
-
-  const currentUser = useSelector(state => state.auth?.user);
 
   const { data, isLoading, isError } = useGetSingleContestQuery(id);
   const [announceWinner, { isLoading: isAnnouncing }] =
@@ -139,7 +145,7 @@ export default function ContestDetailsPage({ params, role }) {
       toast.error(err?.data?.message ?? "Failed to announce winner.");
     }
   };
-  
+
   const handleJoin = async () => {
     try {
       await joinContest(id).unwrap();
@@ -209,7 +215,13 @@ export default function ContestDetailsPage({ params, role }) {
           <ActionIcon icon={Bookmark} title="Bookmark" />
           <ActionIcon icon={QrCode} title="QR Code" />
           <ActionIcon icon={Share2} title="Share" />
-          {isMyContest && <ActionIcon icon={Pencil} title="Edit contest" />}
+          {isMyContest && (
+            <ActionIcon
+              icon={Pencil}
+              title="Edit contest"
+              onClick={() => setEditModalOpen(true)}
+            />
+          )}
         </div>
       </div>
 
@@ -285,7 +297,16 @@ export default function ContestDetailsPage({ params, role }) {
           {c.rules && (
             <div className="mt-4">
               <p className="text-xs font-semibold text-black mb-1">Rules</p>
-              <p className="text-xs text-gray leading-relaxed">{c.rules}</p>
+              <ul>
+                {c.rules.map((rule, index) => (
+                  <li
+                    key={index}
+                    className="text-sm text-gray leading-relaxed list-disc ml-5"
+                  >
+                    {rule}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
         </div>
@@ -343,13 +364,13 @@ export default function ContestDetailsPage({ params, role }) {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-black leading-tight">
                       {p.name}{" "}
-                      <span
-                        className={`text-xs font-medium capitalize ${ROLE_COLORS[p.role] ?? "text-gray-400"}`}
-                      >
+                      <span className="text-xs font-medium capitalize text-primary">
                         ({p.role})
                       </span>
                     </p>
-                    <p className="text-xs text-gray mt-0.5">--</p>
+                    <p className="text-xs text-gray mt-0.5">
+                      {getDaysAgo(p.pivot.created_at)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -375,6 +396,12 @@ export default function ContestDetailsPage({ params, role }) {
         onClose={() => setJoinModalOpen(false)}
         onConfirm={handleJoin}
         isLoading={isJoining}
+        contest={c}
+      />
+
+      <CreateContestModal
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
         contest={c}
       />
     </div>

@@ -3,19 +3,28 @@ import { apiSlice } from "../apiSlice";
 export const contestApi = apiSlice.injectEndpoints({
   endpoints: builder => ({
     getMyContests: builder.query({
-      query: () => ({ url: "/api/contest/my-contests", method: "GET" }),
+      query: (params = {}) => ({
+        url: "/api/contest/my-contests",
+        method: "GET",
+        params,
+      }),
       providesTags: ["Contest"],
     }),
 
     getAllContests: builder.query({
-      query: () => ({ url: "/api/contest", method: "GET" }),
+      query: (params = {}) => ({
+        url: "/api/contest",
+        method: "GET",
+        params,
+      }),
       providesTags: ["Contest"],
     }),
 
     getParticipatedContests: builder.query({
-      query: () => ({
+      query: (params = {}) => ({
         url: "/api/contest/participated-contests",
         method: "GET",
+        params,
       }),
       providesTags: ["Contest"],
     }),
@@ -23,12 +32,21 @@ export const contestApi = apiSlice.injectEndpoints({
     getSingleContest: builder.query({
       query: id => ({ url: `/api/contest/show?id=${id}`, method: "GET" }),
       providesTags: ["Contest"],
-      // providesTags: (result, error, id) => [{ type: "Contest", id }],
     }),
 
     createContest: builder.mutation({
       query: formData => ({
         url: "/api/contest/store",
+        method: "POST",
+        body: formData,
+        formData: true,
+      }),
+      invalidatesTags: ["Contest"],
+    }),
+
+    updateContest: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/api/contest/update?id=${id}`,
         method: "POST",
         body: formData,
         formData: true,
@@ -51,10 +69,6 @@ export const contestApi = apiSlice.injectEndpoints({
         method: "POST",
       }),
       invalidatesTags: ["Contest"],
-      // invalidatesTags: (result, error, contestId) => [
-      //   "Contest",
-      //   { type: "Contest", id: contestId },
-      // ],
     }),
   }),
 });
@@ -65,6 +79,7 @@ export const {
   useGetParticipatedContestsQuery,
   useGetSingleContestQuery,
   useCreateContestMutation,
+  useUpdateContestMutation,
   useAnnounceWinnerMutation,
   useJoinContestMutation,
 } = contestApi;
