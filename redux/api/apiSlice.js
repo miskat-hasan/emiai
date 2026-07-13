@@ -22,6 +22,11 @@ export const apiSlice = createApi({
     "Users",
     "SocialStatus",
     "Agencies",
+    "Conversation",
+    "Messages",
+    "AvailableUsers",
+    "PinnedMessages",
+    "GroupMembers",
   ],
 
   endpoints: () => ({}),

@@ -1,3 +1,4 @@
+// components/dashboard/inbox/modals/ReportModal.jsx
 "use client";
 
 import React, { useState } from "react";
