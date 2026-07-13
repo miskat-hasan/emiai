@@ -121,8 +121,43 @@ export default function AdDetailsPage({
 
   if (isLoading) {
     return (
-      <div className="p-10 text-center animate-pulse">
-        Loading ad details...
+      <div className="space-y-5 animate-pulse">
+        {/* Page heading skeleton */}
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="h-8 w-32 bg-gray-200 rounded"></div>
+            <div className="h-4 w-64 bg-gray-200 rounded mt-2"></div>
+          </div>
+          <div className="h-10 w-32 bg-gray-200 rounded-xl"></div>
+        </div>
+
+        {/* Hero Image */}
+        <div className="w-full h-[300px] md:h-[400px] bg-gray-200 rounded-[2rem]"></div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          {/* Left Column */}
+          <div className="lg:col-span-2 flex flex-col gap-5">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+              <div className="space-y-2">
+                <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+            <hr className="border-gray-200" />
+            <div className="space-y-3">
+              <div className="h-4 w-full bg-gray-200 rounded"></div>
+              <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
+              <div className="h-4 w-4/6 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+          
+          {/* Right Column */}
+          <div className="lg:col-span-1">
+            <div className="h-64 bg-gray-200 rounded-3xl"></div>
+          </div>
+        </div>
       </div>
     );
   }

@@ -44,7 +44,7 @@ export default function CollaborationsPage() {
             
             currency: "$", // Default currency
             requestedLabel: "Ticket Price",
-            avatar: item.invited_user?.profile_photo || "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face",
+            avatar: item.invited_user?.avatar,
         }));
     }, [sentInvitationsResponse]);
 
