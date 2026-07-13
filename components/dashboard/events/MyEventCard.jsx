@@ -9,7 +9,6 @@ const MyEventCard = ({
   organizer,
   date,
   onClick,
-  onEditClick,
 }) => {
   return (
     <div

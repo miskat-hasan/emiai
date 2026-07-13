@@ -1,18 +1,20 @@
 "use client";
 
-import { use, useState } from "react";
+import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import EventHeroImage from "./EventHeroImage";
+import { use, useState } from "react";
 import EventDescription from "./EventDescription";
+import EventHeroImage from "./EventHeroImage";
 import EventInfoCard from "./EventInfoCard";
 import EventLocation from "./EventLocation";
 import EventParticipants from "./EventParticipants";
 import MyEventActionButtons from "./MyEventActionButtons";
-import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
-import dynamic from "next/dynamic";
 
 import SendInvitationFlow from "./SendInvitationFlow";
-const CreateEventModal = dynamic(() => import("./CreateEventModal"), { ssr: false });
+const CreateEventModal = dynamic(() => import("./CreateEventModal"), {
+  ssr: false,
+});
 
 const EventDetailsSkeleton = () => (
   <div className="space-y-5 animate-pulse">
@@ -100,7 +102,7 @@ export default function MyEventDetailsPage({ role, params }) {
     })) || [];
 
   const infoItems = [
-    { label: "Event Type", value: event.eventType  },
+    { label: "Event Type", value: event.eventType },
     { label: "Participants", value: String(event.participants.length || 0) },
     { label: "Sponsored", value: event.sponsor },
     { label: "Location", value: event.location },
