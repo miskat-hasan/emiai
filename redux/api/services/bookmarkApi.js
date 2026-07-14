@@ -22,7 +22,7 @@ export const bookmarkApi = apiSlice.injectEndpoints({
           body: formData,
         };
       },
-      invalidatesTags: ["Bookmark", "Ad", "Contest", "Event"],
+      invalidatesTags: ["Bookmark", "Ad", "Contest", "Event", "Portfolio"],
     }),
   }),
 });

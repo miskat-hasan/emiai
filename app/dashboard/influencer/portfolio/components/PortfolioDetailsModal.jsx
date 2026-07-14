@@ -3,6 +3,7 @@ import { getImageUrl } from "@/helper/getImageUrl";
 
 import {
   BookmarkFilledSVG2,
+  BookmarkSVG,
   HeartSVG2,
   MailSVG,
   ShareSVG,
@@ -11,6 +12,10 @@ import { X, Heart, Eye, Pencil } from "lucide-react";
 import Image from "next/image";
 import { FaHeart } from "react-icons/fa";
 import { useGetSinglePortfolioQuery } from "@/redux/api/services/portfolioApi";
+import { useEffect, useState } from "react";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
+import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import { toast } from "react-toastify";
 
 function formatDate(dateStr) {
   if (!dateStr) return "";
@@ -29,6 +34,19 @@ export default function PortfolioDetailsModal({
   const { data: res, isLoading } = useGetSinglePortfolioQuery(portfolioId, {
     skip: !open || !portfolioId,
   });
+
+  const [toggleBookmark] = useToggleBookmarkMutation();
+  const [storeInteraction] = useStoreInteractionMutation();
+
+  useEffect(() => {
+    if (open && portfolioId) {
+      storeInteraction({
+        target_type: "portfolio",
+        target_id: portfolioId,
+        interaction_type: "view",
+      });
+    }
+  }, [open, portfolioId, storeInteraction]);
 
   if (!open) return null;
 
@@ -66,6 +84,43 @@ export default function PortfolioDetailsModal({
     })),
   };
 
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (rawPortfolio) {
+      setIsLiked(Boolean(rawPortfolio.is_liked));
+      setIsBookmarked(Boolean(rawPortfolio.is_bookmarked));
+    }
+  }, [rawPortfolio]);
+
+  const handleLike = async () => {
+    try {
+      setIsLiked(prev => !prev);
+      await storeInteraction({
+        target_type: "portfolio",
+        target_id: portfolioId,
+        interaction_type: "like",
+      }).unwrap();
+    } catch (e) {
+      setIsLiked(prev => !prev);
+      toast.error("Failed to like portfolio");
+    }
+  };
+
+  const handleBookmark = async () => {
+    try {
+      setIsBookmarked(prev => !prev);
+      await toggleBookmark({
+        type: "portfolio",
+        id: portfolioId,
+      }).unwrap();
+    } catch (e) {
+      setIsBookmarked(prev => !prev);
+      toast.error("Failed to bookmark portfolio");
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#000000]/90 p-4 no-scrollbar">
       <div className="relative w-full max-w-[800px] bg-[#000000]/50 p-6 sm:py-8 sm:pl-14 pr-8 overflow-y-auto max-h-[90vh]">
@@ -89,8 +144,15 @@ export default function PortfolioDetailsModal({
           </div>
 
           {/* Bookmark */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">
-            <BookmarkFilledSVG2 className="w-10 h-10 text-gray-400" />
+          <button 
+            onClick={handleBookmark}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
+          >
+            {isBookmarked ? (
+              <BookmarkFilledSVG2 className="w-10 h-10 text-primary" />
+            ) : (
+              <BookmarkSVG className="w-5 h-5 text-gray-400" />
+            )}
           </button>
 
           {/* Share */}
@@ -115,8 +177,15 @@ export default function PortfolioDetailsModal({
           )}
 
           {/* Like */}
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors">
-            <HeartSVG2 className="w-5 h-5 text-gray-400" />
+          <button 
+            onClick={handleLike}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-100 transition-colors"
+          >
+            {isLiked ? (
+              <FaHeart className="w-5 h-5 text-primary" />
+            ) : (
+              <HeartSVG2 className="w-5 h-5 text-gray-400" />
+            )}
           </button>
         </div>
 

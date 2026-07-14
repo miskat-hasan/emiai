@@ -4,11 +4,10 @@ import { toast } from "react-toastify";
 import { useMemo, useState } from "react";
 import PaymentRequestCard from "../components/PaymentRequestCard";
 import SentCollaborationCard from "../components/SentCollaborationCard";
-import { paymentRequests } from "../components/Data/collaborationPaymentData";
 import CollaborationPaymentModal from "../components/CollaborationPaymentModal";
 import IncomingCollaborationCard from "../components/IncomingCollaborationCard";
-import { incomingCollaborationRequests } from "../components/Data/collaborationIncomingData";
 import { useGetMySentInvitationsQuery } from "@/redux/api/services/eventApi";
+import { useGetCollaboratorsQuery, useGetPaymentRequestedInvitationsQuery, useActionInvitationMutation } from "@/redux/api/services/collaboratosApi";
 
 
 const collaborationTabs = [
@@ -31,45 +30,144 @@ export default function CollaborationsPage() {
     const [selectedCollaboration, setSelectedCollaboration] = useState(null);
 
     const { data: sentInvitationsResponse, isLoading: isLoadingSent } = useGetMySentInvitationsQuery();
+    const { data: incomingInvitationsResponse, isLoading: isLoadingIncoming } = useGetCollaboratorsQuery();
+    const { data: paymentRequestedResponse, isLoading: isLoadingPayment } = useGetPaymentRequestedInvitationsQuery();
+    const [actionInvitation] = useActionInvitationMutation();
 
     const sentInvitationsData = useMemo(() => {
         const rawData = sentInvitationsResponse?.data || [];
-        return rawData.map(item => ({
-            id: item.id,
-            title: item.event?.title || "Unknown Event",
-            host: item.invited_user?.name || "Unknown User",
-            status: item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Pending",
-            statusTone: item.status || "pending",
-            amount: item.ticket?.price || 0,
-            
-            currency: "$", // Default currency
-            requestedLabel: "Ticket Price",
-            avatar: item.invited_user?.avatar,
-        }));
+        return rawData.map(item => {
+            let detailsUrl = "#";
+            let contentTitle = "Unknown Content";
+            if (item.event) {
+                detailsUrl = `/dashboard/influencer/events/${item.event_id || item.event?.id}`;
+                contentTitle = item.event?.title;
+            } else if (item.ad) {
+                detailsUrl = `/dashboard/influencer/ads/${item.ad_id || item.ad?.id}`;
+                contentTitle = item.ad?.title;
+            } else if (item.contest) {
+                detailsUrl = `/dashboard/influencer/contests/${item.contest_id || item.contest?.id}`;
+                contentTitle = item.contest?.title;
+            }
+
+            return {
+                id: item.id,
+                title: contentTitle || "Unknown Event",
+                detailsUrl,
+                host: item.invited_user?.name || "Unknown User",
+                status: item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Pending",
+                statusTone: item.status || "pending",
+                amount: item.ticket?.price || 0,
+                currency: "$",
+                requestedLabel: "Ticket Price",
+                avatar: item.invited_user?.avatar,
+            };
+        });
     }, [sentInvitationsResponse]);
+
+    const incomingInvitationsData = useMemo(() => {
+        const rawData = incomingInvitationsResponse?.data || [];
+        return rawData.map(item => {
+            let detailsUrl = "#";
+            let contentTitle = "Unknown Content";
+            if (item.event) {
+                detailsUrl = `/dashboard/influencer/events/${item.event_id || item.event?.id}`;
+                contentTitle = item.event?.title;
+            } else if (item.ad) {
+                detailsUrl = `/dashboard/influencer/ads/${item.ad_id || item.ad?.id}`;
+                contentTitle = item.ad?.title;
+            } else if (item.contest) {
+                detailsUrl = `/dashboard/influencer/contests/${item.contest_id || item.contest?.id}`;
+                contentTitle = item.contest?.title;
+            }
+
+            return {
+                id: item.id,
+                title: contentTitle || "Unknown Event",
+                detailsUrl,
+                host: item.invited_by?.name || "Unknown User",
+                status: item.status ? item.status.charAt(0).toUpperCase() + item.status.slice(1) : "Pending",
+                statusTone: item.status || "pending",
+                amount: item.ticket?.price || item.requested_amount || 0,
+                currency: "$",
+                requestedLabel: item.is_payment_requested ? "Requested" : "Ticket Price",
+                avatar: item.invited_by?.avatar || `https://i.pravatar.cc/150?u=${item.id}`,
+            };
+        });
+    }, [incomingInvitationsResponse]);
+
+    const paymentRequestsData = useMemo(() => {
+        const rawData = paymentRequestedResponse?.data || [];
+        return rawData.map(item => {
+            let detailsUrl = "#";
+            let contentTitle = "Unknown Content";
+            if (item.event) {
+                detailsUrl = `/dashboard/influencer/events/${item.event_id || item.event?.id}`;
+                contentTitle = item.event?.title;
+            } else if (item.ad) {
+                detailsUrl = `/dashboard/influencer/ads/${item.ad_id || item.ad?.id}`;
+                contentTitle = item.ad?.title;
+            } else if (item.contest) {
+                detailsUrl = `/dashboard/influencer/contests/${item.contest_id || item.contest?.id}`;
+                contentTitle = item.contest?.title;
+            }
+
+            const isProcessing = item.payment_status === "requested" || item.payment_status === "processing";
+            return {
+                id: item.id,
+                title: contentTitle || "Unknown Event",
+                detailsUrl,
+                host: item.invited_user?.name || "Unknown User",
+                avatar: item.invited_user?.avatar || `https://i.pravatar.cc/150?u=${item.id}`,
+                paymentStatusTone: isProcessing ? "processing" : item.payment_status,
+                paymentStatus: isProcessing ? "Pending Payment" : (item.payment_status ? item.payment_status.charAt(0).toUpperCase() + item.payment_status.slice(1) : "Unknown"),
+                date: item.updated_at || item.created_at,
+                currency: "$",
+                amount: parseFloat(item.requested_amount) || 0,
+            };
+        });
+    }, [paymentRequestedResponse]);
 
     const collaborations = useMemo(() => {
         if (activeTab === "payment") {
-            return paymentRequests;
+            return paymentRequestsData;
         }
 
         if (activeTab === "sent") {
             return sentInvitationsData;
         }
 
-        return incomingCollaborationRequests;
-    }, [activeTab, sentInvitationsData]);
+        return incomingInvitationsData;
+    }, [activeTab, sentInvitationsData, incomingInvitationsData, paymentRequestsData]);
 
     const handleRequestPayment = (item) => {
         setSelectedCollaboration(item);
     };
 
-    const handleAccept = (item) => {
-        toast.success("Collaboration request accepted");
+    const handleAccept = async (item) => {
+        try {
+            const formData = new FormData();
+            formData.append("invitation_id", item.id);
+            formData.append("status", "accepted");
+            await actionInvitation(formData).unwrap();
+            toast.success("Collaboration request accepted");
+        } catch (error) {
+            console.error("Error accepting request:", error);
+            toast.error(error?.data?.message || "Failed to accept request");
+        }
     };
 
-    const handleReject = (item) => {
-        toast.info("Collaboration request rejected");
+    const handleReject = async (item) => {
+        try {
+            const formData = new FormData();
+            formData.append("invitation_id", item.id);
+            formData.append("status", "rejected");
+            await actionInvitation(formData).unwrap();
+            toast.info("Collaboration request rejected");
+        } catch (error) {
+            console.error("Error rejecting request:", error);
+            toast.error(error?.data?.message || "Failed to reject request");
+        }
     };
 
     return (
@@ -94,9 +192,9 @@ export default function CollaborationsPage() {
                 })}
             </div>
 
-            {activeTab === "sent" && isLoadingSent ? (
+            {(activeTab === "sent" && isLoadingSent) || (activeTab === "incoming" && isLoadingIncoming) || (activeTab === "payment" && isLoadingPayment) ? (
                 <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white p-8 text-center">
-                    <p className="text-sm font-medium text-[#7a8582]">Loading sent invitations...</p>
+                    <p className="text-sm font-medium text-[#7a8582]">Loading {activeTab} requests...</p>
                 </div>
             ) : collaborations.length > 0 ? (
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
