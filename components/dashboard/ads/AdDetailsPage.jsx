@@ -284,11 +284,9 @@ export default function AdDetailsPage({
 
           <AdDescription description={ad.description} />
 
-          {ad.topRankings && ad.topRankings.length > 0 && (
-            <div className="md:w-1/2">
-              <AdTopRanking rankings={ad.topRankings} />
-            </div>
-          )}
+          <div className="md:w-1/2 mt-2">
+            <AdTopRanking adId={ad.id} rankings={ad.topRankings?.length > 0 ? ad.topRankings : undefined} />
+          </div>
         </div>
 
         {/* Right Column */}
