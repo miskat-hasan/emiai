@@ -108,9 +108,16 @@ export function mapApiMessage(msg) {
     senderName,
     senderAvatar: msg.owner?.avatar ? getImageUrl(msg.owner.avatar) : undefined,
     // reactions: msg.reactions?.reactions ?? [],
-    reactions: msg.reactions || { reactions: {}, total: 0 },
-    reactionTotal: msg.reactions?.total ?? 0,
+    // reactions: msg.reactions || { reactions: {}, total: 0 },
+    // reactionTotal: msg.reactions?.total ?? 0,
+    reactions: msg.reactions ?? { reactions: [], total: 0 },
     isSystem: msg.message_type === "system",
     replyTo: msg.reply,
+    // No explicit is_edited flag documented — inferred from timestamp drift.
+    // Flag to backend if this ever needs to be exact (e.g. if updated_at
+    // can change for reasons other than an edit).
+    isEdited:
+      msg.created_at && msg.updated_at && msg.created_at !== msg.updated_at,
+    statuses: msg.statuses ?? [],
   };
 }

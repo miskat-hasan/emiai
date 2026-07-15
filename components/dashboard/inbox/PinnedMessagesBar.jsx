@@ -8,7 +8,7 @@ import {
   useTogglePinMessageMutation,
 } from "@/redux/api/services/chatApi";
 
-export default function PinnedMessagesBar({ conversationId }) {
+export default function PinnedMessagesBar({ conversationId, onJumpToMessage }) {
   const [expanded, setExpanded] = useState(false);
   const { data } = useGetPinnedMessagesQuery(conversationId, {
     skip: !conversationId,
@@ -47,7 +47,8 @@ export default function PinnedMessagesBar({ conversationId }) {
           {pinned.map(msg => (
             <div
               key={msg.id}
-              className="flex items-center justify-between gap-3 bg-white rounded-lg px-3 py-2 text-xs"
+              onClick={() => onJumpToMessage?.(msg.id)}
+              className="w-full flex items-center justify-between gap-3 bg-white rounded-lg px-3 py-2 text-xs hover:bg-gray-50 transition-colors cursor-pointer text-left"
             >
               <div className="min-w-0">
                 <span className="font-semibold text-gray-700">
@@ -58,7 +59,10 @@ export default function PinnedMessagesBar({ conversationId }) {
                 </span>
               </div>
               <button
-                onClick={() => handleUnpin(msg.id)}
+                onClick={e => {
+                  e.stopPropagation();
+                  handleUnpin(msg.id);
+                }}
                 className="text-gray-300 hover:text-red-500 transition-colors cursor-pointer shrink-0"
               >
                 <X size={13} />

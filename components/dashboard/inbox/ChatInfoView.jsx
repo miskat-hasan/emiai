@@ -34,6 +34,7 @@ import {
   useRemoveGroupMembersMutation,
   useDeleteGroupMutation,
   useRegenerateInviteMutation,
+  useGetGroupMembersQuery,
 } from "@/redux/api/services/chatApi";
 
 export default function ChatInfoView({ chat, currentUserId, onBack }) {
@@ -59,6 +60,29 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
     useRegenerateInviteMutation();
 
   const isCurrentUserAdmin = chat.isAdmin;
+
+  const isGroup = user.role === "Group";
+  const { data: liveMembers, isLoading: isLoadingMembers } =
+    useGetGroupMembersQuery(chat.id, {
+      skip: !isGroup || !chat.id,
+    });
+
+  // Prefer the dedicated members endpoint (fresher, has full user objects)
+  // over the cached participants list from /api/conversations; fall back to
+  // the cached list while the live query is still loading.
+  const members =
+    liveMembers?.data?.map(m => ({
+      id: m.user?.id,
+      name: m.user?.name,
+      avatar: m.user?.avatar,
+      role: m.role,
+      roleColor:
+        m.role === "super_admin" || m.role === "admin"
+          ? "text-primary"
+          : "text-gray-400",
+    })) ??
+    chat.members ??
+    [];
 
   const handleToggleAdmin = async member => {
     setMemberMenuId(null);
@@ -124,7 +148,7 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
     }
   };
 
-  const tabs = ["Gallery", "Message", "Documents", "Links"];
+  const tabs = ["Gallery", "Documents", "Links"];
 
   // Render Group Chat View
   if (user.role === "Group") {
@@ -150,11 +174,6 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
 
         <div className="flex-1 overflow-y-auto pb-8">
           <div className="flex flex-col items-center px-6 lg:px-10 mt-2">
-            <div className="relative w-full flex justify-end">
-              <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer">
-                <Bookmark size={22} className="fill-gray-500 text-gray-500" />
-              </button>
-            </div>
 
             {/* Collage Avatar (mocked with an image) */}
             <div className="relative w-28 h-28 lg:w-32 lg:h-32 rounded-[24px] overflow-hidden mb-6 mt-[-10px] shadow-sm">
@@ -217,7 +236,7 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
             <div className="w-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-gray-900 text-[15px]">
-                  All Member ({chat.members?.length || 0})
+                  All Member ({members.length})
                 </h3>
                 <ChevronDown
                   size={20}
@@ -226,7 +245,12 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
               </div>
 
               <div className="flex flex-col gap-6">
-                {chat.members?.map(member => (
+                {isLoadingMembers && (
+                  <p className="text-center text-xs text-gray-400 py-2">
+                    Loading members...
+                  </p>
+                )}
+                {members.map(member => (
                   <div
                     key={member.id}
                     className="relative flex items-center justify-between group"
@@ -314,7 +338,7 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
         <AddMemberModal
           isOpen={isAddMemberModalOpen}
           groupId={chat.id}
-          existingMemberIds={chat.members?.map(m => m.id) ?? []}
+          existingMemberIds={members.map(m => m.id)}
           onClose={() => setIsAddMemberModalOpen(false)}
         />
 
@@ -337,9 +361,7 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
         >
           <ArrowLeft size={20} />
         </button>
-        <button className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors">
-          <Bookmark size={20} className="fill-gray-400 text-gray-400" />
-        </button>
+     
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 lg:px-8 pb-8">
