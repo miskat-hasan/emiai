@@ -1,3 +1,4 @@
+// components/dashboard/inbox/AttachmentGrid.jsx
 "use client";
 
 import { useState } from "react";

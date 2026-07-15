@@ -2,7 +2,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { Search, SlidersHorizontal, ChevronLeft } from "lucide-react";
+import { Search, SlidersHorizontal, ChevronLeft, Plus } from "lucide-react";
 import ChatItem from "./ChatItem";
 
 const ChatList = memo(
@@ -14,19 +14,20 @@ const ChatList = memo(
     setSearchQuery,
     onBack,
     onOpenFilter,
+    onNewChat,
+    onConversationDeleted,
+    isLoading,
   }) => {
     return (
       <div className="flex flex-col h-full">
         {/* Header / Search Area */}
         <div className="p-4 flex items-center gap-3 shrink-0">
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="lg:hidden w-10 h-10 shrink-0 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
-            >
-              <ChevronLeft size={20} strokeWidth={2} />
-            </button>
-          )}
+          <button
+            onClick={onBack}
+            className="lg:hidden w-10 h-10 shrink-0 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-xl transition-colors cursor-pointer"
+          >
+            <ChevronLeft size={20} strokeWidth={2} />
+          </button>
           <div className="relative flex-1">
             <Search
               size={18}
@@ -41,6 +42,13 @@ const ChatList = memo(
             />
           </div>
           <button
+            onClick={onNewChat}
+            className="w-10 h-10 shrink-0 flex items-center justify-center bg-primary text-white rounded-xl hover:opacity-90 transition-opacity cursor-pointer"
+            aria-label="New message"
+          >
+            <Plus size={18} />
+          </button>
+          <button
             onClick={onOpenFilter}
             className="w-10 h-10 shrink-0 flex items-center justify-center bg-primary/10 text-primary rounded-xl hover:bg-primary/20 transition-colors cursor-pointer"
           >
@@ -50,7 +58,11 @@ const ChatList = memo(
 
         {/* Chat List Area */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-          {chats.length > 0 ? (
+          {isLoading ? (
+            <p className="text-center text-xs text-gray-400 py-8">
+              Loading conversations...
+            </p>
+          ) : chats.length > 0 ? (
             <div className="flex flex-col">
               {chats.map(chat => (
                 <ChatItem
@@ -58,6 +70,9 @@ const ChatList = memo(
                   chat={chat}
                   isSelected={chat.id === selectedChatId}
                   onClick={() => onSelectChat(chat.id)}
+                  onDeleted={() => {
+                    if (chat.id === selectedChatId) onConversationDeleted?.();
+                  }}
                 />
               ))}
             </div>

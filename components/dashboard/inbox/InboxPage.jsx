@@ -15,6 +15,11 @@ import { mapConversationToChat } from "./chatMappers";
 import { usePrivateChannel } from "@/hooks/useEcho";
 import CreateGroupModal from "./modals/CreateGroupModal";
 import FilterModal from "./modals/FilterModal";
+import NewChatModal from "./modals/NewChatModal";
+
+// Mobile shows exactly one of these full-width at a time.
+// Desktop (lg+) always shows sidebar + list, and chat/info in the remaining space.
+const PANEL = { SIDEBAR: "sidebar", LIST: "list", CHAT: "chat", INFO: "info" };
 
 export default function InboxPage({ role }) {
   const dispatch = useDispatch();
@@ -22,11 +27,10 @@ export default function InboxPage({ role }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [newChatOpen, setNewChatOpen] = useState(false);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
-
-  const [showChatViewOnMobile, setShowChatViewOnMobile] = useState(false);
-  const [showInfoView, setShowInfoView] = useState(false);
+  const [mobilePanel, setMobilePanel] = useState(PANEL.SIDEBAR);
 
   const [chatListWidth, setChatListWidth] = useState(350);
   const [isDragging, setIsDragging] = useState(false);
@@ -36,20 +40,11 @@ export default function InboxPage({ role }) {
   const currentUserId = useSelector(state => state.auth?.user?.id);
 
   const { data, isLoading } = useGetConversationsQuery();
-  console.log(data)
 
-  // ConversationEvent broadcasts here whenever the backend targets this
-  // user specifically (new group added, new DM, etc.) — refetch the list
-  // rather than guess at the payload shape.
   usePrivateChannel(
     currentUserId ? `user.${currentUserId}` : null,
     {
-      ConversationEvent: ({ action, conversation }) => {
-        console.log(
-          "[Echo] user-channel ConversationEvent:",
-          action,
-          conversation,
-        );
+      ConversationEvent: () => {
         dispatch(
           chatApi.util.invalidateTags([{ type: "Conversation", id: "LIST" }]),
         );
@@ -72,19 +67,16 @@ export default function InboxPage({ role }) {
 
   useEffect(() => {
     if (!isDragging) return;
-
     const handleMouseMove = e => {
       const deltaX = e.clientX - startDragX.current;
-      const newWidth = startWidth.current + deltaX;
-      setChatListWidth(Math.min(Math.max(newWidth, 280), 500));
+      setChatListWidth(
+        Math.min(Math.max(startWidth.current + deltaX, 280), 500),
+      );
     };
-
     const handleMouseUp = () => setIsDragging(false);
-
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
     document.body.style.userSelect = "none";
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
@@ -94,24 +86,17 @@ export default function InboxPage({ role }) {
 
   const filteredChats = useMemo(() => {
     let list = chats;
-
-    if (activeTab === "saved") {
-      list = list.filter(c => c.isStarred);
-    } else if (activeTab === "unread") {
-      list = list.filter(c => c.unreadCount > 0);
-    } else if (activeTab === "group") {
-      list = list.filter(c => c.type === "group");
-    }
-    // "inbox" shows everything
+    if (activeTab === "saved") list = list.filter(c => c.isStarred);
+    else if (activeTab === "unread") list = list.filter(c => c.unreadCount > 0);
+    else if (activeTab === "group") list = list.filter(c => c.type === "group");
 
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      list = list.filter(c => c.user.name.toLowerCase().includes(query));
+      const q = searchQuery.toLowerCase();
+      list = list.filter(c => c.user.name.toLowerCase().includes(q));
     }
     if (activeFilter === "online") list = list.filter(c => c.user.isOnline);
     if (activeFilter === "blocked") list = list.filter(c => c.isBlocked);
     if (activeFilter === "muted") list = list.filter(c => c.isMuted);
-
     return list;
   }, [chats, activeTab, searchQuery, activeFilter]);
 
@@ -129,50 +114,43 @@ export default function InboxPage({ role }) {
     [chats, selectedChatId],
   );
 
-  const handleSelectChat = id => {
-    if (selectedChatId !== id) {
-      setShowInfoView(false);
-    }
-    setSelectedChatId(id);
-    setShowChatViewOnMobile(true);
+  const handleSelectTab = tabId => {
+    setActiveTab(tabId);
+    setMobilePanel(PANEL.LIST); // mobile: tapping a sidebar tab moves to the list panel
   };
 
-  const handleBackToList = () => {
-    setShowChatViewOnMobile(false);
-    setShowInfoView(false);
+  const handleSelectChat = id => {
+    setSelectedChatId(id);
+    setMobilePanel(PANEL.CHAT);
+  };
+
+  const handleConversationDeleted = () => {
+    setSelectedChatId(null);
+    setMobilePanel(PANEL.LIST);
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-100px)] overflow-hidden">
-      <div
-        className={`mb-6 shrink-0 ${showChatViewOnMobile ? "hidden lg:block" : "block"}`}
-      >
-        <h1 className="text-2xl font-bold text-black">Inbox</h1>
-        <p className="text-sm text-gray mt-0.5">
-          <span className="text-primary font-medium">Dashboard</span>
-          {" / "}
-          <span>Inbox</span>
-        </p>
-      </div>
-
-      <div className="flex-1 flex overflow-hidden relative lg:p-0">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative lg:gap-0 lg:p-0">
+        {/* Sidebar */}
         <div
           className={`
-          ${showChatViewOnMobile ? "hidden lg:flex" : "flex"}
-          w-full lg:w-auto shrink-0 flex-col overflow-y-auto scrollbar-hide
-        `}
+            ${mobilePanel === PANEL.SIDEBAR ? "flex" : "hidden"} lg:flex
+            w-full lg:w-auto shrink-0 flex-col overflow-y-auto scrollbar-hide p-3 lg:p-0
+          `}
         >
           <InboxSidebar
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleSelectTab}
             counts={counts}
             onCreateGroup={() => setCreateGroupOpen(true)}
           />
         </div>
 
+        {/* Chat list */}
         <div
           className={`
-            ${showChatViewOnMobile ? "hidden lg:flex" : "flex"}
+            ${mobilePanel === PANEL.LIST ? "flex" : "hidden"} lg:flex
             w-full lg:w-[var(--chat-list-width)] shrink-0 flex-col overflow-hidden
           `}
           style={{ "--chat-list-width": `${chatListWidth}px` }}
@@ -184,12 +162,11 @@ export default function InboxPage({ role }) {
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             onOpenFilter={() => setFilterModalOpen(true)}
+            onNewChat={() => setNewChatOpen(true)}
+            onBack={() => setMobilePanel(PANEL.SIDEBAR)}
+            onConversationDeleted={handleConversationDeleted}
+            isLoading={isLoading}
           />
-          {isLoading && (
-            <p className="text-center text-xs text-gray-400 py-4">
-              Loading conversations...
-            </p>
-          )}
         </div>
 
         <div
@@ -200,29 +177,30 @@ export default function InboxPage({ role }) {
           onMouseDown={handleMouseDown}
         />
 
+        {/* Chat / info panel */}
         <div
           className={`
-          ${!showChatViewOnMobile && !selectedChatId ? "hidden lg:flex" : "flex"}
-          w-full lg:w-auto lg:flex-1 flex-col overflow-hidden
-        `}
+            ${mobilePanel === PANEL.CHAT || mobilePanel === PANEL.INFO ? "flex" : "hidden"} lg:flex
+            w-full lg:w-auto lg:flex-1 flex-col overflow-hidden p-2
+          `}
         >
           {selectedChat ? (
-            showInfoView ? (
+            mobilePanel === PANEL.INFO ? (
               <ChatInfoView
                 chat={selectedChat}
                 currentUserId={currentUserId}
-                onBack={() => setShowInfoView(false)}
+                onBack={() => setMobilePanel(PANEL.CHAT)}
               />
             ) : (
               <ChatView
                 chat={selectedChat}
                 currentUserId={currentUserId}
-                onBack={handleBackToList}
-                onOpenInfo={() => setShowInfoView(true)}
+                onBack={() => setMobilePanel(PANEL.LIST)}
+                onOpenInfo={() => setMobilePanel(PANEL.INFO)}
               />
             )
           ) : (
-            <div className="flex-1 flex items-center justify-center bg-orange-50/20">
+            <div className="flex-1 flex items-center justify-center bg-orange-50/20 rounded-2xl">
               <div className="flex flex-col items-center text-gray-300">
                 <Mail
                   size={64}
@@ -237,12 +215,21 @@ export default function InboxPage({ role }) {
           )}
         </div>
       </div>
+
       <CreateGroupModal
         open={createGroupOpen}
         onClose={() => setCreateGroupOpen(false)}
-        onCreated={conversation => {
-          if (conversation?.id) handleSelectChat(conversation.id);
-        }}
+        onCreated={conversation =>
+          conversation?.id && handleSelectChat(conversation.id)
+        }
+      />
+
+      <NewChatModal
+        open={newChatOpen}
+        onClose={() => setNewChatOpen(false)}
+        onStarted={conversation =>
+          conversation?.id && handleSelectChat(conversation.id)
+        }
       />
 
       <FilterModal

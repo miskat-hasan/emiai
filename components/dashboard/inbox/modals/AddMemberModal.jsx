@@ -1,3 +1,4 @@
+// components/dashboard/inbox/modals/AddMemberModal.jsx
 "use client";
 import { getImageUrl } from "@/helper/getImageUrl";
 
