@@ -24,28 +24,39 @@ export function proxy(request) {
   const role = request.cookies.get("role")?.value;
 
   const isAuthRoute =
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/registration");
+    pathname.startsWith("/login") || pathname.startsWith("/registration");
 
   const isDashboardRoot = pathname === "/dashboard";
   const isDashboardRoute = pathname.startsWith("/dashboard");
 
+  // Check if it's the dynamic invite page: /dashboard/invite/<anything>
+  const isInviteRoute = /^\/dashboard\/invite\/[^/]+$/.test(pathname);
+
+  // 1. If trying to see the invite page, allow anyone to view it without checking roles
+  if (isInviteRoute) {
+    return NextResponse.next();
+  }
+
+  // 2. Protect all other dashboard routes from unauthenticated users
   if (isDashboardRoute && !token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // 3. Handle root dashboard redirects
   if (isDashboardRoot && token) {
     return NextResponse.redirect(
-      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url)
+      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url),
     );
   }
 
+  // 4. Prevent logged-in users from hitting login/registration
   if (isAuthRoute && token) {
     return NextResponse.redirect(
-      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url)
+      new URL(ROLE_HOME[role] ?? DEFAULT_DASHBOARD, request.url),
     );
   }
 
+  // 5. Restrict roles to their respective folder paths
   if (isDashboardRoute && token) {
     const allowedPrefix = ROLE_PREFIX[role];
 

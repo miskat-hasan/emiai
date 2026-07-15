@@ -13,6 +13,7 @@ import {
 } from "@/redux/api/services/chatApi";
 import { mapConversationToChat } from "./chatMappers";
 import { usePrivateChannel } from "@/hooks/useEcho";
+import { usePresenceChannel } from "@/hooks/useEcho";
 import CreateGroupModal from "./modals/CreateGroupModal";
 import FilterModal from "./modals/FilterModal";
 import NewChatModal from "./modals/NewChatModal";
@@ -38,6 +39,7 @@ export default function InboxPage({ role }) {
   const startWidth = useRef(0);
 
   const currentUserId = useSelector(state => state.auth?.user?.id);
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
 
   const { data, isLoading } = useGetConversationsQuery();
 
@@ -49,6 +51,22 @@ export default function InboxPage({ role }) {
           chatApi.util.invalidateTags([{ type: "Conversation", id: "LIST" }]),
         );
       },
+    },
+    [currentUserId],
+  );
+
+  // Global presence channel — channels.php already defines
+  // Broadcast::channel('online', ...) returning {id, name, avatar}, so this
+  // needs no backend change. Anyone subscribed to "online" while the app is
+  // open shows up here; joining/leaving fire as people open/close tabs.
+  usePresenceChannel(
+    currentUserId ? "online" : null,
+    {
+      here: members => setOnlineUserIds(members.map(m => m.id)),
+      joining: member =>
+        setOnlineUserIds(prev => [...new Set([...prev, member.id])]),
+      leaving: member =>
+        setOnlineUserIds(prev => prev.filter(id => id !== member.id)),
     },
     [currentUserId],
   );
@@ -84,8 +102,20 @@ export default function InboxPage({ role }) {
     };
   }, [isDragging]);
 
+  const chatsWithPresence = useMemo(
+    () =>
+      chats.map(c => ({
+        ...c,
+        user: {
+          ...c.user,
+          isOnline: c.user.isOnline || onlineUserIds.includes(c.user.id),
+        },
+      })),
+    [chats, onlineUserIds],
+  );
+
   const filteredChats = useMemo(() => {
-    let list = chats;
+    let list = chatsWithPresence;
     if (activeTab === "saved") list = list.filter(c => c.isStarred);
     else if (activeTab === "unread") list = list.filter(c => c.unreadCount > 0);
     else if (activeTab === "group") list = list.filter(c => c.type === "group");
@@ -98,20 +128,20 @@ export default function InboxPage({ role }) {
     if (activeFilter === "blocked") list = list.filter(c => c.isBlocked);
     if (activeFilter === "muted") list = list.filter(c => c.isMuted);
     return list;
-  }, [chats, activeTab, searchQuery, activeFilter]);
+  }, [chatsWithPresence, activeTab, searchQuery, activeFilter]);
 
   const counts = useMemo(
     () => ({
-      inbox: chats.reduce((acc, c) => acc + c.unreadCount, 0),
-      unread: chats.filter(c => c.unreadCount > 0).length,
-      group: chats.filter(c => c.type === "group").length,
+      inbox: chatsWithPresence.reduce((acc, c) => acc + c.unreadCount, 0),
+      unread: chatsWithPresence.filter(c => c.unreadCount > 0).length,
+      group: chatsWithPresence.filter(c => c.type === "group").length,
     }),
-    [chats],
+    [chatsWithPresence],
   );
 
   const selectedChat = useMemo(
-    () => chats.find(c => c.id === selectedChatId) || null,
-    [chats, selectedChatId],
+    () => chatsWithPresence.find(c => c.id === selectedChatId) || null,
+    [chatsWithPresence, selectedChatId],
   );
 
   const handleSelectTab = tabId => {
