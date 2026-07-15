@@ -1,3 +1,4 @@
+// components/dashboard/inbox/ChatView.jsx
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -12,6 +13,7 @@ import {
   Send,
   FileText,
   Reply,
+  Search,
 } from "lucide-react";
 import { IoIosAttach } from "react-icons/io";
 import Modal from "@/components/common/Modal";
@@ -21,6 +23,8 @@ import MessageReactions from "./MessageReactions";
 import PinnedMessagesBar from "./PinnedMessagesBar";
 import MessageActionsMenu from "./MessageActionsMenu";
 import ForwardMessageModal from "./modals/ForwardMessageModal";
+import MessageSearchBar from "./MessageSearchBar";
+import MessagesSkeleton from "./MessagesSkeleton";
 import {
   useGetMessagesQuery,
   useSendMessageMutation,
@@ -51,12 +55,15 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
   const [replyTo, setReplyTo] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
   const [forwardMessage, setForwardMessage] = useState(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [highlightedId, setHighlightedId] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const textareaRef = useRef(null);
+  const messageRefs = useRef({});
   const { user } = chat;
 
-  const { data, isLoading } = useGetMessagesQuery(
+  const { data, isLoading, isError, refetch } = useGetMessagesQuery(
     { conversationId: chat.id },
     { skip: !chat?.id },
   );
@@ -162,6 +169,19 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
     textareaRef.current?.focus();
   };
 
+  const handleJumpToMessage = messageId => {
+    if (!messageId) return;
+    setHighlightedId(messageId);
+    messageRefs.current[messageId]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    setTimeout(
+      () => setHighlightedId(id => (id === messageId ? null : id)),
+      1800,
+    );
+  };
+
   const handleTogglePin = async messageId => {
     try {
       await togglePin({ messageId, conversationId: chat.id }).unwrap();
@@ -260,19 +280,45 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
               </button>
             </div>
 
-            <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shadow-[0_4px_10px_rgba(239,68,68,0.2)] shrink-0">
-              <Video size={16} />
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => setSearchOpen(v => !v)}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                  searchOpen
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                <Search size={16} />
+              </button>
+              <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shadow-[0_4px_10px_rgba(239,68,68,0.2)]">
+                <Video size={16} />
+              </button>
+            </div>
           </div>
+          <MessageSearchBar
+            conversationId={chat.id}
+            open={searchOpen}
+            onClose={() => setSearchOpen(false)}
+            onJumpToMessage={handleJumpToMessage}
+          />
 
           <PinnedMessagesBar conversationId={chat.id} />
 
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-6 flex flex-col gap-4 md:gap-5 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
-            {isLoading && (
-              <p className="text-center text-xs text-gray-400">
-                Loading messages...
-              </p>
+           {isLoading && <MessagesSkeleton />}
+
+            {isError && !isLoading && (
+              <div className="flex flex-col items-center justify-center py-10 gap-3">
+                <p className="text-sm text-gray-400">Couldn't load messages.</p>
+                <button
+                  onClick={refetch}
+                  className="text-xs font-semibold text-primary hover:opacity-80 transition-opacity cursor-pointer"
+                >
+                  Try again
+                </button>
+              </div>
             )}
 
             {messages.map(msg => {
@@ -290,7 +336,12 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
               return (
                 <div
                   key={msg.id}
-                  className={`group/msg flex w-full ${isSelf ? "justify-end" : "justify-start"}`}
+                  ref={el => {
+                    messageRefs.current[msg.id] = el;
+                  }}
+                  className={`group/msg flex w-full transition-colors duration-500 rounded-2xl ${isSelf ? "justify-end" : "justify-start"} ${
+                    highlightedId === msg.id ? "bg-primary/10" : ""
+                  }`}
                 >
                   <div
                     className={`flex flex-col ${isSelf ? "items-end" : "items-start"} max-w-[92%] md:max-w-[85%]`}

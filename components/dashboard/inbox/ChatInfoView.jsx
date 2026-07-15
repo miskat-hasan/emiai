@@ -37,7 +37,6 @@ import {
 } from "@/redux/api/services/chatApi";
 
 export default function ChatInfoView({ chat, currentUserId, onBack }) {
-  // console.log(chat);
   const { user, deliveryDate, gallery } = chat;
   const [activeTab, setActiveTab] = useState("gallery");
 
@@ -107,14 +106,18 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
 
   const handleCopyInvite = async () => {
     if (!chat.inviteLink) return;
-    await navigator.clipboard.writeText(chat.inviteLink);
+    const token = chat.inviteLink.split("/").pop();
+    const inviteLink = `${window.location.origin}/dashboard/invite/${token}`;
+    await navigator.clipboard.writeText(inviteLink);
     toast.success("Invite link copied.");
   };
 
   const handleRegenerateInvite = async () => {
     try {
       const res = await regenerateInvite(chat.id).unwrap();
-      await navigator.clipboard.writeText(res?.data?.invite_link ?? "");
+      const token = res?.data?.invite_link.split("/").pop();
+      const inviteLink = `${window.location.origin}/dashboard/invite/${token}`;
+      await navigator.clipboard.writeText(inviteLink);
       toast.success("New invite link copied to clipboard.");
     } catch (err) {
       toast.error(err?.data?.message ?? "Couldn't regenerate invite link.");
