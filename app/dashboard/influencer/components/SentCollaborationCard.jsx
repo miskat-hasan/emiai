@@ -29,7 +29,7 @@ export default function SentCollaborationCard({ item }) {
                         </h3>
 
                         <p className="mt-1 text-[11px] font-medium text-[#6d7774]">
-                            By {item.host}
+                            To   {item.host}
                         </p>
                     </div>
                 </div>

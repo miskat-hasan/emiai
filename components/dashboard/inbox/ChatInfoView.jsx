@@ -14,7 +14,12 @@ import {
   UserPlus,
   LogOut,
   MoreVertical,
+  Settings,
+  Link2,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
+import { toast } from "react-toastify";
 import { MinusCircleSVG, ExclamationCircleSVG } from "@/components/common/Svg";
 import BlockModal from "./modals/BlockModal";
 import ReportModal from "./modals/ReportModal";
@@ -22,6 +27,14 @@ import DeliveryModal from "./modals/DeliveryModal";
 import ExtensionDeliveryModal from "./modals/ExtensionDeliveryModal";
 import LeaveGroupModal from "./modals/LeaveGroupModal";
 import AddMemberModal from "./modals/AddMemberModal";
+import GroupSettingsModal from "./modals/GroupSettingsModal";
+import {
+  useAddGroupAdminsMutation,
+  useRemoveGroupAdminsMutation,
+  useRemoveGroupMembersMutation,
+  useDeleteGroupMutation,
+  useRegenerateInviteMutation,
+} from "@/redux/api/services/chatApi";
 
 export default function ChatInfoView({ chat, currentUserId, onBack }) {
   // console.log(chat);
@@ -35,13 +48,85 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [memberMenuId, setMemberMenuId] = useState(null);
+
+  const [addAdmins] = useAddGroupAdminsMutation();
+  const [removeAdmins] = useRemoveGroupAdminsMutation();
+  const [removeMembers] = useRemoveGroupMembersMutation();
+  const [deleteGroup, { isLoading: isDeletingGroup }] =
+    useDeleteGroupMutation();
+  const [regenerateInvite, { isLoading: isRegenerating }] =
+    useRegenerateInviteMutation();
+
+  const isCurrentUserAdmin = chat.isAdmin;
+
+  const handleToggleAdmin = async member => {
+    setMemberMenuId(null);
+    const isAdmin = member.role === "admin" || member.role === "super_admin";
+    try {
+      if (isAdmin) {
+        await removeAdmins({
+          groupId: chat.id,
+          member_ids: [member.id],
+        }).unwrap();
+        toast.success(`${member.name} is no longer an admin.`);
+      } else {
+        await addAdmins({ groupId: chat.id, member_ids: [member.id] }).unwrap();
+        toast.success(`${member.name} is now an admin.`);
+      }
+    } catch (err) {
+      toast.error(err?.data?.message ?? "Couldn't update admin status.");
+    }
+  };
+
+  const handleRemoveMember = async member => {
+    setMemberMenuId(null);
+    try {
+      await removeMembers({
+        groupId: chat.id,
+        member_ids: [member.id],
+      }).unwrap();
+      toast.success(`${member.name} removed from group.`);
+    } catch (err) {
+      toast.error(err?.data?.message ?? "Couldn't remove member.");
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!confirm("Delete this group permanently? This cannot be undone."))
+      return;
+    try {
+      await deleteGroup(chat.id).unwrap();
+      toast.success("Group deleted.");
+      onBack();
+    } catch (err) {
+      toast.error(err?.data?.message ?? "Couldn't delete group.");
+    }
+  };
+
+  const handleCopyInvite = async () => {
+    if (!chat.inviteLink) return;
+    await navigator.clipboard.writeText(chat.inviteLink);
+    toast.success("Invite link copied.");
+  };
+
+  const handleRegenerateInvite = async () => {
+    try {
+      const res = await regenerateInvite(chat.id).unwrap();
+      await navigator.clipboard.writeText(res?.data?.invite_link ?? "");
+      toast.success("New invite link copied to clipboard.");
+    } catch (err) {
+      toast.error(err?.data?.message ?? "Couldn't regenerate invite link.");
+    }
+  };
 
   const tabs = ["Gallery", "Message", "Documents", "Links"];
 
   // Render Group Chat View
   if (user.role === "Group") {
     return (
-      <div className="flex flex-col h-full bg-white rounded-[24px] overflow-hidden border border-gray-100/80 m-3 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative animate-in slide-in-from-right-8 duration-300">
+      <div className="flex flex-col h-full bg-white rounded-[24px] overflow-hidden border border-gray-100/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative animate-in slide-in-from-right-8 duration-300">
         {/* Header */}
         <div className="flex items-center justify-between p-4 lg:p-6 shrink-0 z-10 bg-transparent">
           <button
@@ -50,6 +135,14 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
           >
             <ArrowLeft size={20} />
           </button>
+          {isCurrentUserAdmin && (
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black transition-colors cursor-pointer"
+            >
+              <Settings size={20} />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto pb-8">
@@ -92,13 +185,28 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
               >
                 <UserPlus size={24} strokeWidth={2.5} />
               </button>
-              <button className="text-gray-800 hover:text-black transition-colors cursor-pointer">
+              <button
+                onClick={handleCopyInvite}
+                disabled={!chat.inviteLink}
+                className="text-gray-800 hover:text-black transition-colors cursor-pointer disabled:opacity-30"
+                title="Copy invite link"
+              >
                 <Share2 size={24} strokeWidth={2.5} />
               </button>
               <button className="w-[42px] h-[42px] rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors shadow-sm shadow-red-500/30 cursor-pointer">
                 <Video size={20} strokeWidth={2.5} />
               </button>
             </div>
+            {isCurrentUserAdmin && chat.inviteLink && (
+              <button
+                onClick={handleRegenerateInvite}
+                disabled={isRegenerating}
+                className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:opacity-80 transition-opacity cursor-pointer mb-6 disabled:opacity-50"
+              >
+                <Link2 size={13} />
+                {isRegenerating ? "Regenerating..." : "Regenerate invite link"}
+              </button>
+            )}
 
             <hr className="w-full border-gray-200 mb-8" />
 
@@ -118,7 +226,7 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
                 {chat.members?.map(member => (
                   <div
                     key={member.id}
-                    className="flex items-center justify-between group"
+                    className="relative flex items-center justify-between group"
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative w-11 h-11 rounded-full overflow-hidden border border-gray-100 shadow-sm">
@@ -141,25 +249,76 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
                         </span>
                       </div>
                     </div>
-                    <button className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer p-1">
-                      <MoreVertical size={20} />
-                    </button>
+                    {isCurrentUserAdmin && member.id !== currentUserId && (
+                      <>
+                        <button
+                          onClick={() =>
+                            setMemberMenuId(
+                              memberMenuId === member.id ? null : member.id,
+                            )
+                          }
+                          className="text-gray-400 hover:text-gray-700 transition-colors cursor-pointer p-1"
+                        >
+                          <MoreVertical size={20} />
+                        </button>
+                        {memberMenuId === member.id && (
+                          <div className="absolute right-0 top-10 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30">
+                            <button
+                              onClick={() => handleToggleAdmin(member)}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                            >
+                              <ShieldCheck size={13} />
+                              {member.role === "admin" ||
+                              member.role === "super_admin"
+                                ? "Remove as admin"
+                                : "Make admin"}
+                            </button>
+                            <button
+                              onClick={() => handleRemoveMember(member)}
+                              className="w-full flex items-center gap-2 px-4 py-2 text-xs font-semibold text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                              Remove from group
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
+            {isCurrentUserAdmin && (
+              <button
+                onClick={handleDeleteGroup}
+                disabled={isDeletingGroup}
+                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-red-500 hover:bg-red-50 rounded-xl py-3 mt-8 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <Trash2 size={15} />
+                {isDeletingGroup ? "Deleting..." : "Delete group"}
+              </button>
+            )}
           </div>
         </div>
 
         {/* Modals for Group Chat */}
         <LeaveGroupModal
           isOpen={isLeaveModalOpen}
+          groupId={chat.id}
           onClose={() => setIsLeaveModalOpen(false)}
         />
 
         <AddMemberModal
           isOpen={isAddMemberModalOpen}
+          groupId={chat.id}
+          existingMemberIds={chat.members?.map(m => m.id) ?? []}
           onClose={() => setIsAddMemberModalOpen(false)}
+        />
+
+        <GroupSettingsModal
+          open={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          chat={chat}
         />
       </div>
     );
