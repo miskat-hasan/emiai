@@ -118,7 +118,7 @@ export default function VouchersPage({ role }) {
 
       {/* Vouchers Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -145,7 +145,7 @@ export default function VouchersPage({ role }) {
           <p className="text-base font-medium">No vouchers found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {vouchers.map((voucher) => (
             <VoucherCard
               key={voucher.id}

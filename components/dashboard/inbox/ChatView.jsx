@@ -3,37 +3,34 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
-import { ArrowLeft, Video, Gift, Star, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Video,
+  Gift,
+  Star,
+  X,
+  Send,
+  FileText,
+  Reply,
+} from "lucide-react";
 import { IoIosAttach } from "react-icons/io";
 import Modal from "@/components/common/Modal";
 import CreateDealModal from "./modals/CreateDealModal";
 import AttachmentGrid from "./AttachmentGrid";
 import MessageReactions from "./MessageReactions";
 import PinnedMessagesBar from "./PinnedMessagesBar";
+import MessageActionsMenu from "./MessageActionsMenu";
+import ForwardMessageModal from "./modals/ForwardMessageModal";
 import {
   useGetMessagesQuery,
   useSendMessageMutation,
   useMarkConversationSeenMutation,
+  useEditMessageMutation,
   chatApi,
   useTogglePinMessageMutation,
 } from "@/redux/api/services/chatApi";
 import { mapApiMessage } from "./chatMappers";
 import { usePresenceChannel } from "@/hooks/useEcho";
-
-const TrophySVG = () => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M12 2C11.172 2 10.5 2.672 10.5 3.5V4H6.5C5.672 4 5 4.672 5 5.5C5 7.985 6.82 10 9.174 10.488C9.678 11.371 10.5 12 11.5 12.374V14H10C8.895 14 8 14.895 8 16V17C8 17.552 8.448 18 9 18H15C15.552 18 16 17.552 16 17V16C16 14.895 15.105 14 14 14H12.5V12.374C13.5 12 14.322 11.371 14.826 10.488C17.18 10 19 7.985 19 5.5C19 4.672 18.328 4 17.5 4H13.5V3.5C13.5 2.672 12.828 2 12 2Z"
-      fill="currentColor"
-    />
-  </svg>
-);
 
 function detectMessageType(files) {
   if (files.length > 1) return "multiple";
@@ -47,12 +44,16 @@ function detectMessageType(files) {
 export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
   const dispatch = useDispatch();
   const [openDeal, isOpenDeal] = useState(false);
-
   const [inputText, setInputText] = useState("");
   const [pendingFiles, setPendingFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [onlineMemberIds, setOnlineMemberIds] = useState([]);
+  const [replyTo, setReplyTo] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [forwardMessage, setForwardMessage] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const textareaRef = useRef(null);
   const { user } = chat;
 
   const { data, isLoading } = useGetMessagesQuery(
@@ -60,12 +61,6 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
     { skip: !chat?.id },
   );
 
-  // Presence channel: who's currently viewing this conversation (drives the
-  // online dot), plus the two custom events for live message/conversation
-  // updates. Both handlers refetch via invalidateTags rather than patch the
-  // socket payload directly into cache — see note above on unknown payload
-  // shape. Once confirmed, MessageEvent especially is worth optimistic-patching
-  // since it fires most often.
   usePresenceChannel(
     chat?.id ? `conversation.${chat.id}` : null,
     {
@@ -75,26 +70,14 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
       leaving: member =>
         setOnlineMemberIds(prev => prev.filter(id => id !== member.id)),
       events: {
-        MessageEvent: ({ type, payload }) => {
-          console.log("[Echo] MessageEvent:", type, payload);
-          if (type === "reaction") {
-            dispatch(
-              chatApi.util.invalidateTags([{ type: "Messages", id: chat.id }]),
-            );
-            return;
-          }
+        MessageEvent: ({ type }) => {
           if (type === "pinned" || type === "unpinned") {
             dispatch(
               chatApi.util.invalidateTags([
                 { type: "PinnedMessages", id: chat.id },
               ]),
             );
-            dispatch(
-              chatApi.util.invalidateTags([{ type: "Messages", id: chat.id }]),
-            );
-            return;
           }
-          // sent | updated | deleted | deleted_for_everyone | deleted_permanent | delivered | seen
           dispatch(
             chatApi.util.invalidateTags([{ type: "Messages", id: chat.id }]),
           );
@@ -102,8 +85,7 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
             chatApi.util.invalidateTags([{ type: "Conversation", id: "LIST" }]),
           );
         },
-        ConversationEvent: ({ action, conversation }) => {
-          console.log("[Echo] ConversationEvent:", action, conversation);
+        ConversationEvent: ({ conversation }) => {
           dispatch(
             chatApi.util.invalidateTags([{ type: "Conversation", id: "LIST" }]),
           );
@@ -121,16 +103,9 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
   );
 
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+  const [editMessage] = useEditMessageMutation();
   const [markSeen] = useMarkConversationSeenMutation();
   const [togglePin] = useTogglePinMessageMutation();
-
-  const handleTogglePin = async messageId => {
-    try {
-      await togglePin({ messageId, conversationId: chat.id }).unwrap();
-    } catch {
-      // silent
-    }
-  };
 
   const messages = (data?.data ?? []).map(mapApiMessage).reverse();
 
@@ -142,6 +117,28 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
     if (chat?.id) markSeen(chat.id);
   }, [chat?.id, markSeen]);
 
+  // Generate/revoke thumbnail preview URLs as pendingFiles change
+  useEffect(() => {
+    const urls = pendingFiles.map(file => ({
+      file,
+      url:
+        file.type.startsWith("image/") || file.type.startsWith("video/")
+          ? URL.createObjectURL(file)
+          : null,
+    }));
+    setPreviewUrls(urls);
+    return () => urls.forEach(u => u.url && URL.revokeObjectURL(u.url));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFiles]);
+
+  // Auto-grow textarea instead of a fixed tall box
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }, [inputText]);
+
   const handleFileSelect = e => {
     const files = Array.from(e.target.files ?? []);
     if (files.length) setPendingFiles(prev => [...prev, ...files]);
@@ -152,49 +149,92 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
     setPendingFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleReply = msg => {
+    setEditingMessage(null);
+    setReplyTo(msg);
+    textareaRef.current?.focus();
+  };
+
+  const handleEdit = msg => {
+    setReplyTo(null);
+    setEditingMessage(msg);
+    setInputText(msg.text ?? "");
+    textareaRef.current?.focus();
+  };
+
+  const handleTogglePin = async messageId => {
+    try {
+      await togglePin({ messageId, conversationId: chat.id }).unwrap();
+    } catch {
+      // silent
+    }
+  };
+
   const handleSend = async () => {
+    if (editingMessage) {
+      if (!inputText.trim()) return;
+      try {
+        await editMessage({
+          messageId: editingMessage.id,
+          message: inputText.trim(),
+          conversationId: chat.id,
+        }).unwrap();
+        setEditingMessage(null);
+        setInputText("");
+      } catch {
+        // stays populated on failure
+      }
+      return;
+    }
+
     if (!inputText.trim() && pendingFiles.length === 0) return;
 
     const fd = new FormData();
     fd.append("conversation_id", chat.id);
-    if (chat.type !== "group" && user?.id) {
-      fd.append("receiver_id", user.id);
-    }
+    if (chat.type !== "group" && user?.id) fd.append("receiver_id", user.id);
     fd.append("message", inputText.trim());
     fd.append(
       "message_type",
       pendingFiles.length > 0 ? detectMessageType(pendingFiles) : "text",
     );
-    pendingFiles.forEach((file, i) => {
-      fd.append(`attachments[${i}][path]`, file);
-    });
+    if (replyTo) fd.append("reply_to_message_id", replyTo.id);
+    pendingFiles.forEach((file, i) =>
+      fd.append(`attachments[${i}][path]`, file),
+    );
 
     try {
       await sendMessage(fd).unwrap();
       setInputText("");
       setPendingFiles([]);
+      setReplyTo(null);
     } catch {
-      // RTK Query error — the input stays populated so nothing is lost.
+      // input stays populated
     }
+  };
+
+  const cancelComposerContext = () => {
+    setReplyTo(null);
+    setEditingMessage(null);
+    setInputText("");
   };
 
   return (
     <>
-      <div className="flex flex-col h-full gap-3 m-3">
-        <div className="flex flex-col flex-1 bg-white rounded-[24px] overflow-hidden border border-gray-100/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] min-h-0">
+      <div className="flex flex-col h-full gap-2 min-h-0">
+        <div className="flex flex-col flex-1 bg-white rounded-[20px] overflow-hidden border border-gray-100/80 shadow-[0_4px_20px_rgba(0,0,0,0.03)] min-h-0">
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 shrink-0 border-b border-gray-50/50">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between px-4 md:px-5 py-3 md:py-4 shrink-0 border-b border-gray-50/50">
+            <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
               <button
                 onClick={onBack}
-                className="lg:hidden w-8 h-8 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
+                className="lg:hidden w-8 h-8 shrink-0 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
               >
                 <ArrowLeft size={18} strokeWidth={2} />
               </button>
 
-              <div className="relative">
+              <div className="relative shrink-0">
                 {user.avatar.length > 2 ? (
-                  <div className="w-10 h-10 rounded-full overflow-hidden relative">
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full overflow-hidden relative">
                     <Image
                       src={user.avatar}
                       alt={user.name}
@@ -204,30 +244,31 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-[#125B50] text-white flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#125B50] text-white flex items-center justify-center font-bold text-sm">
                     {user.avatar}
                   </div>
                 )}
                 {(user.isOnline || onlineMemberIds.includes(user.id)) && (
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full"></div>
                 )}
               </div>
               <button
                 onClick={onOpenInfo}
-                className="font-bold text-gray-900 text-[15px] hover:text-primary transition-colors cursor-pointer text-left"
+                className="font-bold text-gray-900 text-sm md:text-[15px] hover:text-primary transition-colors cursor-pointer text-left truncate"
               >
                 {user.name}
               </button>
             </div>
 
-            <button className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shadow-[0_4px_10px_rgba(239,68,68,0.2)]">
-              <Video size={18} />
+            <button className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-red-500 text-white flex items-center justify-center hover:opacity-90 transition-opacity cursor-pointer shadow-[0_4px_10px_rgba(239,68,68,0.2)] shrink-0">
+              <Video size={16} />
             </button>
           </div>
 
           <PinnedMessagesBar conversationId={chat.id} />
+
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-6 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 md:py-6 flex flex-col gap-4 md:gap-5 scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
             {isLoading && (
               <p className="text-center text-xs text-gray-400">
                 Loading messages...
@@ -249,17 +290,17 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
               return (
                 <div
                   key={msg.id}
-                  className={`flex w-full ${isSelf ? "justify-end" : "justify-start"}`}
+                  className={`group/msg flex w-full ${isSelf ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`flex flex-col ${isSelf ? "items-end" : "items-start"} max-w-[85%]`}
+                    className={`flex flex-col ${isSelf ? "items-end" : "items-start"} max-w-[92%] md:max-w-[85%]`}
                   >
                     <div
-                      className={`flex items-start gap-3 w-full ${isSelf ? "flex-row-reverse justify-start" : "flex-row"}`}
+                      className={`flex items-start gap-2 md:gap-3 w-full ${isSelf ? "flex-row-reverse justify-start" : "flex-row"}`}
                     >
                       {!isSelf && (
                         <div className="shrink-0">
-                          <div className="w-10 h-10 rounded-full bg-[#125B50] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                          <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#125B50] text-white flex items-center justify-center font-bold text-xs md:text-sm shadow-sm">
                             {user.avatar.length > 2
                               ? user.name?.[0]
                               : user.avatar}
@@ -267,21 +308,54 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
                         </div>
                       )}
 
+                      {/* Hover action row */}
+                      <div
+                        className={`flex items-center gap-0.5 opacity-0 group-hover/msg:opacity-100 transition-opacity shrink-0 self-center ${isSelf ? "order-first" : "order-last"}`}
+                      >
+                        <button
+                          onClick={() => handleReply(msg)}
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                        >
+                          <Reply size={14} />
+                        </button>
+                        <MessageActionsMenu
+                          message={msg}
+                          conversationId={chat.id}
+                          isSelf={isSelf}
+                          onEdit={() => handleEdit(msg)}
+                          onForward={() => setForwardMessage(msg)}
+                        />
+                      </div>
+
                       <div
                         className={`
-                      flex flex-col min-w-[280px] max-w-[85%]
-                      ${
-                        isSelf
-                          ? "bg-[#F9F9F9] rounded-[24px] rounded-tr-md border border-gray-100/60"
-                          : "bg-gradient-to-b from-white via-white to-primary/10 rounded-[24px] rounded-tl-md border border-gray-50"
-                      }
-                    `}
+                          flex flex-col min-w-[200px] md:min-w-[280px] max-w-full
+                          ${
+                            isSelf
+                              ? "bg-[#F9F9F9] rounded-[18px] rounded-tr-md border border-gray-100/60"
+                              : "bg-gradient-to-b from-white via-white to-primary/10 rounded-[18px] rounded-tl-md border border-gray-50"
+                          }
+                        `}
                       >
+                        {msg.replyTo && (
+                          <div
+                            className={`mx-4 mt-3 px-3 py-2 rounded-lg bg-black/5 border-l-2 border-primary text-xs ${isSelf ? "text-right" : ""}`}
+                          >
+                            <p className="font-semibold text-gray-600">
+                              {msg.replyTo.sender?.name}
+                            </p>
+                            <p className="text-gray-400 truncate">
+                              {msg.replyTo.message ??
+                                `[${msg.replyTo.message_type}]`}
+                            </p>
+                          </div>
+                        )}
+
                         <div
-                          className={`flex items-start justify-between px-5 pt-4 pb-4 gap-4 ${isSelf ? "flex-row-reverse" : "flex-row"}`}
+                          className={`flex items-start justify-between px-4 md:px-5 pt-3 md:pt-4 pb-3 md:pb-4 gap-3 md:gap-4 ${isSelf ? "flex-row-reverse" : "flex-row"}`}
                         >
                           {msg.text && (
-                            <p className="text-[15px] text-gray-600 leading-relaxed font-medium whitespace-pre-wrap break-words">
+                            <p className="text-sm md:text-[15px] text-gray-600 leading-relaxed font-medium whitespace-pre-wrap break-words">
                               {msg.text}
                             </p>
                           )}
@@ -293,7 +367,7 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
                             }
                           >
                             <Star
-                              size={20}
+                              size={18}
                               className={
                                 msg.isPinned
                                   ? "text-primary fill-primary"
@@ -307,9 +381,9 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
                         <AttachmentGrid attachments={msg.attachments} />
 
                         <div
-                          className={`flex px-5 pb-4 ${isSelf ? "justify-start" : "justify-end"}`}
+                          className={`flex px-4 md:px-5 pb-3 md:pb-4 ${isSelf ? "justify-start" : "justify-end"}`}
                         >
-                          <span className="text-[14px] text-gray-500 font-medium">
+                          <span className="text-xs md:text-[14px] text-gray-500 font-medium">
                             {msg.timestamp}
                           </span>
                         </div>
@@ -329,76 +403,125 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
           </div>
         </div>
 
-        {/* Input Area */}
-        <div className="shrink-0 mt-auto w-full">
-          <div className="flex flex-col bg-gradient-to-br from-[#FCFCFC] to-primary/10 border border-gray-200/80 rounded-[24px] p-5 shadow-sm">
-            {pendingFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-3">
-                {pendingFiles.map((file, i) => (
-                  <span
+        {/* Composer — compact, thumbnail previews, reply/edit context bar */}
+        <div className="shrink-0 w-full">
+          <div className="flex flex-col bg-gradient-to-br from-[#FCFCFC] to-primary/10 border border-gray-200/80 rounded-[18px] p-2.5 md:p-3 shadow-sm">
+            {(replyTo || editingMessage) && (
+              <div className="flex items-center justify-between bg-white/70 border-l-2 border-primary rounded-lg px-3 py-1.5 mb-2">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-primary">
+                    {editingMessage
+                      ? "Editing message"
+                      : `Replying to ${replyTo.senderName || user.name}`}
+                  </p>
+                  {!editingMessage && (
+                    <p className="text-xs text-gray-500 truncate">
+                      {replyTo.text || `[${replyTo.messageType}]`}
+                    </p>
+                  )}
+                </div>
+                <button
+                  onClick={cancelComposerContext}
+                  className="text-gray-400 hover:text-red-500 cursor-pointer shrink-0 p-1"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            )}
+
+            {previewUrls.length > 0 && (
+              <div className="flex gap-2 mb-2 overflow-x-auto pb-1">
+                {previewUrls.map((p, i) => (
+                  <div
                     key={i}
-                    className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-700"
+                    className="relative shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100 border border-gray-200"
                   >
-                    {file.name}
+                    {p.file.type.startsWith("image/") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={p.url}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                    ) : p.file.type.startsWith("video/") ? (
+                      <video
+                        src={p.url}
+                        className="w-full h-full object-cover"
+                        muted
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-1 px-1">
+                        <FileText size={16} className="text-gray-400" />
+                        <span className="text-[8px] text-gray-400 truncate w-full text-center">
+                          {p.file.name}
+                        </span>
+                      </div>
+                    )}
                     <button
                       onClick={() => removePendingFile(i)}
-                      className="text-gray-400 hover:text-red-500 cursor-pointer"
+                      className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer"
                     >
-                      <X size={12} />
+                      <X size={10} />
                     </button>
-                  </span>
+                  </div>
                 ))}
               </div>
             )}
 
-            <textarea
-              value={inputText}
-              onChange={e => setInputText(e.target.value)}
-              placeholder="Type something.."
-              rows={2}
-              className="w-full bg-transparent outline-none text-[15px] text-gray-800 placeholder:text-gray-400 px-1 py-1 resize-none mb-6"
-              onKeyDown={e => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-            />
-            <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center gap-4">
-                <button
-                  onClick={() => isOpenDeal(true)}
-                  className="bg-linear-to-r from-primary to-secondary text-white p-2.5 rounded-[14px] hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
-                >
-                  <Gift size={20} strokeWidth={2} />
-                </button>
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={textareaRef}
+                value={inputText}
+                onChange={e => setInputText(e.target.value)}
+                placeholder="Type something.."
+                rows={1}
+                className="flex-1 bg-transparent outline-none text-sm md:text-[15px] text-gray-800 placeholder:text-gray-400 px-2 py-2 resize-none max-h-[120px]"
+                onKeyDown={e => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                  if (e.key === "Escape" && (replyTo || editingMessage))
+                    cancelComposerContext();
+                }}
+              />
 
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  className="hidden"
-                  onChange={handleFileSelect}
-                />
+              <div className="flex items-center gap-1.5 md:gap-2 shrink-0 pb-1">
+                {!editingMessage && (
+                  <>
+                    <button
+                      onClick={() => isOpenDeal(true)}
+                      className="bg-linear-to-r from-primary to-secondary text-white p-2 rounded-xl hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+                    >
+                      <Gift size={16} strokeWidth={2} />
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      className="hidden"
+                      onChange={handleFileSelect}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer p-2"
+                    >
+                      <IoIosAttach size={18} strokeWidth={2} />
+                    </button>
+                  </>
+                )}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="*:text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                  onClick={handleSend}
+                  disabled={
+                    (!inputText.trim() && pendingFiles.length === 0) ||
+                    isSending
+                  }
+                  className="bg-gradient-to-r from-primary to-secondary text-white w-10 h-10 rounded-xl flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-primary/25"
+                  aria-label="Send message"
                 >
-                  <IoIosAttach size={20} strokeWidth={2} />
-                </button>
-                <button className="text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
-                  <TrophySVG />
+                  <Send size={16} />
                 </button>
               </div>
-              <button
-                onClick={handleSend}
-                disabled={
-                  (!inputText.trim() && pendingFiles.length === 0) || isSending
-                }
-                className="bg-gradient-to-r from-primary to-secondary text-white px-7 py-3 rounded-[14px] text-[15px] font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg shadow-primary/25"
-              >
-                {isSending ? "Sending..." : "Send Message"}
-              </button>
             </div>
           </div>
         </div>
@@ -414,6 +537,12 @@ export default function ChatView({ chat, currentUserId, onBack, onOpenInfo }) {
           onClose={() => isOpenDeal(false)}
         />
       </Modal>
+
+      <ForwardMessageModal
+        message={forwardMessage}
+        open={!!forwardMessage}
+        onClose={() => setForwardMessage(null)}
+      />
     </>
   );
 }

@@ -1,3 +1,4 @@
+// components/dashboard/inbox/Lightbox.jsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";

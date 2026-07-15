@@ -36,7 +36,7 @@ const InboxSidebar = React.memo(
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200
+                w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 cursor-pointer
                 ${
                   isActive
                     ? "bg-transparent text-gray-900 font-semibold"

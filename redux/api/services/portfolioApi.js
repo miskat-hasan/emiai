@@ -7,6 +7,7 @@ const portfolioApi = apiSlice.injectEndpoints({
         url: "/api/portfolios/my-portfolio",
         method: "GET",
       }),
+      providesTags: ["Portfolio"],
     }),
 
     getInfluencerPortfolios: builder.query({
@@ -14,6 +15,7 @@ const portfolioApi = apiSlice.injectEndpoints({
         url: "/api/portfolios?role=influencer",
         method: "GET",
       }),
+      providesTags: ["Portfolio"],
     }),
 
     getMyClients: builder.query({
@@ -28,6 +30,7 @@ const portfolioApi = apiSlice.injectEndpoints({
         url: `/api/portfolios/show?portfolio_id=${portfolioId}`,
         method: "GET",
       }),
+      providesTags: ["Portfolio"],
     }),
 
     postPortfolio: builder.mutation({
@@ -49,6 +52,7 @@ const portfolioApi = apiSlice.injectEndpoints({
           body: fd,
         };
       },
+      invalidatesTags: ["Portfolio"],
     }),
 
     updatePortfolio: builder.mutation({
@@ -81,6 +85,7 @@ const portfolioApi = apiSlice.injectEndpoints({
           body: fd,
         };
       },
+      invalidatesTags: ["Portfolio"],
     }),
   }),
 });

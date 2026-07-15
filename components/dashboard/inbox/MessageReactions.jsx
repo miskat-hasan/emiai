@@ -1,3 +1,4 @@
+// components/dashboard/inbox/MessageReactions.jsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";

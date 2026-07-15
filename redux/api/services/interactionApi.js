@@ -17,7 +17,7 @@ export const interactionApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: (result, error, body) => {
         if (body.interaction_type !== 'view') {
-          return ["Ad", "Contest", "Event"];
+          return ["Ad", "Contest", "Event", "Portfolio"];
         }
         return [];
       },
