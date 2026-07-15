@@ -1,3 +1,4 @@
+// components/dashboard/inbox/PinnedMessagesBar.jsx
 "use client";
 
 import { useState } from "react";

@@ -29,11 +29,11 @@ export default function BlockModal({ isOpen, onClose, userId, userName }) {
 
         <div className="relative flex flex-col items-center px-8 py-10 text-center z-10">
           <h3 className="text-xl font-bold text-gray-900 mb-3">
-            Block "{userName}"
+            Block &quot;{userName}&quot;
           </h3>
           <p className="text-sm text-gray-500 mb-8 px-2">
             Are you sure you want to block{" "}
-            <span className="font-semibold text-gray-700">"{userName}"</span>?
+            <span className="font-semibold text-gray-700">&quot;{userName}&quot;</span>?
           </p>
 
           <div className="flex items-center justify-center gap-6 w-full">
