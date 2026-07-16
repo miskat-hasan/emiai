@@ -24,7 +24,7 @@ export default function AttachmentGrid({ attachments }) {
   return (
     <>
       {media.length > 0 && (
-        <div className={`grid ${gridCols} gap-1.5 px-5 pb-3`}>
+        <div className={`grid ${gridCols} max-w-[400px] gap-1.5 px-5 py-3 -z-0`}>
           {media.map((att, i) => (
             <button
               key={att.id}
