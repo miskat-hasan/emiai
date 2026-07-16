@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { User, Phone, Globe2, Lock } from "lucide-react";
+import { User, Phone, Globe2, Lock, Building2 } from "lucide-react";
 import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 import {
   useUpdatePasswordMutation,
@@ -28,6 +28,8 @@ function FieldIcon({ Icon }) {
 
 export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
   const dispatch = useDispatch();
+
+  const role = user?.role;
 
   const [updateUser, { isLoading: isSavingProfile }] = useUpdateUserMutation();
   const [updatePassword, { isLoading: isSavingPassword }] =
@@ -127,24 +129,69 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
         <hr className="border-gray-100" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-xs font-semibold text-gray mb-1.5">
-              Full Name
-            </label>
-            <div className="relative">
-              <FieldIcon Icon={User} />
-              <input
-                type="text"
-                {...registerAbout("name", { required: "Name is required" })}
-                className={inputClass}
-              />
+          {role === "advertiser" || role === "agency" ? (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-gray mb-1.5">
+                  Company Name
+                </label>
+                <div className="relative">
+                  <FieldIcon Icon={Building2} />
+                  <input
+                    type="text"
+                    {...registerAbout("name", {
+                      required: "Company Name is required",
+                    })}
+                    className={inputClass}
+                  />
+                </div>
+                {aboutErrors.name && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {aboutErrors.name.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray mb-1.5">
+                  Company Address
+                </label>
+                <div className="relative">
+                  <FieldIcon Icon={Building2} />
+                  <input
+                    type="text"
+                    {...registerAbout("name", {
+                      required: "Company Name is required",
+                    })}
+                    className={inputClass}
+                  />
+                </div>
+                {aboutErrors.name && (
+                  <p className="text-xs text-red-500 mt-1">
+                    {aboutErrors.name.message}
+                  </p>
+                )}
+              </div>
+            </>
+          ) : (
+            <div>
+              <label className="block text-xs font-semibold text-gray mb-1.5">
+                Full Name
+              </label>
+              <div className="relative">
+                <FieldIcon Icon={User} />
+                <input
+                  type="text"
+                  {...registerAbout("name", { required: "Name is required" })}
+                  className={inputClass}
+                />
+              </div>
+              {aboutErrors.name && (
+                <p className="text-xs text-red-500 mt-1">
+                  {aboutErrors.name.message}
+                </p>
+              )}
             </div>
-            {aboutErrors.name && (
-              <p className="text-xs text-red-500 mt-1">
-                {aboutErrors.name.message}
-              </p>
-            )}
-          </div>
+          )}
 
           <div>
             <label className="block text-xs font-semibold text-gray mb-1.5">
