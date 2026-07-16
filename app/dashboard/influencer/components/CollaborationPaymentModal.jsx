@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { useRequestPaymentMutation } from "@/redux/api/services/collaboratosApi";
 
 export default function CollaborationPaymentModal({
     open,
@@ -12,12 +13,14 @@ export default function CollaborationPaymentModal({
         register,
         handleSubmit,
         reset,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm({
         defaultValues: {
             amount: "",
         },
     });
+
+    const [requestPayment, { isLoading: isSubmitting }] = useRequestPaymentMutation();
 
     const handleClose = () => {
         reset();
@@ -25,16 +28,19 @@ export default function CollaborationPaymentModal({
     };
 
     const onSubmit = async (data) => {
-        const payload = {
-            collaborationId: collaboration?.id,
-            title: collaboration?.title,
-            amount: data.amount,
-        };
+        try {
+            const formData = new FormData();
+            formData.append("invitation_id", collaboration?.id);
+            formData.append("amount", data.amount);
 
-        console.log("Collaboration payment request:", payload);
+            await requestPayment(formData).unwrap();
 
-        toast.success("Payment request created successfully");
-        handleClose();
+            toast.success("Payment request created successfully");
+            handleClose();
+        } catch (error) {
+            console.error("Error creating payment request:", error);
+            toast.error(error?.data?.message || "Failed to create payment request");
+        }
     };
 
     if (!open) return null;

@@ -137,9 +137,8 @@ export default function PublishedAdDetailsPage({ role, adId }) {
           <AdsReactionChart />
         </div>
 
-        {/* Cell 4: Top Rankings */}
         <div className="h-full">
-          <AdTopRanking rankings={ad.topRankings} />
+          <AdTopRanking adId={ad.id} rankings={ad.topRankings} />
         </div>
       </div>
 

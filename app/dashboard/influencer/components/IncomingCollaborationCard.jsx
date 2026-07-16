@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 const statusStyles = {
     pending: "bg-[#fff7c7] text-[#936800]",
@@ -8,6 +9,8 @@ const statusStyles = {
 export default function IncomingCollaborationCard({
     item,
     onRequestPayment,
+    onAccept,
+    onReject
 }) {
     return (
         <div className="rounded-[14px] border border-gray-200 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
@@ -22,9 +25,11 @@ export default function IncomingCollaborationCard({
                     </div>
 
                     <div>
-                        <h3 className="text-[14px] font-bold leading-tight text-[#202626]">
-                            {item.title}
-                        </h3>
+                        <Link href={item.detailsUrl || "#"} className="hover:text-primary transition-colors">
+                            <h3 className="text-[14px] font-bold leading-tight text-[#202626] hover:text-primary">
+                                {item.title}
+                            </h3>
+                        </Link>
 
                         <p className="mt-1 text-[11px] font-medium text-[#6d7774]">
                             By {item.host}
@@ -54,6 +59,7 @@ export default function IncomingCollaborationCard({
             <div className="mb-4 grid grid-cols-2 gap-3">
                 <button
                     type="button"
+                    onClick={() => onReject?.(item)}
                     className="h-9 rounded-lg border border-secondary bg-white text-[11px] font-semibold text-secondary transition-all duration-300 hover:bg-secondary hover:text-white"
                 >
                     Reject
@@ -61,6 +67,7 @@ export default function IncomingCollaborationCard({
 
                 <button
                     type="button"
+                    onClick={() => onAccept?.(item)}
                     className="h-9 rounded-lg bg-[#f2f2f2] text-[11px] font-semibold text-secondary transition-all duration-300 hover:bg-secondary hover:text-white"
                 >
                     Accept

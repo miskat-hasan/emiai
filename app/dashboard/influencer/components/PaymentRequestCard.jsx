@@ -1,6 +1,6 @@
 "use client";
 import { getImageUrl } from "@/helper/getImageUrl";
-
+import Link from "next/link";
 import Image from "next/image";
 
 const paymentStatusStyles = {
@@ -34,9 +34,11 @@ export default function PaymentRequestCard({ item, onAccept, onReject }) {
                     </div>
 
                     <div>
-                        <h3 className="text-[14px] font-bold leading-tight text-[#202626]">
-                            {item.title}
-                        </h3>
+                        <Link href={item.detailsUrl || "#"} className="hover:text-primary transition-colors">
+                            <h3 className="text-[14px] font-bold leading-tight text-[#202626] hover:text-primary">
+                                {item.title}
+                            </h3>
+                        </Link>
 
                         <p className="mt-1 text-[11px] font-medium text-[#6d7774]">
                             By {item.host}

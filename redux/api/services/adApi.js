@@ -51,6 +51,10 @@ export const adApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Ad"],
     }),
+    getAdWinners: builder.query({
+      query: (adId) => ({ url: `/api/ads/winners?ad_id=${adId}`, method: "GET" }),
+      providesTags: ["Ad"],
+    }),
   }),
 });
 
@@ -61,4 +65,5 @@ export const {
   useGetAdByIdQuery,
   useCreateAdMutation,
   useUpdateAdMutation,
+  useGetAdWinnersQuery,
 } = adApi;

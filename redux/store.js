@@ -5,6 +5,7 @@ import authReducer from "@/redux/slices/authSlice";
 import { apiSlice } from "@/redux/api/apiSlice";
 import registrationReducer from "@/redux/slices/registrationSlice";
 import adCreationReducer from "@/redux/slices/adCreationSlice";
+import { rtkQueryErrorLogger } from "@/redux/rtkQueryErrorLogger";
 import {
   persistStore,
   FLUSH,
@@ -38,7 +39,7 @@ export const store = configureStore({
         ],
         ignoredPaths: ["adCreation.draft.mediaFile"],
       },
-    }).concat(apiSlice.middleware),
+  }).concat(apiSlice.middleware, rtkQueryErrorLogger),
 });
 
 export const persister = persistStore(store);

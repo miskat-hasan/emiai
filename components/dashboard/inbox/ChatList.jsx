@@ -4,6 +4,7 @@
 import React, { memo } from "react";
 import { Search, SlidersHorizontal, ChevronLeft, Plus } from "lucide-react";
 import ChatItem from "./ChatItem";
+import ChatListSkeleton from "./ChatListSkeleton";
 
 const ChatList = memo(
   ({
@@ -59,9 +60,7 @@ const ChatList = memo(
         {/* Chat List Area */}
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
           {isLoading ? (
-            <p className="text-center text-xs text-gray-400 py-8">
-              Loading conversations...
-            </p>
+            <ChatListSkeleton />
           ) : chats.length > 0 ? (
             <div className="flex flex-col">
               {chats.map(chat => (
