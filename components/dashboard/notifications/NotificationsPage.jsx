@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Bell, Check } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -71,16 +71,16 @@ export default function NotificationsPage({ role }) {
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  const markOneRead = id => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n)),
+  const markOneRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
     );
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="space-y-6">
@@ -88,7 +88,10 @@ export default function NotificationsPage({ role }) {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          <Link href={`/dashboard/${role}`} className="text-primary font-medium hover:underline">
+          <Link
+            href={`/dashboard/${role}`}
+            className="text-primary font-medium hover:underline"
+          >
             Dashboard
           </Link>
           {" / "}
@@ -122,7 +125,7 @@ export default function NotificationsPage({ role }) {
 
         {/* List */}
         <div className="divide-y divide-gray-100">
-          {notifications.map(n => (
+          {notifications.map((n) => (
             <div
               key={n.id}
               onClick={() => markOneRead(n.id)}
