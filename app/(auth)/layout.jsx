@@ -36,7 +36,7 @@ export default function AuthLayout({ children }) {
 
       {/* ── Right panel — form ── */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 sm:px-12 xl:px-20">
-        <div className="w-full max-w-[430px] flex flex-col items-center gap-8">
+        <div className="w-full max-w-[430px] flex flex-col items-center gap-8 relative">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <div className="relative w-12 h-12">

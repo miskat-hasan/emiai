@@ -1,10 +1,10 @@
 // components/dashboard/contests/CreateContestModal.jsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { X, Plus, Upload, Calendar } from "lucide-react";
+import { X, Plus, Calendar } from "lucide-react";
 import {
   useCreateContestMutation,
   useUpdateContestMutation,
@@ -14,112 +14,7 @@ import MultiSelectKeyValue from "../../ui/MultiSelectKeyValue";
 import Input from "../../ui/Input";
 import Textarea from "../../ui/Textarea";
 import { useGetAllUsersQuery } from "@/redux/api/services/userApi";
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function Field({ label, error, children }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {label && (
-        <label className="text-sm font-medium text-black">{label}</label>
-      )}
-      {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
-    </div>
-  );
-}
-
-function UploadBox({
-  label,
-  accept,
-  hint,
-  file,
-  previewUrl,
-  onChange,
-  onRemove,
-}) {
-  const ref = useRef(null);
-  const [localUrl, setLocalUrl] = useState(null);
-  const isImage = accept?.includes("image");
-
-  useEffect(() => {
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setLocalUrl(url);
-      return () => URL.revokeObjectURL(url);
-    }
-    setLocalUrl(null);
-  }, [file]);
-
-  const displayUrl = localUrl || previewUrl;
-
-  return (
-    <Field label={label}>
-      {displayUrl && isImage ? (
-        <div className="relative rounded-xl overflow-hidden border border-gray-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={displayUrl}
-            alt={label}
-            className="w-full h-40 object-cover"
-          />
-          <button
-            type="button"
-            onClick={onRemove}
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors cursor-pointer"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      ) : (
-        <div
-          onClick={() => ref.current?.click()}
-          className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
-        >
-          <Upload size={18} className="text-primary shrink-0" />
-          <div className="text-sm min-w-0 flex-1">
-            {file || previewUrl ? (
-              <span className="font-medium text-black truncate block">
-                {file?.name ?? "Uploaded file"}
-              </span>
-            ) : (
-              <>
-                <span className="font-semibold text-primary underline underline-offset-2">
-                  Click to Upload
-                </span>
-                <span className="text-gray"> or drag & drop</span>
-              </>
-            )}
-            {!file && !previewUrl && (
-              <p className="text-xs text-gray mt-0.5">{hint}</p>
-            )}
-          </div>
-          {(file || previewUrl) && (
-            <button
-              type="button"
-              onClick={e => {
-                e.stopPropagation();
-                onRemove();
-              }}
-              className="text-gray hover:text-red-500 transition-colors cursor-pointer"
-            >
-              <X size={14} />
-            </button>
-          )}
-        </div>
-      )}
-      <input
-        ref={ref}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={e => onChange(e.target.files?.[0] ?? null)}
-      />
-    </Field>
-  );
-}
-
-// ─── Main modal ───────────────────────────────────────────────────────────────
+import UploadBox from "@/components/ui/UploadBox";
 
 export default function CreateContestModal({
   open,
