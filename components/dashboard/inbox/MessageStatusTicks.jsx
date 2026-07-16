@@ -20,15 +20,27 @@ function getOverallStatus(statuses) {
   );
 }
 
-export default function MessageStatusTicks({ statuses }) {
+export default function MessageStatusTicks({ statuses, light }) {
   const status = getOverallStatus(statuses);
-  if (!status) return <Clock size={12} className="text-gray-300" />;
+  if (!status)
+    return (
+      <Clock size={12} className={light ? "text-white/60" : "text-gray-300"} />
+    );
 
   if (status === "seen") {
-    return <CheckCheck size={14} className="text-primary" />;
+    return (
+      <CheckCheck size={14} className={light ? "text-white" : "text-primary"} />
+    );
   }
   if (status === "delivered") {
-    return <CheckCheck size={14} className="text-gray-400" />;
+    return (
+      <CheckCheck
+        size={14}
+        className={light ? "text-white/70" : "text-gray-400"}
+      />
+    );
   }
-  return <Check size={14} className="text-gray-400" />;
+  return (
+    <Check size={14} className={light ? "text-white/70" : "text-gray-400"} />
+  );
 }
