@@ -126,7 +126,9 @@ export default function SocialMediaConnect({ variant = "profile" }) {
 
       {variant === "profile" && <hr className="border-gray-100" />}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+      <div
+        className={` grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 ${variant === "profile" ? "grid" : "flex flex-col gap-4"}`}
+      >
         {PLATFORM_UI.map(({ key, label, Icon, iconClass }) => {
           const { data, isLoading } = statusMap[key];
           const connected = !!data?.data?.connected;
