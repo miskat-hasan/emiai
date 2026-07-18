@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { BookmarkSVG, BookmarkFilledSVG } from "@/components/common/Svg";
 import CountdownTimer from "@/components/common/CountdownTimer";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 const AdCard = ({
   imageUrl,
@@ -86,13 +87,17 @@ const AdCard = ({
       <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-10">
         <div className="flex items-center gap-3 w-full">
           {/* User avatar */}
-          <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/30">
-            <Image
-              src={process.env.NEXT_PUBLIC_API_URL + "/" + userAvatar}
-              alt={userName}
-              fill
-              className="object-cover"
-            />
+          <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-white/30 bg-primary flex items-center justify-center text-white font-bold text-lg uppercase">
+            {userAvatar ? (
+              <Image
+                src={getImageUrl(userAvatar)}
+                alt={userName}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <span>{userName ? userName.charAt(0) : "?"}</span>
+            )}
           </div>
 
           {/* Text block taking remaining width */}

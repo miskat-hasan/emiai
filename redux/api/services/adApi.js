@@ -51,9 +51,17 @@ export const adApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Ad"],
     }),
-    getAdWinners: builder.query({
+      getAdWinners: builder.query({
       query: (adId) => ({ url: `/api/ads/winners?ad_id=${adId}`, method: "GET" }),
       providesTags: ["Ad"],
+    }),
+
+    checkCouponPermission: builder.mutation({
+      query: (body) => ({ url: "/api/ads/coupon-permission", method: "POST", body }),
+    }),
+
+    checkPartnerCode: builder.mutation({
+      query: (body) => ({ url: "/api/ads/check-partner-code", method: "POST", body }),
     }),
   }),
 });
@@ -66,4 +74,6 @@ export const {
   useCreateAdMutation,
   useUpdateAdMutation,
   useGetAdWinnersQuery,
+  useCheckCouponPermissionMutation,
+  useCheckPartnerCodeMutation,
 } = adApi;
