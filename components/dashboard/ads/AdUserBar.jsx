@@ -16,7 +16,7 @@ export default function AdUserBar({
     <div className="flex items-center gap-4 flex-wrap">
       {/* Avatar + Name */}
       <div className="flex items-center gap-3">
-        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-gray-200">
+        <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 border-2 border-gray-200 bg-primary flex items-center justify-center text-white font-bold text-lg uppercase">
           {
             userAvatar && userAvatar !== "null" ? (
               <Image
@@ -26,9 +26,7 @@ export default function AdUserBar({
                 className="object-cover"
               />
             ) : (
-              <div className="w-full h-full bg-gray flex items-center justify-center">
-                <span className="text-white font-bold">{userName}</span>
-              </div>
+              <span>{userName ? userName.charAt(0) : "?"}</span>
             )
           }
         </div>

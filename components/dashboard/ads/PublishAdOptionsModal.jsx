@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { setOptionsData, setStep } from "@/redux/slices/adCreationSlice";
+import { useCheckPartnerCodeMutation } from "@/redux/api/services/adApi";
 
 // Sub-components
 function Field({ label, error, children, className = "" }) {
@@ -32,10 +33,13 @@ export default function PublishAdOptionsModal({ onCancel, onApply }) {
   const dispatch = useDispatch();
   const options = useSelector((state) => state.adCreation.options);
 
+  const [checkPartnerCode, { isLoading: isCheckingCode }] = useCheckPartnerCodeMutation();
+
   const {
     register,
     handleSubmit,
     watch,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: options,
@@ -43,7 +47,28 @@ export default function PublishAdOptionsModal({ onCancel, onApply }) {
 
   const selectedOption = watch("selectedOption");
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    if (data.selectedOption === "promo_code" && data.code) {
+      try {
+        const fd = new FormData();
+        fd.append("partner_code", data.code);
+        const res = await checkPartnerCode(fd).unwrap();
+        if (res?.data?.valid === false) {
+          setError("code", {
+            type: "manual",
+            message: res.data.reason || "Invalid partner/promo code",
+          });
+          return;
+        }
+      } catch (err) {
+        setError("code", {
+          type: "manual",
+          message: err?.data?.message || err?.message || "Invalid partner/promo code",
+        });
+        return;
+      }
+    }
+
     dispatch(setOptionsData({ selectedOption: data.selectedOption, code: data.code }));
     if (onApply) {
       onApply(data.selectedOption, data.code);
@@ -94,9 +119,10 @@ export default function PublishAdOptionsModal({ onCancel, onApply }) {
           </button>
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-all cursor-pointer shadow-sm shadow-primary/20"
+            disabled={isCheckingCode}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition-all cursor-pointer shadow-sm shadow-primary/20"
           >
-            Apply
+            {isCheckingCode ? "Checking..." : "Apply"}
           </button>
         </div>
       </form>

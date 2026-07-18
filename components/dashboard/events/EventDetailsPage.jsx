@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { getImageUrl } from "@/helper/getImageUrl";
 import EventHeroImage from "./EventHeroImage";
 import EventDescription from "./EventDescription";
 import EventInfoCard from "./EventInfoCard";
@@ -88,9 +89,7 @@ export default function EventDetailsPage({ role, params }) {
     date: rawEvent.start_date,
     eventType: rawEvent.type,
     participants: rawEvent.participants.length || 0,
-    imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
-      : null,
+    imageUrl: getImageUrl(rawEvent.photo),
     mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };

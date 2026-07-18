@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { toast } from "react-toastify";
 import {
   useCreateVoucherMutation,
   useGetVoucherCategoriesQuery,
 } from "@/redux/api/services/voucherApi";
+import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 import { CalendarIcon } from "lucide-react";
+import MultiSelect from "@/components/ui/MultiSelect";
 
 function Field({ label, error, children, className = "" }) {
   return (
@@ -50,14 +52,26 @@ export default function CreateVoucherModal({
     useGetVoucherCategoriesQuery();
   const categories = categoriesResponse?.data || [];
 
+  const { data: countriesData, isLoading: loadingCountries } =
+    useGetCountriesQuery();
+  const countryOptions = (countriesData?.data || []).map((c) => ({
+    id: c.code || c.id || c.name,
+    name: c.name,
+  }));
+
   const [createVoucher, { isLoading }] = useCreateVoucherMutation();
 
   const {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      countries: [],
+    }
+  });
 
   useEffect(() => {
     if (!open) {
@@ -75,6 +89,12 @@ export default function CreateVoucherModal({
       fd.append("end_date", data.end_date);
       fd.append("category_id", data.category_id);
       fd.append("description", data.description);
+
+      if (data.countries && data.countries.length > 0) {
+        data.countries.forEach(country => {
+          fd.append("countries[]", country);
+        });
+      }
 
       const res = await createVoucher(fd).unwrap();
 
@@ -120,6 +140,15 @@ export default function CreateVoucherModal({
 
             {/* Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Field label="Promo Code" error={errors.promo_code?.message}>
+                <Input
+                  placeholder="Write Your Promo Code"
+                  {...register("promo_code", {
+                    required: "Promo code is required",
+                  })}
+                />
+              </Field>
+
               <Field
                 label="Voucher Category"
                 error={errors.category_id?.message}
@@ -143,13 +172,50 @@ export default function CreateVoucherModal({
                 </div>
               </Field>
 
-              <Field label="Promo Code" error={errors.promo_code?.message}>
+              <Field
+                label="Discount Type"
+                error={errors.discount_type?.message}
+              >
+                <div className="relative">
+                  <select
+                    {...register("discount_type", {
+                      required: "Type is required",
+                    })}
+                    className="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount</option>
+                  </select>
+                </div>
+              </Field>
+            </div>
+
+            {/* Row 2 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Field label="Discount Value" error={errors.discount?.message}>
                 <Input
-                  placeholder="Write Your Promo Code"
-                  {...register("promo_code", {
-                    required: "Promo code is required",
+                  type="number"
+                  placeholder="e.g. 20"
+                  {...register("discount", {
+                    required: "Discount is required",
                   })}
                 />
+              </Field>
+
+              <Field label="Start Date" error={errors.start_date?.message}>
+                <div className="relative">
+                  <Input
+                    type="date"
+                    className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
+                    {...register("start_date", {
+                      required: "Start date is required",
+                    })}
+                  />
+                  <CalendarIcon
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none"
+                    size={18}
+                  />
+                </div>
               </Field>
 
               <Field label="End Date" error={errors.end_date?.message}>
@@ -169,51 +235,24 @@ export default function CreateVoucherModal({
               </Field>
             </div>
 
-            {/* Row 2: Added fields to match backend expectations */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Field label="Discount Value" error={errors.discount?.message}>
-                <Input
-                  type="number"
-                  placeholder="e.g. 20"
-                  {...register("discount", {
-                    required: "Discount is required",
-                  })}
-                />
-              </Field>
-
-              <Field
-                label="Discount Type"
-                error={errors.discount_type?.message}
-              >
-                <div className="relative">
-                  <select
-                    {...register("discount_type", {
-                      required: "Type is required",
-                    })}
-                    className="w-full rounded-xl bg-gray-50 border border-transparent px-4 py-3 text-sm text-black outline-none focus:border-primary/40 focus:bg-white transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount</option>
-                  </select>
-                </div>
-              </Field>
-
-              <Field label="Start Date" error={errors.start_date?.message}>
-                <div className="relative">
-                  <Input
-                    type="date"
-                    className="appearance-none pr-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-full cursor-pointer text-gray-800"
-                    {...register("start_date", {
-                      required: "Start date is required",
-                    })}
+            {/* Row 3 */}
+            <Field label="Valid Countries" error={errors.countries?.message}>
+              <Controller
+                name="countries"
+                control={control}
+                rules={{ required: "At least one country is required" }}
+                render={({ field: { onChange, value } }) => (
+                  <MultiSelect
+                    id="countries"
+                    placeholder="Select countries..."
+                    options={countryOptions}
+                    value={value || []}
+                    onChange={onChange}
+                    isLoading={loadingCountries}
                   />
-                  <CalendarIcon
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-black pointer-events-none"
-                    size={18}
-                  />
-                </div>
-              </Field>
-            </div>
+                )}
+              />
+            </Field>
 
             {/* Row 3 */}
             <Field

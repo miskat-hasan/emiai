@@ -148,13 +148,17 @@ export default function PostPreview() {
         <div className="flex-1 flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full overflow-hidden relative">
-                <Image
-                  src={getImageUrl(userAvatar)}
-                  alt="User"
-                  fill
-                  className="object-cover"
-                />
+              <div className="w-14 h-14 rounded-full overflow-hidden relative bg-primary flex items-center justify-center text-white font-bold text-xl uppercase">
+                {userAvatar && userAvatar !== "null" ? (
+                  <Image
+                    src={getImageUrl(userAvatar)}
+                    alt="User"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <span>{userName ? userName.charAt(0) : "?"}</span>
+                )}
               </div>
               <h3 className="font-bold text-black text-lg">{userName}</h3>
             </div>
