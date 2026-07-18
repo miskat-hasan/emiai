@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetEventByIdQuery } from "@/redux/api/services/eventApi";
+import { getImageUrl } from "@/helper/getImageUrl";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { use, useState } from "react";
@@ -88,9 +89,7 @@ export default function MyEventDetailsPage({ role, params }) {
     date: rawEvent.start_date,
     eventType: rawEvent.type,
     participants: rawEvent.total_participants || 0,
-    imageUrl: rawEvent.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL}/${rawEvent.photo}`
-      : null,
+    imageUrl: getImageUrl(rawEvent.photo),
     mapUrl: rawEvent.full_location,
     description: rawEvent.description || "No description provided.",
   };

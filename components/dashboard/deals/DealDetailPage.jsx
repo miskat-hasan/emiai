@@ -1,11 +1,16 @@
 "use client";
 import StatusBadge from "@/components/common/StatusBadge";
+import {
+  AcceptDelivaryPage,
+  ConfirmationModal,
+  DeliveryModal,
+} from "@/components/dashboard/deals";
 import { formatDate } from "@/helper/formatDate";
 import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetDealDetailsQuery,
-  useUpdateDealStatusMutation,
   useSubmitDeliveryMutation,
+  useUpdateDealStatusMutation,
 } from "@/redux/api/services/dealApi";
 import { Flag, Headphones } from "lucide-react";
 import Image from "next/image";
@@ -13,7 +18,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { ConfirmationModal, DeliveryModal, AcceptDelivaryPage } from "@/components/dashboard/deals";
 
 const MOCK_DEAL = {
   id: 1,
@@ -36,11 +40,14 @@ export default function DealDetailPage({ role }) {
   const router = useRouter();
   const { id } = useParams();
   const { data: dealDetails, isLoading } = useGetDealDetailsQuery(id);
-  const [updateDealStatus, { isLoading: isUpdating }] = useUpdateDealStatusMutation();
-  const [submitDelivery, { isLoading: isSubmitting }] = useSubmitDeliveryMutation();
+  const [updateDealStatus, { isLoading: isUpdating }] =
+    useUpdateDealStatusMutation();
+  const [submitDelivery, { isLoading: isSubmitting }] =
+    useSubmitDeliveryMutation();
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
-  const [isConfirmDeliveryModalOpen, setIsConfirmDeliveryModalOpen] = useState(false);
+  const [isConfirmDeliveryModalOpen, setIsConfirmDeliveryModalOpen] =
+    useState(false);
   const [deliveryData, setDeliveryData] = useState(null);
   const user = useSelector((state) => state.auth?.user);
   console.log(dealDetails);
@@ -49,7 +56,7 @@ export default function DealDetailPage({ role }) {
   const isOwner = user?.id === dealDetails?.data?.requested_by?.id;
 
   if (isOwner && dealDetails?.data?.status === "delivered") {
-    return <AcceptDelivaryPage role={role} />;
+    return <AcceptDelivaryPage role={role} dealDetails={dealDetails} />;
   }
 
   return (
@@ -192,26 +199,41 @@ export default function DealDetailPage({ role }) {
             </button>
           </div>
         )}
+        
+        {!isOwner && dealDetails?.data?.status === "rejected" && (
+          <div className="flex items-center justify-between px-6 pb-6">
+            <button
+              onClick={() => console.log("reject", deal.id)}
+              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => setIsDeliveryModalOpen(true)}
+              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
+            >
+              Deliver Again
+            </button>
+          </div>
+        )}
 
         {/* jodi status active hoy and deal worker hoy tahole delivary korar button dekhate hobe */}
-        {
-          !isOwner && dealDetails?.data?.status === "active" && (
-            <div className="flex items-center justify-between px-6 pb-6">
-              <button
-                onClick={() => console.log("reject", deal.id)}
-                className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => setIsDeliveryModalOpen(true)}
-                className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
-              >
-                Mark as Delivered
-              </button>
-            </div>
-          )
-        }
+        {!isOwner && dealDetails?.data?.status === "active" && (
+          <div className="flex items-center justify-between px-6 pb-6">
+            <button
+              onClick={() => console.log("reject", deal.id)}
+              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => setIsDeliveryModalOpen(true)}
+              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
+            >
+              Mark as Delivered
+            </button>
+          </div>
+        )}
 
         {/* ── Sponsor section ── */}
         <div
@@ -257,7 +279,9 @@ export default function DealDetailPage({ role }) {
             toast.success("Deal accepted successfully!");
           } catch (error) {
             console.error("Failed to accept deal", error);
-            toast.error(error?.data?.message || error?.message || "Failed to accept deal");
+            toast.error(
+              error?.data?.message || error?.message || "Failed to accept deal",
+            );
           }
         }}
       />
@@ -288,9 +312,9 @@ export default function DealDetailPage({ role }) {
               file: deliveryData?.file,
             }).unwrap();
 
-            await updateDealStatus({ 
-              id: deal.id, 
-              status: "delivered"
+            await updateDealStatus({
+              id: deal.id,
+              status: "delivered",
             }).unwrap();
 
             setIsConfirmDeliveryModalOpen(false);
@@ -298,7 +322,11 @@ export default function DealDetailPage({ role }) {
             toast.success("Deal delivered successfully!");
           } catch (error) {
             console.error("Failed to deliver deal", error);
-            toast.error(error?.data?.message || error?.message || "Failed to deliver deal");
+            toast.error(
+              error?.data?.message ||
+                error?.message ||
+                "Failed to deliver deal",
+            );
           }
         }}
       />

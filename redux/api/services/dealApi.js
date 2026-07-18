@@ -56,7 +56,7 @@ export const dealApi = apiSlice.injectEndpoints({
         formData.append("deal_id", data.deal_id);
         formData.append("delivery_message", data.delivery_message);
         if (data.file) {
-          formData.append("file", data.file);
+          formData.append("attachment", data.file);
         }
         
         return {

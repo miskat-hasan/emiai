@@ -21,6 +21,7 @@ import {
   useGetPublishedAdsQuery,
 } from "@/redux/api/services/adApi";
 import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 function timeSince(dateString) {
   if (!dateString) return "";
@@ -118,12 +119,7 @@ export default function AdsPage({ role }) {
   const totalResults = meta?.total ?? rawAds.length;
 
   const mappedAds = rawAds.map((ad) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const origin = new URL(apiUrl).origin;
-    let imageUrl = ad.media_url;
-    if (imageUrl && !imageUrl.startsWith("http")) {
-      imageUrl = `${origin}${imageUrl}`;
-    }
+    let imageUrl = getImageUrl(ad.media_url);
     let mediaType = ad.media_type;
 
     if (!mediaType && imageUrl) {

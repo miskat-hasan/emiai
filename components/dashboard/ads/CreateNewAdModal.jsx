@@ -12,6 +12,7 @@ import Image from "next/image";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useCheckCouponPermissionMutation } from "@/redux/api/services/adApi";
 
 // Sub-components
 
@@ -140,7 +141,11 @@ export default function CreateNewAdModal({
   const [prizesCount, setPrizesCount] = useState(
     Math.max(1, draft.prizes?.length || 1),
   );
-  const isLoading = false;
+  
+  const [checkCouponPermission, { isLoading: isCheckingCoupon }] =
+    useCheckCouponPermissionMutation();
+
+  const isLoading = isCheckingCoupon;
 
   const {
     register,
@@ -150,6 +155,7 @@ export default function CreateNewAdModal({
     watch,
     control,
     getValues,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: draft,
@@ -200,6 +206,30 @@ export default function CreateNewAdModal({
   };
 
   const onSubmit = async (data) => {
+    if (prizeType === "coupon") {
+      try {
+        const fd = new FormData();
+        const countriesList = data.countries || [];
+        countriesList.forEach((c, idx) => {
+          fd.append(`countries[${idx}]`, c);
+        });
+        const res = await checkCouponPermission(fd).unwrap();
+        if (res?.data?.allowed === false) {
+          setError("promoCode", {
+            type: "manual",
+            message: res.data.reason || "Coupon permission denied",
+          });
+          return;
+        }
+      } catch (err) {
+        setError("promoCode", {
+          type: "manual",
+          message: err?.data?.message || err?.message || "Coupon permission denied for selected countries",
+        });
+        return;
+      }
+    }
+
     // Save draft and move to next step
     const dataToSave = { ...data, mediaFile, previewUrl, id: editingAd?.id };
     dispatch(setDraftData(dataToSave));
@@ -362,10 +392,11 @@ export default function CreateNewAdModal({
           {prizeType === "coupon" && (
             <>
               {/* Create Promo Code */}
-              <Field label="Create Promo Code">
+              <Field label="Create Promo Code" error={errors.promoCode?.message}>
                 <Input
                   placeholder="Write Promo Code here..."
                   {...register("promoCode")}
+                  className={errors.promoCode ? "border-red-500" : ""}
                 />
               </Field>
 

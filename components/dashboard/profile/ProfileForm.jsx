@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { User, Phone, Globe2, Lock, Building2 } from "lucide-react";
+import {
+  User,
+  Lock,
+  Building2,
+  Eye,
+  EyeOff,
+  MapPinHouse,
+} from "lucide-react";
 import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 import {
   useUpdatePasswordMutation,
@@ -13,6 +20,8 @@ import {
 import { setUser } from "@/redux/slices/authSlice";
 import { saveAuthSession } from "@/lib/auth-storage";
 import CustomSelect from "@/components/ui/CustomSelect";
+import CountryCodeSelect from "@/components/ui/CountryCodeSelect";
+import UploadBox from "@/components/ui/UploadBox";
 
 const inputClass =
   "w-full bg-gray-50 border border-gray-100 text-black text-sm rounded-xl pl-10 pr-4 py-3 outline-none focus:border-primary/40 focus:bg-white transition-all";
@@ -28,8 +37,15 @@ function FieldIcon({ Icon }) {
 
 export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
   const dispatch = useDispatch();
-
+  const [documentFile, setDocumentFile] = useState(null);
+  const [documentError, setDocumentError] = useState(false);
   const role = user?.role;
+
+  const requiresBusinessFields = role === "advertiser" || role === "agency";
+
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [updateUser, { isLoading: isSavingProfile }] = useUpdateUserMutation();
   const [updatePassword, { isLoading: isSavingPassword }] =
@@ -42,8 +58,10 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
   const aboutDefaultValues = useMemo(
     () => ({
       name: user?.name ?? "",
+      company_address: user?.company_address ?? "",
       email: user?.email ?? "",
       phone: user?.phone ?? "",
+      phone_code: user?.phone_code ?? "",
       country: user?.country ?? "",
     }),
     [user],
@@ -65,8 +83,15 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
     const fd = new FormData();
     fd.append("name", data.name);
     fd.append("phone", data.phone);
+    fd.append("phone_code", data.phone_code ?? "");
     fd.append("country", data.country);
+    if (requiresBusinessFields && data.company_address) {
+      fd.append("company_address", data.company_address);
+    }
     if (avatarFile) fd.append("avatar", avatarFile);
+    if (requiresBusinessFields && documentFile) {
+      fd.append("document", documentFile);
+    }
 
     try {
       const res = await updateUser(fd).unwrap();
@@ -76,6 +101,7 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
         dispatch(setUser(updatedUser));
         saveAuthSession({ ...updatedUser, token: undefined });
         onAvatarSaved?.();
+        setDocumentFile(null);
       }
     } catch (err) {
       toast.error(err?.data?.message ?? "Failed to update profile.");
@@ -156,18 +182,16 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
                   Company Address
                 </label>
                 <div className="relative">
-                  <FieldIcon Icon={Building2} />
+                  <FieldIcon Icon={MapPinHouse} />
                   <input
                     type="text"
-                    {...registerAbout("name", {
-                      required: "Company Name is required",
-                    })}
+                    {...registerAbout("company_address")}
                     className={inputClass}
                   />
                 </div>
-                {aboutErrors.name && (
+                {aboutErrors.company_address && (
                   <p className="text-xs text-red-500 mt-1">
-                    {aboutErrors.name.message}
+                    {aboutErrors.company_address.message}
                   </p>
                 )}
               </div>
@@ -209,26 +233,29 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray mb-1.5">
-              Number
+            <label className="block text-sm font-medium text-black mb-1.5">
+              Phone Number
             </label>
-            <div className="relative">
-              <FieldIcon Icon={Phone} />
+            <div className="flex gap-2">
+              <Controller
+                name="phone_code"
+                control={control}
+                rules={{ required: "Required" }}
+                render={({ field }) => (
+                  <CountryCodeSelect
+                    value={field.value}
+                    onChange={dial => field.onChange(dial)}
+                  />
+                )}
+              />
               <input
-                type="text"
-                {...registerAbout("phone", {
-                  required: "Contact number required",
-                })}
-                className={inputClass}
+                type="tel"
+                placeholder="123 654 7896"
+                {...registerAbout("phone")}
+                className="flex-1 bg-gray-50 border border-gray-100 text-black text-sm rounded-xl px-4 py-3 outline-none focus:border-primary/40 focus:bg-white transition-all"
               />
             </div>
-            {aboutErrors.phone && (
-              <p className="text-xs text-red-500 mt-1">
-                {aboutErrors.phone.message}
-              </p>
-            )}
           </div>
-
           <div>
             <Controller
               name="country"
@@ -251,6 +278,36 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
               )}
             />
           </div>
+          {requiresBusinessFields && (
+            <div>
+              {user?.document && !documentFile && (
+                <a
+                  href={user.document}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-primary underline mb-1.5 inline-block"
+                >
+                  View current certificate
+                </a>
+              )}
+              <UploadBox
+                label="Registration Certificate"
+                accept=".doc,.docx,.pdf"
+                hint="DOC, PDF"
+                file={documentFile}
+                onChange={file => {
+                  setDocumentFile(file);
+                  setDocumentError(false);
+                }}
+                onRemove={() => setDocumentFile(null)}
+              />
+              {documentError && (
+                <p className="text-xs text-red-500 mt-1">
+                  Registration certificate is required.
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end pt-2 border-t border-gray-100 mt-2">
@@ -291,13 +348,21 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
             <div className="relative">
               <FieldIcon Icon={Lock} />
               <input
-                type="password"
+                type={showOldPassword ? "text" : "password"}
                 placeholder="Current Password"
                 {...registerPassword("old_password", {
                   required: "Current password is required",
                 })}
-                className={inputClass}
+                className={`${inputClass} pr-10`}
               />
+              <button
+                type="button"
+                onClick={() => setShowOldPassword(v => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                tabIndex={-1}
+              >
+                {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {passwordErrors.old_password && (
               <p className="text-xs text-red-500 mt-1">
@@ -313,7 +378,7 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
             <div className="relative">
               <FieldIcon Icon={Lock} />
               <input
-                type="password"
+                type={showNewPassword ? "text" : "password"}
                 placeholder="New Password"
                 {...registerPassword("new_password", {
                   required: "New password is required",
@@ -322,8 +387,16 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
                     message: "Must be at least 6 characters",
                   },
                 })}
-                className={inputClass}
+                className={`${inputClass} pr-10`}
               />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(v => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                tabIndex={-1}
+              >
+                {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {passwordErrors.new_password && (
               <p className="text-xs text-red-500 mt-1">
@@ -339,7 +412,7 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
             <div className="relative">
               <FieldIcon Icon={Lock} />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm New Password"
                 {...registerPassword("new_password_confirmation", {
                   required: "Please confirm your new password",
@@ -348,8 +421,16 @@ export default function ProfileForm({ user, avatarFile, onAvatarSaved }) {
                     val === newPasswordVal ||
                     "Passwords must match exactly",
                 })}
-                className={inputClass}
+                className={`${inputClass} pr-10`}
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(v => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                tabIndex={-1}
+              >
+                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
             {passwordErrors.new_password_confirmation && (
               <p className="text-xs text-red-500 mt-1">

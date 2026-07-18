@@ -2,6 +2,7 @@
 
 import TabSwitcher from "@/components/common/TabSwitcher";
 import { Ticket } from "@/components/common/Ticket";
+import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetMyEventsQuery,
   useGetMyTicketsQuery,
@@ -221,9 +222,7 @@ export default function EventsPage({ role }) {
       day: "numeric",
       year: "numeric",
     }),
-    imageUrl: event.photo
-      ? `${process.env.NEXT_PUBLIC_API_URL}/${event.photo}`
-      : null,
+    imageUrl: getImageUrl(event.photo),
     description: event.description,
   });
 
