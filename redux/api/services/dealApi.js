@@ -67,6 +67,18 @@ export const dealApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["Deals"],
     }),
+    rateDeal: builder.mutation({
+      query: (data) => ({
+        method: "POST",
+        url: "/api/deals/rate-deal",
+        params: {
+          deal_id: data.deal_id,
+          rating: data.rating,
+          message: data.message,
+        },
+      }),
+      invalidatesTags: ["Deals"],
+    }),
   }),
 });
 
@@ -76,4 +88,5 @@ export const {
   useCreateDealMutation,
   useUpdateDealStatusMutation,
   useSubmitDeliveryMutation,
+  useRateDealMutation,
 } = dealApi;
