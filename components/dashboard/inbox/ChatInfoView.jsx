@@ -6,7 +6,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import {
   ArrowLeft,
-  Bookmark,
   Share2,
   Video,
   Calendar,
@@ -20,7 +19,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "react-toastify";
-import { MinusCircleSVG, ExclamationCircleSVG } from "@/components/common/Svg";
+import { ExclamationCircleSVG } from "@/components/common/Svg";
+import { MinusCircle, UserCheck } from "lucide-react";
 import BlockModal from "./modals/BlockModal";
 import ReportModal from "./modals/ReportModal";
 import DeliveryModal from "./modals/DeliveryModal";
@@ -28,7 +28,6 @@ import ExtensionDeliveryModal from "./modals/ExtensionDeliveryModal";
 import LeaveGroupModal from "./modals/LeaveGroupModal";
 import AddMemberModal from "./modals/AddMemberModal";
 import GroupSettingsModal from "./modals/GroupSettingsModal";
-import { ChevronRight } from "lucide-react";
 import ConversationMediaPanel from "./ConversationMediaPanel";
 import {
   useAddGroupAdminsMutation,
@@ -45,6 +44,10 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
 
   // Modal states
   const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  // chat.blocked.by_me comes straight from the conversation payload
+  // (blocked: { by_me, by_them }); local state lets the icon/label update
+  // instantly after the modal succeeds, without waiting on a refetch.
+  const [isBlockedByMe, setIsBlockedByMe] = useState(!!chat.blocked?.by_me);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isDeliveryModalOpen, setIsDeliveryModalOpen] = useState(false);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
@@ -394,9 +397,18 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsBlockModalOpen(true)}
-              className="w-10 h-10 rounded-full bg-gray-900 text-white flex items-center justify-center hover:bg-black transition-colors shadow-sm cursor-pointer"
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-sm cursor-pointer ${
+                isBlockedByMe
+                  ? "bg-primary/10 text-primary hover:bg-primary/20"
+                  : "bg-gray-900 text-white hover:bg-black"
+              }`}
+              title={isBlockedByMe ? "Unblock user" : "Block user"}
             >
-              <MinusCircleSVG className="w-[18px] h-[18px]" />
+              {isBlockedByMe ? (
+                <UserCheck size={18} />
+              ) : (
+                <MinusCircle size={18} />
+              )}
             </button>
             <button
               onClick={() => setIsReportModalOpen(true)}
@@ -455,6 +467,8 @@ export default function ChatInfoView({ chat, currentUserId, onBack }) {
         onClose={() => setIsBlockModalOpen(false)}
         userId={user.id}
         userName={user.name}
+        isBlocked={isBlockedByMe}
+        onToggled={setIsBlockedByMe}
       />
 
       <ReportModal

@@ -4,18 +4,34 @@ import React from "react";
 import { toast } from "react-toastify";
 import { useToggleBlockUserMutation } from "@/redux/api/services/chatApi";
 
-export default function BlockModal({ isOpen, onClose, userId, userName }) {
+export default function BlockModal({
+  isOpen,
+  onClose,
+  userId,
+  userName,
+  isBlocked,
+  onToggled,
+}) {
   const [toggleBlockUser, { isLoading }] = useToggleBlockUserMutation();
 
   if (!isOpen) return null;
 
-  const handleBlock = async () => {
+  const handleToggle = async () => {
     try {
       const res = await toggleBlockUser(userId).unwrap();
-      toast.success(res?.message ?? `Blocked ${userName} successfully.`);
+      toast.success(
+        res?.message ??
+          (isBlocked
+            ? `${userName} unblocked successfully.`
+            : `${userName} blocked successfully.`),
+      );
+      onToggled?.(!isBlocked);
       onClose();
     } catch (err) {
-      toast.error(err?.data?.message ?? "Couldn't block this user.");
+      toast.error(
+        err?.data?.message ??
+          `Couldn't ${isBlocked ? "unblock" : "block"} this user.`,
+      );
     }
   };
 
@@ -29,11 +45,16 @@ export default function BlockModal({ isOpen, onClose, userId, userName }) {
 
         <div className="relative flex flex-col items-center px-8 py-10 text-center z-10">
           <h3 className="text-xl font-bold text-gray-900 mb-3">
-            Block &quot;{userName}&quot;
+            {isBlocked ? "Unblock" : "Block"} &quot;{userName}&quot;
           </h3>
           <p className="text-sm text-gray-500 mb-8 px-2">
-            Are you sure you want to block{" "}
-            <span className="font-semibold text-gray-700">&quot;{userName}&quot;</span>?
+            Are you sure you want to {isBlocked ? "unblock" : "block"}{" "}
+            <span className="font-semibold text-gray-700">
+              &quot;{userName}&quot;
+            </span>
+            ?
+            {!isBlocked &&
+              " They won't be able to message you until you unblock them."}
           </p>
 
           <div className="flex items-center justify-center gap-6 w-full">
@@ -45,11 +66,19 @@ export default function BlockModal({ isOpen, onClose, userId, userName }) {
               No
             </button>
             <button
-              onClick={handleBlock}
+              onClick={handleToggle}
               disabled={isLoading}
-              className="bg-primary text-white px-8 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity shadow-[0_4px_14px_rgba(240,90,40,0.25)] cursor-pointer disabled:opacity-50 min-w-[90px]"
+              className={`px-8 py-2.5 rounded-xl text-sm font-semibold transition-opacity shadow-[0_4px_14px_rgba(240,90,40,0.25)] cursor-pointer disabled:opacity-50 min-w-[90px] ${
+                isBlocked
+                  ? "bg-primary text-white hover:opacity-90"
+                  : "bg-red-500 text-white hover:opacity-90"
+              }`}
             >
-              {isLoading ? "Blocking..." : "Yes"}
+              {isLoading
+                ? isBlocked
+                  ? "Unblocking..."
+                  : "Blocking..."
+                : "Yes"}
             </button>
           </div>
         </div>

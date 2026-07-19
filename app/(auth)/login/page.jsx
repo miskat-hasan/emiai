@@ -6,18 +6,26 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
-import { useLoginUserMutation } from "@/redux/api/authApi";
+import {
+  useLoginUserMutation,
+  useSocialLoginMutation,
+} from "@/redux/api/authApi";
 import { setUser } from "@/redux/slices/authSlice";
 import AuthInput from "@/components/ui/AuthInput";
 import AuthButton from "@/components/ui/AuthButton";
 import { AppleIcon, GoogleIcon } from "@/components/common/Svg";
 import { getRoleHomeRoute } from "@/lib/roleRoutes";
 import { rebuildEcho } from "@/lib/echo";
+import { signInWithGoogle } from "@/lib/googleSignIn";
+import { signInWithApple } from "@/lib/appleSignIn";
+import { useState } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [loginUser, { isLoading }] = useLoginUserMutation();
+  const [socialLogin] = useSocialLoginMutation();
+  const [socialLoadingProvider, setSocialLoadingProvider] = useState(null);
 
   const {
     register,
@@ -36,7 +44,7 @@ export default function LoginPage() {
 
         document.cookie = `token=${userData.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
         document.cookie = `role=${userData.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
-        
+
         rebuildEcho();
 
         toast.success("Welcome back!");
@@ -49,6 +57,62 @@ export default function LoginPage() {
         err?.message ??
         "Invalid email or password. Please try again.";
       toast.error(msg);
+    }
+  };
+
+  const completeSocialLogin = async (result, provider) => {
+    try {
+      const res = await socialLogin({
+        token: result.idToken,
+        provider,
+        username: result.username,
+        email: result.email,
+        avatar: result.avatar,
+      }).unwrap();
+
+      if (res?.success && res?.data) {
+        const userData = res.data;
+        dispatch(setUser(userData));
+        document.cookie = `token=${userData.token}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        document.cookie = `role=${userData.role}; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        rebuildEcho();
+        toast.success("Welcome back!");
+        router.push(getRoleHomeRoute(userData.role));
+      }
+    } catch (err) {
+      toast.error(
+        err?.data?.message ??
+          err?.message ??
+          "Social login failed. Please try again.",
+      );
+    } finally {
+      setSocialLoadingProvider(null);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setSocialLoadingProvider("google");
+    try {
+      const result = await signInWithGoogle();
+      await completeSocialLogin(result, "google");
+    } catch (err) {
+      setSocialLoadingProvider(null);
+      if (err?.message !== "cancelled") {
+        toast.error(err?.message ?? "Couldn't sign in with Google.");
+      }
+    }
+  };
+
+  const handleAppleLogin = async () => {
+    setSocialLoadingProvider("apple");
+    try {
+      const result = await signInWithApple();
+      await completeSocialLogin(result, "apple");
+    } catch (err) {
+      setSocialLoadingProvider(null);
+      if (err?.message !== "cancelled") {
+        toast.error(err?.message ?? "Couldn't sign in with Apple.");
+      }
     }
   };
 
@@ -124,11 +188,23 @@ export default function LoginPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <AuthButton variant="social" type="button">
+          <AuthButton
+            variant="social"
+            type="button"
+            onClick={handleGoogleLogin}
+            loading={socialLoadingProvider === "google"}
+            disabled={socialLoadingProvider === "apple"}
+          >
             <GoogleIcon />
             <span>Google</span>
           </AuthButton>
-          <AuthButton variant="social" type="button">
+          <AuthButton
+            variant="social"
+            type="button"
+            onClick={handleAppleLogin}
+            loading={socialLoadingProvider === "apple"}
+            disabled={socialLoadingProvider === "google"}
+          >
             <AppleIcon />
             <span>Apple</span>
           </AuthButton>
