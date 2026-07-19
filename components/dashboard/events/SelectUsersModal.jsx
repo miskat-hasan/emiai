@@ -46,13 +46,17 @@ export default function SelectUsersModal({
           return (
             <div key={user.id} className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                  <Image
-                    src={getImageUrl(user.avatar)}
-                    alt={user.name}
-                    fill
-                    className="object-cover"
-                  />
+                <div className="relative w-12 h-12 rounded-full overflow-hidden bg-primary flex items-center justify-center text-white font-bold text-xl uppercase">
+                  {user.avatar ? (
+                    <Image
+                      src={getImageUrl(user.avatar)}
+                      alt={user.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span>{user.name ? user.name.charAt(0) : "?"}</span>
+                  )}
                 </div>
                 <span className="font-medium text-black">{user.name}</span>
               </div>

@@ -3,12 +3,14 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TabSwitcher from "@/components/common/TabSwitcher";
-import { AdsGrid } from "@/components/dashboard/ads";
 import { Search, Calendar, Filter } from "lucide-react";
 import ExploreReelsView from "./ExploreReelsView";
 import ExploreFilterModal from "./ExploreFilterModal";
+import ExploreFeedView from "./ExploreFeedView";
 import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
 import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
+import { getImageUrl } from "@/helper/getImageUrl";
 import Pagination from "@/components/ui/Pagination";
 
 const DEFAULT_PER_PAGE = 12;
@@ -36,15 +38,17 @@ function timeSince(dateString) {
   return isFuture ? "in a moment" : "just now";
 }
 
-const AdCardSkeleton = () => (
-  <div className="relative rounded-2xl overflow-hidden aspect-[4/5] bg-gray-200 animate-pulse">
-    <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 z-10 flex items-center gap-3 w-full">
-      <div className="w-11 h-11 rounded-full bg-gray-300 shrink-0 border-2 border-white/30"></div>
-      <div className="flex-1 flex flex-col gap-2">
-        <div className="h-4 bg-gray-300 rounded w-2/3"></div>
-        <div className="h-3 bg-gray-300 rounded w-full"></div>
-      </div>
+const FeedSkeleton = () => (
+  <div className="w-full flex flex-col pt-6 pb-4 border-b border-gray-100 animate-pulse">
+    <div className="flex items-center gap-3">
+      <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
     </div>
+    <div className="mt-4 flex flex-col gap-2">
+      <div className="h-4 bg-gray-200 rounded w-full"></div>
+      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+    </div>
+    <div className="w-full aspect-[16/9] bg-gray-200 rounded-md mt-4"></div>
   </div>
 );
 
@@ -78,17 +82,19 @@ export default function ExplorePage({ role }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
-  const queryType = activeTab === "explore" ? "all" : "all"; //we will later use explore, now for showing data we are using all
+  const queryType = activeTab === "explore" ? "all" : "active"; //we will later use explore, now for showing data we are using all
   const { data: exploreAdsResponse, isLoading } =
     useGetGuestExploreAdsQuery({ type: queryType, page, per_page: perPage });
 
   const [bookmarkedApiAds, setBookmarkedApiAds] = useState([]);
+  const [likedAds, setLikedAds] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [dateQuery, setDateQuery] = useState("");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("");
   const router = useRouter();
   const [storeInteraction] = useStoreInteractionMutation();
+  const [toggleBookmark] = useToggleBookmarkMutation();
 
   let rawAds = [];
   if (Array.isArray(exploreAdsResponse)) rawAds = exploreAdsResponse;
@@ -102,13 +108,7 @@ export default function ExplorePage({ role }) {
   const totalResults = meta?.total ?? rawAds.length;
 
   const mappedApiAds = rawAds.map((ad) => {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_API_URL;
-    const origin = new URL(apiUrl).origin;
-    let imageUrl = ad.media_url;
-    if (imageUrl && !imageUrl.startsWith("http")) {
-      imageUrl = `${origin}${ad.media_url}`;
-    }
+    let imageUrl = getImageUrl(ad.media_url);
     let mediaType = ad.media_type;
 
     if (!mediaType && imageUrl) {
@@ -125,14 +125,31 @@ export default function ExplorePage({ role }) {
       .sort((a, b) => (a.rank ?? a.queue_order ?? 0) - (b.rank ?? b.queue_order ?? 0))
       .find((p) => p.window_status === "active" && p.window_ends_at);
 
+    // Format precise date for feed view
+    const rawDate = ad.publish_at || ad.created_at;
+    let createdAtFormatted = "";
+    if (rawDate) {
+      const d = new Date(rawDate);
+      createdAtFormatted = d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }) + " " + d.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+
     return {
       id: ad.id,
       imageUrl,
       mediaType,
       userName: ad.advertiser.name,
-      userAvatar: ad.advertiser.avatar||'/images/profile_photo_url.png',
+      userAvatar: getImageUrl(ad.advertiser.avatar),
       description: ad.description,
-      timeAgo: timeSince(ad.publish_at || ad.created_at),
+      timeAgo: timeSince(rawDate),
+      createdAtFormatted,
       isBookmarked: ad.is_bookmarked || false,
       is_liked: ad.is_liked || false,
       targetCountries: ad.target_countries || [],
@@ -145,12 +162,16 @@ export default function ExplorePage({ role }) {
       setBookmarkedApiAds(
         rawAds.filter((ad) => ad.is_bookmarked).map((ad) => ad.id),
       );
+      setLikedAds(
+        rawAds.filter((ad) => ad.is_liked).map((ad) => ad.id),
+      );
     }
   }, [rawAds]);
 
   const displayAds = mappedApiAds.map((ad) => ({
     ...ad,
     isBookmarked: bookmarkedApiAds.includes(ad.id),
+    is_liked: likedAds.includes(ad.id),
   }));
 
   const filteredAds = displayAds.filter((ad) => {
@@ -163,10 +184,34 @@ export default function ExplorePage({ role }) {
     return matchesSearch && matchesCountry;
   });
 
-  const handleBookmarkToggle = (id) => {
+  const handleBookmarkToggle = async (id) => {
     setBookmarkedApiAds((prev) =>
       prev.includes(id) ? prev.filter((bId) => bId !== id) : [...prev, id],
     );
+    try {
+      await toggleBookmark({ id, type: "ad" }).unwrap();
+    } catch (err) {
+      setBookmarkedApiAds((prev) =>
+        prev.includes(id) ? prev.filter((bId) => bId !== id) : [...prev, id],
+      );
+    }
+  };
+
+  const handleLikeToggle = async (id) => {
+    setLikedAds((prev) =>
+      prev.includes(id) ? prev.filter((lId) => lId !== id) : [...prev, id],
+    );
+    try {
+      await storeInteraction({
+        target_id: id,
+        target_type: "ad",
+        interaction_type: "like",
+      }).unwrap();
+    } catch (err) {
+      setLikedAds((prev) =>
+        prev.includes(id) ? prev.filter((lId) => lId !== id) : [...prev, id],
+      );
+    }
   };
 
   const handleAdClick = (id) => {
@@ -255,17 +300,18 @@ export default function ExplorePage({ role }) {
       {/* Ads grid (Only show under Your Interests) */}
       {activeTab === "your-interests" &&
         (isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-5">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <AdCardSkeleton key={i} />
+          <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
+            {[1, 2, 3].map((i) => (
+              <FeedSkeleton key={i} />
             ))}
           </div>
         ) : filteredAds.length > 0 ? (
           <div>
-            <AdsGrid
+            <ExploreFeedView
               ads={filteredAds}
               onAdClick={handleAdClick}
               onBookmarkToggle={handleBookmarkToggle}
+              onLikeToggle={handleLikeToggle}
             />
             {totalResults > 0 && (
               <Pagination

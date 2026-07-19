@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 const CreateAdFlow = dynamic(() => import("./CreateAdFlow"), { ssr: false });
 const PostPreview = dynamic(() => import("./PostPreview"), { ssr: false });
 
+import { getImageUrl } from "@/helper/getImageUrl";
 import {
   AdActionButtons,
   AdDescription,
@@ -48,12 +49,7 @@ export default function AdDetailsPage({
 
     if (!rawAd) return null;
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    const origin = new URL(apiUrl).origin;
-    let imageUrl = rawAd.media_url;
-    if (imageUrl && !imageUrl.startsWith("http")) {
-      imageUrl = `${origin}${imageUrl}`;
-    }
+    let imageUrl = getImageUrl(rawAd.media_url);
 
     let mediaType = rawAd.media_type;
     // Fallback and override for videos that might be incorrectly labeled as images
@@ -270,11 +266,7 @@ export default function AdDetailsPage({
         <div className="lg:col-span-2 flex flex-col gap-5">
           <AdUserBar
             userName={ad.userName}
-            userAvatar={
-              ad.userAvatar === null
-                ? "/images/avatar_placeholder.png"
-                : ad.userAvatar
-            }
+            userAvatar={ad.userAvatar}
             likes={ad.likes}
             views={ad.views}
             boostLabel={ad.boostLabel}

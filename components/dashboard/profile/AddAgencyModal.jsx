@@ -1,3 +1,4 @@
+// components/dashboard/profile/AddAgencyModal.jsx
 "use client";
 
 import { useState } from "react";
@@ -7,6 +8,7 @@ import CustomSelect from "@/components/ui/CustomSelect";
 import { useGetAllUsersQuery } from "@/redux/api/services/userApi";
 import { useStoreAgencyMutation } from "@/redux/api/services/managerApi";
 import { PERMISSION_DEFS } from "./permissionDefs";
+import ToggleSwitch from "@/components/ui/ToggleButton";
 
 const emptyPermissions = PERMISSION_DEFS.reduce((acc, def) => {
   acc[def.key] = false;
@@ -74,47 +76,43 @@ export default function AddAgencyModal({ open, onClose }) {
         <h3 className="text-lg font-bold text-[#202626] mb-6">Add Agency</h3>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Controller
-              name="agency"
-              control={control}
-              rules={{ required: "Agency is required" }}
-              render={({ field }) => (
-                <CustomSelect
-                  label="Agency"
-                  placeholder="Select an Agency"
-                  options={agencyOptions}
-                  valueKey="id"
-                  labelKey="name"
-                  search
-                  isLoading={isAgencyUsersLoading}
-                  value={field.value}
-                  onChange={field.onChange}
-                  error={errors.agency?.message}
-                />
-              )}
-            />
+          <Controller
+            name="agency"
+            control={control}
+            rules={{ required: "Agency is required" }}
+            render={({ field }) => (
+              <CustomSelect
+                label="Agency"
+                placeholder="Select an Agency"
+                options={agencyOptions}
+                valueKey="id"
+                labelKey="name"
+                search
+                isLoading={isAgencyUsersLoading}
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.agency?.message}
+              />
+            )}
+          />
 
-            <div className="flex items-center justify-between sm:pt-6 px-1">
-              <span className="text-xs font-bold text-[#202626]">
-                Exclusive
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsExclusive(!isExclusive)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  isExclusive
-                    ? "bg-gradient-to-r from-[#FF5C26] to-[#FF7A45]"
-                    : "bg-gray-200"
+          <div className="flex items-center gap-4 sm:pt-6 px-1">
+            <span className="text-xs font-bold text-[#202626]">Exclusive</span>
+            <button
+              type="button"
+              onClick={() => setIsExclusive(!isExclusive)}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                isExclusive
+                  ? "bg-gradient-to-r from-[#FF5C26] to-[#FF7A45]"
+                  : "bg-gray-200"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                  isExclusive ? "translate-x-5" : "translate-x-0"
                 }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                    isExclusive ? "translate-x-5" : "translate-x-0"
-                  }`}
-                />
-              </button>
-            </div>
+              />
+            </button>
           </div>
 
           {/* Permissions — multi-select checkboxes, since the payload needs
@@ -125,20 +123,19 @@ export default function AddAgencyModal({ open, onClose }) {
             </label>
             <div className="bg-[#F1EDE7] rounded-xl p-2 space-y-0.5">
               {PERMISSION_DEFS.map(def => (
-                <label
+                <div
                   key={def.key}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer hover:bg-black/5 transition-colors select-none"
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-black/5"
                 >
-                  <input
-                    type="checkbox"
-                    checked={permissions[def.key]}
-                    onChange={() => togglePermission(def.key)}
-                    className="w-4 h-4 rounded border-gray-300 text-[#FF5C26] focus:ring-[#FF5C26] cursor-pointer"
-                  />
                   <span className="text-xs font-medium text-[#202626]">
                     {def.label}
                   </span>
-                </label>
+
+                  <ToggleSwitch
+                    checked={permissions[def.key]}
+                    onChange={() => togglePermission(def.key)}
+                  />
+                </div>
               ))}
             </div>
           </div>

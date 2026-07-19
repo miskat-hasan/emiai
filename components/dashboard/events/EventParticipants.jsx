@@ -24,7 +24,7 @@ export default function EventParticipants({
           {participants.map(participant => (
             <div key={participant.id} className="flex items-center gap-4">
               {/* Avatar */}
-              <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-gray/20">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0 bg-primary flex items-center justify-center text-white font-bold text-lg uppercase">
                 {participant.avatar ? (
                   <Image
                     src={getImageUrl(participant.avatar)}
@@ -33,12 +33,7 @@ export default function EventParticipants({
                     className="object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-gray bg-gray/20">
-                    {participant.name
-                      .split(" ")
-                      .map(n => n[0])
-                      .join("")}
-                  </div>
+                  <span>{participant.name ? participant.name.charAt(0) : "?"}</span>
                 )}
               </div>
 
