@@ -55,12 +55,28 @@ export const chatApi = apiSlice.injectEndpoints({
       query: () => "/api/online-users",
     }),
 
+    getBlockedUsers: builder.query({
+      query: ({ page, per_page, search, role } = {}) => {
+        const params = new URLSearchParams();
+        if (page) params.set("page", page);
+        if (per_page) params.set("per_page", per_page);
+        if (search) params.set("search", search);
+        if (role) params.set("role", role);
+        const qs = params.toString();
+        return `/api/users/blocked${qs ? `?${qs}` : ""}`;
+      },
+      providesTags: [{ type: "BlockedUsers", id: "LIST" }],
+    }),
+
     toggleBlockUser: builder.mutation({
       query: userId => ({
         url: `/api/users/${userId}/block-toggle`,
         method: "POST",
       }),
-      invalidatesTags: [{ type: "Conversation", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Conversation", id: "LIST" },
+        { type: "BlockedUsers", id: "LIST" },
+      ],
     }),
 
     // ── Messages ──
@@ -295,6 +311,7 @@ export const {
   useDeleteConversationMutation,
   useGetAvailableUsersQuery,
   useGetOnlineUsersQuery,
+  useGetBlockedUsersQuery,
   useToggleBlockUserMutation,
   useGetMessagesQuery,
   useSendMessageMutation,
