@@ -83,6 +83,15 @@ export const authApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+
+    socialLogin: builder.mutation({
+      // body: { token, provider, username, email, avatar }
+      query: body => ({
+        url: "/api/social-login",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 });
 
@@ -97,4 +106,5 @@ export const {
   useVerifyOtpMutation,
   useResendOtpMutation,
   useResetPasswordMutation,
+  useSocialLoginMutation,
 } = authApi;
