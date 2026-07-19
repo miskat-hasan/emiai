@@ -55,7 +55,7 @@ export default function DealDetailPage({ role }) {
 
   const isOwner = user?.id === dealDetails?.data?.requested_by?.id;
 
-  if (isOwner && dealDetails?.data?.status === "delivered") {
+  if (isOwner && (dealDetails?.data?.status === "delivered" || dealDetails?.data?.status === "completed")) {
     return <AcceptDelivaryPage role={role} dealDetails={dealDetails} />;
   }
 

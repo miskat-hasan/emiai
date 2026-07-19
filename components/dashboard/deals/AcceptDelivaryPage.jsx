@@ -6,8 +6,13 @@ import { useRouter } from "next/navigation";
 
 import { formatDate } from "@/helper/formatDate";
 import { getImageUrl } from "@/helper/getImageUrl";
-import { useUpdateDealStatusMutation } from "@/redux/api/services/dealApi";
+import {
+  useUpdateDealStatusMutation,
+  useRateDealMutation,
+} from "@/redux/api/services/dealApi";
 import { toast } from "react-toastify";
+import { RatingModal } from "./RatingModal";
+import { useState } from "react";
 
 export default function AcceptDelivaryPage({
   role = "influencer",
@@ -16,7 +21,9 @@ export default function AcceptDelivaryPage({
   const router = useRouter();
   const [updateDealStatus, { isLoading: isUpdating }] =
     useUpdateDealStatusMutation();
+  const [rateDeal, { isLoading: isRating }] = useRateDealMutation();
   const deal = dealDetails?.data;
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const handleUpdateStatus = async (status) => {
     try {
@@ -210,21 +217,57 @@ export default function AcceptDelivaryPage({
 
       {/* Actions */}
       <div className="flex items-center justify-between py-1 px-2">
-        <button
-          disabled={isUpdating}
-          onClick={() => handleUpdateStatus("rejected")}
-          className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
-        >
-          Cancel Delivery
-        </button>
-        <button
-          disabled={isUpdating}
-          onClick={() => handleUpdateStatus("completed")}
-          className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
-        >
-          {isUpdating ? "Updating..." : "Accept Delivery"}
-        </button>
+        {deal?.status === "completed" ? (
+          <div className="flex w-full justify-end">
+            <button
+              onClick={() => setIsRatingModalOpen(true)}
+              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+            >
+              Rate now
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              disabled={isUpdating}
+              onClick={() => handleUpdateStatus("rejected")}
+              className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
+            >
+              Cancel Delivery
+            </button>
+            <button
+              disabled={isUpdating}
+              onClick={() => handleUpdateStatus("completed")}
+              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
+            >
+              {isUpdating ? "Updating..." : "Accept Delivery"}
+            </button>
+          </>
+        )}
       </div>
+
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        isLoading={isRating}
+        onClose={() => setIsRatingModalOpen(false)}
+        onSubmit={async (data) => {
+          try {
+            await rateDeal({
+              deal_id: deal.id,
+              rating: data.rating,
+              message: data.message,
+            }).unwrap();
+            
+            toast.success("Rating submitted successfully!");
+            setIsRatingModalOpen(false);
+          } catch (error) {
+            console.error("Failed to submit rating", error);
+            toast.error(
+              error?.data?.message || error?.message || "Failed to submit rating"
+            );
+          }
+        }}
+      />
     </div>
   );
 }

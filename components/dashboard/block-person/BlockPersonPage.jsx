@@ -1,17 +1,17 @@
 "use client";
 import { getImageUrl } from "@/helper/getImageUrl";
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
+import Pagination from "@/components/ui/Pagination";
 import {
-  Search,
-  SlidersHorizontal,
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
   MinusCircle,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
-import Pagination from "@/components/ui/Pagination";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -125,7 +125,7 @@ function Dropdown({ trigger, children }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
-    const h = e => {
+    const h = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener("mousedown", h);
@@ -133,7 +133,7 @@ function Dropdown({ trigger, children }) {
   }, []);
   return (
     <div ref={ref} className="relative">
-      <div onClick={() => setOpen(v => !v)}>{trigger}</div>
+      <div onClick={() => setOpen((v) => !v)}>{trigger}</div>
       {open && (
         <div className="absolute right-0 mt-1.5 min-w-[160px] bg-white rounded-xl border border-gray-100 shadow-xl py-1 z-30">
           {children(() => setOpen(false))}
@@ -154,20 +154,20 @@ export default function BlockPersonPage({ role }) {
   const [perPage, setPerPage] = useState(10);
   const [blocked, setBlocked] = useState(MOCK);
 
-  const handleSort = field => {
-    if (sortBy === field) setSortDir(d => (d === "asc" ? "desc" : "asc"));
+  const handleSort = (field) => {
+    if (sortBy === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
     else {
       setSortBy(field);
       setSortDir("asc");
     }
   };
 
-  const handleUnblock = id => {
-    setBlocked(prev => prev.filter(p => p.id !== id));
+  const handleUnblock = (id) => {
+    setBlocked((prev) => prev.filter((p) => p.id !== id));
   };
 
   const filtered = blocked
-    .filter(p => {
+    .filter((p) => {
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       const matchFilter = filter === "All" || p.type === filter;
       return matchSearch && matchFilter;
@@ -217,7 +217,7 @@ export default function BlockPersonPage({ role }) {
               <input
                 type="text"
                 value={search}
-                onChange={e => {
+                onChange={(e) => {
                   setSearch(e.target.value);
                   setPage(1);
                 }}
@@ -236,8 +236,8 @@ export default function BlockPersonPage({ role }) {
                 </button>
               }
             >
-              {close =>
-                FILTER_OPTIONS.map(f => (
+              {(close) =>
+                FILTER_OPTIONS.map((f) => (
                   <button
                     key={f}
                     onClick={() => {
@@ -264,8 +264,8 @@ export default function BlockPersonPage({ role }) {
                   </button>
                 }
               >
-                {close =>
-                  SORT_OPTIONS.map(s => (
+                {(close) =>
+                  SORT_OPTIONS.map((s) => (
                     <button
                       key={s}
                       onClick={() => {
@@ -290,11 +290,11 @@ export default function BlockPersonPage({ role }) {
           <table className="w-full">
             <thead className="border-b border-gray-100 bg-gray-50/60">
               <tr>
-                <TH label="Name" field="name" />
-                <TH label="Type" field="type" />
-                <TH label="Date" field="date" />
-                <TH label="Time" />
-                <TH label="Action" />
+                <th label="Name" field="name" />
+                <th label="Type" field="type" />
+                <th label="Date" field="date" />
+                <th label="Time" />
+                <th label="Action" />
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -308,7 +308,7 @@ export default function BlockPersonPage({ role }) {
                   </td>
                 </tr>
               ) : (
-                paged.map(p => (
+                paged.map((p) => (
                   <tr
                     key={p.id}
                     className="hover:bg-gray-50/60 transition-colors"
@@ -368,7 +368,7 @@ export default function BlockPersonPage({ role }) {
             totalPages={totalPages}
             onPageChange={setPage}
             perPage={perPage}
-            onPerPageChange={n => {
+            onPerPageChange={(n) => {
               setPerPage(n);
               setPage(1);
             }}
