@@ -51,7 +51,9 @@ export default function CreateContestModal({
 
   const [rules, setRules] = useState([""]);
   const [prizePhoto, setPrizePhoto] = useState(null);
+  const [prizePhotoPreview, setPrizePhotoPreview] = useState(null);
   const [documentFile, setDocumentFile] = useState(null);
+  const [documentFilePreview, setDocumentFilePreview] = useState(null);
   const [isPublished, setIsPublished] = useState(false);
   const [collaboratorIds, setCollaboratorIds] = useState([]);
   const [sponsors, setSponsors] = useState([]); // [{ id, value }]
@@ -84,12 +86,20 @@ export default function CreateContestModal({
         })),
       );
       setPrizePhoto(null);
+      setPrizePhotoPreview(
+        contest?.prize_photo_url
+          ? `${process.env.NEXT_PUBLIC_API_URL}/${contest.prize_photo_url}`
+          : null
+      );
       setDocumentFile(null);
+      setDocumentFilePreview(contest?.document_url ?? null);
     } else {
       reset();
       setRules([""]);
       setPrizePhoto(null);
+      setPrizePhotoPreview(null);
       setDocumentFile(null);
+      setDocumentFilePreview(null);
       setIsPublished(false);
       setCollaboratorIds([]);
       setSponsors([]);
@@ -264,13 +274,15 @@ export default function CreateContestModal({
             accept="image/png,image/jpeg"
             hint="PNG, JPG"
             file={prizePhoto}
-            previewUrl={
-              contest?.prize_photo_url
-                ? `${process.env.NEXT_PUBLIC_API_URL}/${contest.prize_photo_url}`
-                : null
-            }
-            onChange={setPrizePhoto}
-            onRemove={() => setPrizePhoto(null)}
+            previewUrl={prizePhotoPreview}
+            onChange={(file) => {
+              setPrizePhoto(file);
+              if (file) setPrizePhotoPreview(URL.createObjectURL(file));
+            }}
+            onRemove={() => {
+              setPrizePhoto(null);
+              setPrizePhotoPreview(null);
+            }}
           />
 
           <UploadBox
@@ -278,9 +290,15 @@ export default function CreateContestModal({
             accept=".doc,.docx,.pdf"
             hint="DOC, PDF"
             file={documentFile}
-            previewUrl={contest?.document_url ?? null}
-            onChange={setDocumentFile}
-            onRemove={() => setDocumentFile(null)}
+            previewUrl={documentFilePreview}
+            onChange={(file) => {
+              setDocumentFile(file);
+              if (file) setDocumentFilePreview(URL.createObjectURL(file));
+            }}
+            onRemove={() => {
+              setDocumentFile(null);
+              setDocumentFilePreview(null);
+            }}
           />
 
           <MultiSelectKeyValue

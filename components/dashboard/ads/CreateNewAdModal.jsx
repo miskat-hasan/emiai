@@ -50,68 +50,7 @@ const Textarea = forwardRef(({ className = "", ...props }, ref) => {
 });
 Textarea.displayName = "Textarea";
 
-function UploadBox({
-  label,
-  accept,
-  hint,
-  onChange,
-  fileName,
-  previewUrl,
-  mediaType,
-}) {
-  const ref = useRef(null);
-  return (
-    <Field label={label}>
-      <div
-        onClick={() => ref.current?.click()}
-        className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
-      >
-        <Upload size={18} className="text-primary shrink-0" />
-        <div className="text-sm">
-          {fileName ? (
-            <span className="font-medium text-black">{fileName}</span>
-          ) : (
-            <>
-              <span className="font-semibold text-primary underline underline-offset-2">
-                Click to Upload
-              </span>
-              <span className="text-gray"> or drag & drop</span>
-            </>
-          )}
-          {!fileName && <p className="text-xs text-gray mt-0.5">{hint}</p>}
-        </div>
-      </div>
-      <input
-        ref={ref}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0] ?? null;
-          onChange(file);
-        }}
-      />
-      {previewUrl && (
-        <div className="relative w-full h-40 rounded-xl overflow-hidden mt-3">
-          {mediaType?.startsWith("video/") ? (
-            <video
-              src={previewUrl}
-              controls
-              className="w-full h-full object-cover bg-black"
-            />
-          ) : (
-            <Image
-              src={getImageUrl(previewUrl)}
-              alt="Preview"
-              fill
-              className="object-cover"
-            />
-          )}
-        </div>
-      )}
-    </Field>
-  );
-}
+import UploadBox from "@/components/ui/UploadBox";
 
 const getOrdinalNumber = (n) => {
   const s = ["th", "st", "nd", "rd"];
@@ -421,6 +360,8 @@ export default function CreateNewAdModal({
             label="Photo/Video"
             accept="image/png,image/jpeg,video/mp4"
             hint="PNG, JPG or MP4"
+            file={mediaFile}
+            previewUrl={previewUrl}
             onChange={(file) => {
               if (file) {
                 setMediaFile(file);
@@ -432,8 +373,11 @@ export default function CreateNewAdModal({
                 setPreviewUrl(null);
               }
             }}
-            fileName={mediaFile?.name}
-            previewUrl={previewUrl}
+            onRemove={() => {
+              setMediaFile(null);
+              setValue("media", null);
+              setPreviewUrl(null);
+            }}
             mediaType={
               mediaFile?.type ||
               (mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i)

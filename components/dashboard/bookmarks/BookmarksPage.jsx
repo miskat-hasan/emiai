@@ -12,6 +12,7 @@ import {
   useToggleBookmarkMutation,
   useGetBookmarksQuery,
 } from "@/redux/api/services/bookmarkApi";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 
@@ -80,15 +81,10 @@ function PortfolioGrid({ items, onToggle }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {items.map(item => {
-        const pf = item.bookmarkable || item;
+        const pf = item.bookmarkable || item.item || item;
 
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL;
-        const origin = new URL(apiUrl).origin;
-        let imageUrl = pf.image || pf.photo || pf.imageUrl || pf.media_url;
-        if (imageUrl && !imageUrl.startsWith("http")) {
-          imageUrl = `${origin}${imageUrl}`;
-        }
+        let imageUrl = pf.image || pf.photo || pf.imageUrl || pf.media_url || pf.media?.[0]?.media_url;
+        imageUrl = getImageUrl(imageUrl);
 
         return (
           <PortfolioBookmarkCard
@@ -118,15 +114,10 @@ function EventGrid({ items, onToggle }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {items.map(item => {
-        const ev = item.bookmarkable || item;
+        const ev = item.bookmarkable || item.item || item;
 
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL;
-        const origin = new URL(apiUrl).origin;
-        let imageUrl = ev.photo || ev.image || ev.imageUrl || ev.media_url;
-        if (imageUrl && !imageUrl.startsWith("http")) {
-          imageUrl = `${origin}${imageUrl}`;
-        }
+        let imageUrl = ev.photo || ev.image || ev.imageUrl || ev.media_url || ev.media?.[0]?.media_url;
+        imageUrl = getImageUrl(imageUrl);
 
         return (
           <EventBookmarkCard
@@ -160,15 +151,10 @@ function AdGrid({ items, onToggle, onAdClick }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-4">
       {items.map(item => {
-        const ad = item.bookmarkable || item;
+        const ad = item.bookmarkable || item.item || item;
 
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL;
-        const origin = new URL(apiUrl).origin;
-        let imageUrl = ad.media_url || ad.imageUrl;
-        if (imageUrl && !imageUrl.startsWith("http")) {
-          imageUrl = `${origin}${imageUrl}`;
-        }
+        let imageUrl = ad.media_url || ad.imageUrl || ad.media?.[0]?.media_url;
+        imageUrl = getImageUrl(imageUrl);
         let mediaType = ad.media_type || ad.mediaType;
 
         if (!mediaType && imageUrl) {
@@ -236,13 +222,13 @@ export default function BookmarksPage({ role }) {
 
   // Filter out items that were just unbookmarked, and filter by search
   const visibleItems = rawItems.filter(item => {
-    const id = item.bookmarkable?.id || item.id;
+    const id = item.bookmarkable?.id || item.item?.id || item.id;
     if (unbookmarkedIds.includes(id)) return false;
 
     // basic search filtering
     if (search) {
-      const title = item.bookmarkable?.title || item.title || "";
-      const desc = item.bookmarkable?.description || item.description || "";
+      const title = item.bookmarkable?.title || item.item?.title || item.title || "";
+      const desc = item.bookmarkable?.description || item.item?.description || item.description || "";
       const s = search.toLowerCase();
       if (!title.toLowerCase().includes(s) && !desc.toLowerCase().includes(s)) {
         return false;
