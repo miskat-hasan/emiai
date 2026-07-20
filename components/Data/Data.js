@@ -107,6 +107,11 @@ export const NAV_ITEMS = {
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/advertiser/wallet" },
     {
+      label: "Collaborations",
+      icon: Handshake,
+      href: "/dashboard/advertiser/collaborations",
+    },
+    {
       label: "Influencers",
       icon: Users,
       href: "/dashboard/advertiser/influencers",
@@ -167,6 +172,11 @@ export const NAV_ITEMS = {
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/agency/wallet" },
     {
+      label: "Collaborations",
+      icon: Handshake,
+      href: "/dashboard/agency/collaborations",
+    },
+    {
       label: "Smart Matching",
       icon: SlidersHorizontal,
       href: "/dashboard/agency/smart-matching",
@@ -210,6 +220,11 @@ export const NAV_ITEMS = {
       href: "/dashboard/business_manager/wallet",
     },
     {
+      label: "Collaborations",
+      icon: Handshake,
+      href: "/dashboard/business_manager/collaborations",
+    },
+    {
       label: "Influencers",
       icon: Users,
       href: "/dashboard/business_manager/influencers",
@@ -246,14 +261,21 @@ export const NAV_ITEMS = {
     { label: "Inbox", icon: Inbox, href: "/dashboard/guest/inbox" },
     { label: "Wallet", icon: Wallet, href: "/dashboard/guest/wallet" },
     { label: "Influencers", icon: Users, href: "/dashboard/guest/influencers" },
-    { label: "Image Generation", icon: Wand2, href: "/dashboard/guest/image-generation" },
+    {
+      label: "Image Generation",
+      icon: Wand2,
+      href: "/dashboard/guest/image-generation",
+    },
     { label: "Contests", icon: Trophy, href: "/dashboard/guest/contests" },
     { label: "Events", icon: CalendarDays, href: "/dashboard/guest/events" },
     { label: "Vouchers", icon: Ticket, href: "/dashboard/guest/vouchers" },
     { label: "Ads", icon: Megaphone, href: "/dashboard/guest/ads" },
     { label: "Tickets", icon: Ticket, href: "/dashboard/guest/tickets" },
     { label: "Share app", icon: ShareAppSVG, href: "/dashboard/guest/share" },
-    { label: "Contact Support", icon: HeadphonesIcon, href: "/dashboard/guest/support",
+    {
+      label: "Contact Support",
+      icon: HeadphonesIcon,
+      href: "/dashboard/guest/support",
     },
   ],
 };
