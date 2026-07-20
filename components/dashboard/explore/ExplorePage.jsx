@@ -75,6 +75,7 @@ const ReelSkeleton = () => (
 const TABS = [
   { key: "your-interests", label: "Your Interests" },
   { key: "explore", label: "Explore" },
+  { key: "gift-hub", label: "Gift Hub" },
 ];
 
 export default function ExplorePage({ role }) {
@@ -82,7 +83,7 @@ export default function ExplorePage({ role }) {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
-  const queryType = activeTab === "explore" ? "all" : "active"; //we will later use explore, now for showing data we are using all
+  const queryType = "all"; // Show all types of ads for the guest user
   const { data: exploreAdsResponse, isLoading } =
     useGetGuestExploreAdsQuery({ type: queryType, page, per_page: perPage });
 
@@ -246,8 +247,8 @@ export default function ExplorePage({ role }) {
           <TabSwitcher tabs={TABS} active={activeTab} onChange={setActiveTab} />
         </div>
 
-        {/* Right side: Search and Date (Only show under Your Interests) */}
-        {activeTab === "your-interests" && (
+        {/* Right side: Search and Date (Only show under Your Interests or Gift Hub) */}
+        {(activeTab === "your-interests" || activeTab === "gift-hub") && (
           <div className="flex items-center gap-4 flex-wrap">
             {/* Search Input */}
             <div className="flex flex-col gap-1.5">
@@ -297,8 +298,8 @@ export default function ExplorePage({ role }) {
         )}
       </div>
 
-      {/* Ads grid (Only show under Your Interests) */}
-      {activeTab === "your-interests" &&
+      {/* Ads grid (Only show under Your Interests or Gift Hub) */}
+      {(activeTab === "your-interests" || activeTab === "gift-hub") &&
         (isLoading ? (
           <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
             {[1, 2, 3].map((i) => (

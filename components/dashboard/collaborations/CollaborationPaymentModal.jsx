@@ -1,3 +1,4 @@
+// components/dashboard/collaborations/CollaborationPaymentModal.jsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -30,11 +31,10 @@ export default function CollaborationPaymentModal({
 
   const onSubmit = async data => {
     try {
-      const formData = new FormData();
-      formData.append("invitation_id", collaboration?.id);
-      formData.append("amount", data.amount);
-
-      await requestPayment(formData).unwrap();
+      await requestPayment({
+        invitation_id: collaboration?.id,
+        amount: Number(data.amount),
+      }).unwrap();
 
       toast.success("Payment request created successfully");
       handleClose();
@@ -47,13 +47,12 @@ export default function CollaborationPaymentModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999]  flex items-center justify-center bg-black/40 px-4 py-6">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4 py-6">
       <div className="w-full max-w-[505px] rounded-[22px] bg-white px-8 py-10 shadow-2xl">
         <div className="mb-8 text-center">
           <h2 className="mb-5 text-2xl font-bold text-[#2f3433]">
             Payment Request
           </h2>
-
           <p className="mx-auto max-w-[390px] text-lg font-medium leading-[1.35] text-[#2f3a38]">
             Make a payment required for Collaborations the event
           </p>
@@ -73,10 +72,7 @@ export default function CollaborationPaymentModal({
               className="h-[62px] w-full rounded-xl border border-transparent bg-[#f7f7f7] px-5 text-lg font-medium text-[#26312f] outline-none transition-all duration-300 placeholder:text-[#26312f] focus:border-primary focus:bg-white"
               {...register("amount", {
                 required: "Payment amount is required",
-                min: {
-                  value: 1,
-                  message: "Amount must be greater than 0",
-                },
+                min: { value: 1, message: "Amount must be greater than 0" },
               })}
             />
 

@@ -48,6 +48,18 @@ export default function PortfolioDetailsModal({
     }
   }, [open, portfolioId, storeInteraction]);
 
+  const rawPortfolio = res?.data;
+
+  const [isLiked, setIsLiked] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (rawPortfolio) {
+      setIsLiked(Boolean(rawPortfolio.is_liked));
+      setIsBookmarked(Boolean(rawPortfolio.is_bookmarked));
+    }
+  }, [rawPortfolio]);
+
   if (!open) return null;
 
   if (isLoading) {
@@ -68,7 +80,6 @@ export default function PortfolioDetailsModal({
   }
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-  const rawPortfolio = res?.data;
   if (!rawPortfolio) return null;
 
   const portfolio = {
@@ -83,16 +94,6 @@ export default function PortfolioDetailsModal({
       image: `${apiUrl}/${m.media_url}`,
     })),
   };
-
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-
-  useEffect(() => {
-    if (rawPortfolio) {
-      setIsLiked(Boolean(rawPortfolio.is_liked));
-      setIsBookmarked(Boolean(rawPortfolio.is_bookmarked));
-    }
-  }, [rawPortfolio]);
 
   const handleLike = async () => {
     try {

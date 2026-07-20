@@ -55,6 +55,15 @@ export default function DealDetailPage({ role }) {
 
   const isOwner = user?.id === dealDetails?.data?.requested_by?.id;
 
+  const handleReject = async (dealId) => {
+    try {
+      await updateDealStatus({ id: dealId, status: "rejected" }).unwrap();
+      toast.success("Deal rejected successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to reject deal");
+    }
+  };
+
   if (isOwner && (dealDetails?.data?.status === "delivered" || dealDetails?.data?.status === "completed")) {
     return <AcceptDelivaryPage role={role} dealDetails={dealDetails} />;
   }
@@ -157,26 +166,20 @@ export default function DealDetailPage({ role }) {
           </div>
         </div>
 
-        {/* <div className="flex items-center justify-between px-6 pb-6">
-          <button
-            onClick={() => console.log("reject", deal.id)}
-            className="text-sm font-semibold text-primary hover:underline transition-colors"
-          >
-            Reject
-          </button>
-          <button
         {/* Actions */}
         {!isOwner && dealDetails?.data?.status === "pending" && (
           <div className="flex items-center justify-between px-6 pb-6">
             <button
-              onClick={() => console.log("reject", deal.id)}
-              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
+              onClick={() => handleReject(dealDetails?.data?.id)}
+              disabled={isUpdating}
+              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer disabled:opacity-50"
             >
               Reject
             </button>
             <button
               onClick={() => setIsAcceptModalOpen(true)}
-              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
+              disabled={isUpdating}
+              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer disabled:opacity-50"
             >
               Accept
             </button>

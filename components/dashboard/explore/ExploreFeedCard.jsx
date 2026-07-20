@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Heart, Bookmark, Share2, Eye, VolumeX, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
 
 export default function ExploreFeedCard({
   ad,
@@ -14,6 +15,40 @@ export default function ExploreFeedCard({
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
+  const hasViewedRef = useRef(false);
+  const [storeInteraction] = useStoreInteractionMutation();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          videoRef.current?.play().catch(() => {});
+
+          if (!hasViewedRef.current && ad.id) {
+            hasViewedRef.current = true;
+            storeInteraction({
+              target_id: ad.id,
+              target_type: "ad",
+              interaction_type: "view",
+            }).catch(() => {});
+          }
+        } else {
+          videoRef.current?.pause();
+        }
+      },
+      { threshold: 0.6 }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [ad.id, storeInteraction]);
+
 
   const toggleMute = (e) => {
     e.stopPropagation();
@@ -36,11 +71,11 @@ export default function ExploreFeedCard({
   const renderMedia = () => {
     if (mediaType === "video" || imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
       return (
-        <div className="relative w-full aspect-[4/5] bg-black overflow-hidden rounded-md mt-4 group">
+        <div className="relative w-full aspect-[4/5] max-h-[65vh] bg-black overflow-hidden rounded-md mt-4 group">
           <video
             ref={videoRef}
             src={imageUrl}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
             loop
             muted={isMuted}
             playsInline
@@ -67,12 +102,12 @@ export default function ExploreFeedCard({
     }
     
     return (
-      <div className="relative w-full aspect-[16/9] md:aspect-[2/1] bg-gray-100 overflow-hidden rounded-md mt-4">
+      <div className="relative w-full aspect-[16/9] md:aspect-[2/1] max-h-[65vh] bg-black overflow-hidden rounded-md mt-4">
         <Image
           src={imageUrl}
           alt={description || "Ad Media"}
           fill
-          className="object-cover"
+          className="object-contain"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 800px"
         />
       </div>
@@ -80,7 +115,7 @@ export default function ExploreFeedCard({
   };
 
   return (
-    <div className="w-full flex flex-col pt-6 pb-4 border-b border-gray-100">
+    <div ref={containerRef} className="w-full flex flex-col pt-6 pb-4 border-b border-gray-100">
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-3">

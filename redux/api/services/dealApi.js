@@ -22,6 +22,14 @@ export const dealApi = apiSlice.injectEndpoints({
       }),
       providesTags: ["Deals"],
     }),
+    getDealDeliveries: builder.query({
+      query: deal_id => ({
+        method: "GET",
+        url: `/api/deals/deliveries`,
+        params: { deal_id },
+      }),
+      providesTags: ["Deals"],
+    }),
     createDeal: builder.mutation({
       query: data => ({
         method: "POST",
@@ -85,6 +93,7 @@ export const dealApi = apiSlice.injectEndpoints({
 export const {
   useGetDealsQuery,
   useGetDealDetailsQuery,
+  useGetDealDeliveriesQuery,
   useCreateDealMutation,
   useUpdateDealStatusMutation,
   useSubmitDeliveryMutation,

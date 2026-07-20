@@ -79,6 +79,13 @@ const portfolioApi = apiSlice.injectEndpoints({
           fd.append(`new_media[${index}][file]`, item.file);
         });
 
+        // Add delete_media (removed existing files)
+        (data.delete_media || []).forEach((id) => {
+          fd.append(`delete_media[]`, id);
+          fd.append(`deleted_media[]`, id);
+          fd.append(`delete_media_ids[]`, id);
+        });
+
         return {
           url: "/api/portfolios/update",
           method: "POST",
