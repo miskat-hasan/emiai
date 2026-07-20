@@ -1,6 +1,7 @@
 // components/ui/UploadBox.jsx
 import { Upload, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { getImageUrl } from "@/helper/getImageUrl";
 
 function Field({ label, error, children }) {
   return (
@@ -22,11 +23,11 @@ export default function UploadBox({
   previewUrl,
   onChange,
   onRemove,
+  mediaType,
 }) {
   const ref = useRef(null);
   const [localUrl, setLocalUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
-  const isImage = accept?.includes("image");
 
   useEffect(() => {
     if (file) {
@@ -38,6 +39,19 @@ export default function UploadBox({
   }, [file]);
 
   const displayUrl = localUrl || previewUrl;
+  
+  const isVideo = 
+    file?.type?.startsWith("video/") || 
+    mediaType?.startsWith("video") || 
+    (typeof displayUrl === 'string' && displayUrl.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i));
+    
+  const isImage = !isVideo && (
+    file?.type?.startsWith("image/") || 
+    accept?.includes("image") || 
+    (typeof displayUrl === 'string' && displayUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i)) ||
+    mediaType?.startsWith("image") ||
+    true 
+  );
 
   const isAcceptedFile = file => {
     if (!accept) return true;
@@ -93,14 +107,22 @@ export default function UploadBox({
 
   return (
     <Field label={label}>
-      {displayUrl && isImage ? (
+      {displayUrl && (isImage || isVideo) ? (
         <div className="relative rounded-xl overflow-hidden border border-gray-200">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={displayUrl}
-            alt={label}
-            className="w-full h-40 object-cover"
-          />
+          {isVideo ? (
+            <video
+              src={localUrl ? localUrl : getImageUrl(displayUrl)}
+              controls
+              className="w-full h-40 object-cover bg-black"
+            />
+          ) : (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={localUrl ? localUrl : getImageUrl(displayUrl)}
+              alt={label}
+              className="w-full h-40 object-cover"
+            />
+          )}
           <button
             type="button"
             onClick={onRemove}

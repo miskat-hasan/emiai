@@ -9,6 +9,7 @@ import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useUpdateDealStatusMutation,
   useRateDealMutation,
+  useGetDealDeliveriesQuery,
 } from "@/redux/api/services/dealApi";
 import { toast } from "react-toastify";
 import { RatingModal } from "./RatingModal";
@@ -23,6 +24,10 @@ export default function AcceptDelivaryPage({
     useUpdateDealStatusMutation();
   const [rateDeal, { isLoading: isRating }] = useRateDealMutation();
   const deal = dealDetails?.data;
+  
+  const { data: deliveriesResponse, isLoading: isDeliveriesLoading } = useGetDealDeliveriesQuery(deal?.id, { skip: !deal?.id });
+  const deliveryData = deliveriesResponse?.data?.[0] || deliveriesResponse?.data;
+  
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const handleUpdateStatus = async (status) => {
@@ -162,13 +167,18 @@ export default function AcceptDelivaryPage({
         {/* Description + payout */}
         <div className="flex items-start justify-between gap-8 px-6 py-6 border-b border-gray-100">
           <div className="flex-1 min-w-0">
-            {deal?.delivery_message ? (
+            {isDeliveriesLoading ? (
+              <div className="animate-pulse">
+                <div className="h-4 w-32 bg-gray-200 rounded mb-2.5"></div>
+                <div className="h-4 w-full max-w-4xl bg-gray-200 rounded"></div>
+              </div>
+            ) : deliveryData?.delivery_message || deal?.delivery_message ? (
               <>
                 <p className="text-[15px] font-bold text-black mb-2.5">
                   Delivery Message
                 </p>
                 <p className="text-[14px] text-gray leading-relaxed max-w-4xl whitespace-pre-wrap">
-                  {deal.delivery_message}
+                  {deliveryData?.delivery_message || deal?.delivery_message}
                 </p>
               </>
             ) : (
@@ -193,18 +203,18 @@ export default function AcceptDelivaryPage({
         </div>
 
         {/* Delivery Attachment */}
-        {deal?.attachment && (
+        {(deliveryData?.attachment || deal?.attachment) && (
           <div className="px-6 pb-8 pt-6">
             <div className="w-full h-[240px] md:h-[340px] rounded-[20px] overflow-hidden relative shadow-sm border border-gray-100 bg-gray-50">
-              {deal.attachment.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+              {(deliveryData?.attachment || deal?.attachment).match(/\.(mp4|webm|ogg|mov)$/i) ? (
                 <video
-                  src={getImageUrl(deal.attachment)}
+                  src={getImageUrl(deliveryData?.attachment || deal?.attachment)}
                   controls
                   className="w-full h-full object-contain"
                 />
               ) : (
                 <Image
-                  src={getImageUrl(deal.attachment)}
+                  src={getImageUrl(deliveryData?.attachment || deal?.attachment)}
                   alt="Delivery content"
                   fill
                   className="object-contain"
