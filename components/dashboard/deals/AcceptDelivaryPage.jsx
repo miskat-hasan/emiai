@@ -14,6 +14,7 @@ import {
 import { toast } from "react-toastify";
 import { RatingModal } from "./RatingModal";
 import { useState } from "react";
+import StatusBadge from "@/components/common/StatusBadge";
 
 export default function AcceptDelivaryPage({
   role = "influencer",
@@ -111,9 +112,7 @@ export default function AcceptDelivaryPage({
               <MessageSquare size={15} />
             </button>
 
-            <div className="px-5 py-2 rounded-xl bg-blue-100 text-blue-500 text-xs font-bold ml-2">
-              {deal?.status}
-            </div>
+            <StatusBadge status={deal?.status} className="ml-2" />
           </div>
         </div>
 
