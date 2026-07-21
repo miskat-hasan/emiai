@@ -1,3 +1,5 @@
+"use client";
+
 import { getImageUrl } from "@/helper/getImageUrl";
 import React, { useState } from "react";
 import Image from "next/image";

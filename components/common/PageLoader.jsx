@@ -54,7 +54,7 @@ export default function PageLoader({ className = "" }) {
           alt="Logo"
           width={28}
           height={28}
-          style={{ objectFit: "contain", zIndex: 10, position: "relative" }}
+          style={{ width: "auto", height: "auto", objectFit: "contain", zIndex: 10, position: "relative" }}
         />
       </div>
 

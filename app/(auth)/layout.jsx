@@ -27,6 +27,7 @@ export default function AuthLayout({ children }) {
               src="/images/R-logo.png"
               alt="ReelUp"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
               className="object-contain drop-shadow-2xl"
             />
@@ -44,6 +45,7 @@ export default function AuthLayout({ children }) {
                 src="/images/R-logo.png"
                 alt="R"
                 fill
+                sizes="(max-width: 768px) 100vw, 15vw"
                 className="object-contain"
               />
             </div>
@@ -52,6 +54,7 @@ export default function AuthLayout({ children }) {
                 src="/images/ReelUP-logo.png"
                 alt="ReelUP"
                 fill
+                sizes="(max-width: 768px) 100vw, 25vw"
                 className="object-contain object-left"
               />
             </div>

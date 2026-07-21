@@ -145,7 +145,7 @@ export default function CreateNewAdModal({
   };
 
   const onSubmit = async (data) => {
-    if (prizeType === "coupon") {
+    if (data.prizeType === "coupon") {
       try {
         const fd = new FormData();
         const countriesList = data.countries || [];
@@ -154,16 +154,16 @@ export default function CreateNewAdModal({
         });
         const res = await checkCouponPermission(fd).unwrap();
         if (res?.data?.allowed === false) {
-          setError("promoCode", {
+          setError("prizeType", {
             type: "manual",
-            message: res.data.reason || "Coupon permission denied",
+            message: res.data.reason || "You need system permission to create coupon prizes.",
           });
           return;
         }
       } catch (err) {
-        setError("promoCode", {
+        setError("prizeType", {
           type: "manual",
-          message: err?.data?.message || err?.message || "Coupon permission denied for selected countries",
+          message: err?.data?.reason || err?.data?.message || err?.message || "Coupon permission denied",
         });
         return;
       }
@@ -271,7 +271,7 @@ export default function CreateNewAdModal({
           />
 
           {/* Prize Type */}
-          <Field label="Prize Type">
+          <Field label="Prize Type" error={errors.prizeType?.message}>
             <div className="relative">
               <select
                 defaultValue=""
@@ -292,9 +292,8 @@ export default function CreateNewAdModal({
           </Field>
 
           {/* Dynamic Prizes */}
-          {prizeType !== "coupon" &&
-            Array.from({ length: prizesCount }).map((_, index) => (
-              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`}>
+          {Array.from({ length: prizesCount }).map((_, index) => (
+              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`} error={errors?.prizes?.[index]?.value?.message}>
                 <div className="flex gap-3 items-center">
                   <input
                     type="hidden"
@@ -302,8 +301,20 @@ export default function CreateNewAdModal({
                     {...register(`prizes.${index}.rank`)}
                   />
                   <Input
-                    placeholder="Write prize value..."
-                    {...register(`prizes.${index}.value`)}
+                    type={prizeType === "cash" ? "number" : "text"}
+                    min={prizeType === "cash" ? "0" : undefined}
+                    step={prizeType === "cash" ? "any" : undefined}
+                    placeholder={prizeType === "cash" ? "Write prize amount..." : "Write prize title..."}
+                    {...register(`prizes.${index}.value`, {
+                      required: "Prize is required",
+                      validate: (val) => {
+                        if (prizeType === "cash" && Number(val) <= 0) {
+                          return "Must be a positive number";
+                        }
+                        return true;
+                      }
+                    })}
+                    className={errors?.prizes?.[index]?.value ? "border-red-500" : ""}
                   />
                   {index > 0 && (
                     <button
@@ -328,8 +339,7 @@ export default function CreateNewAdModal({
             ))}
 
           {/* Promo Code Fields */}
-          {prizeType === "coupon" && (
-            <>
+          <>
               {/* Create Promo Code */}
               <Field label="Create Promo Code" error={errors.promoCode?.message}>
                 <Input
@@ -353,7 +363,6 @@ export default function CreateNewAdModal({
                 </Field>
               </div>
             </>
-          )}
 
           {/* Photo/Video */}
           <UploadBox

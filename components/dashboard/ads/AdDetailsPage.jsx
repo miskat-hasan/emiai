@@ -224,7 +224,7 @@ export default function AdDetailsPage({
                   }
 
                   const prizes = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 
-                    ? ad.rawAd.prizes.map((p) => ({ rank: p.rank, value: p.prize_value }))
+                    ? ad.rawAd.prizes.map((p) => ({ rank: p.rank, value: p.prize_value || p.title }))
                     : [];
 
                   const prizeType = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 

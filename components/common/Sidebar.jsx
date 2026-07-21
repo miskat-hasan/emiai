@@ -34,6 +34,7 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
               src="/images/R-logo.png"
               alt="ReelUP"
               fill
+              sizes="(max-width: 768px) 100vw, 15vw"
               className="object-contain"
             />
           </div>
@@ -44,6 +45,7 @@ export default function Sidebar({ role = "advertiser", collapsed = false }) {
                 src="/images/ReelUP-logo.png"
                 alt="ReelUP"
                 fill
+                sizes="(max-width: 768px) 100vw, 25vw"
                 className="object-contain object-left"
               />
             </div>

@@ -1,23 +1,28 @@
 const STATUS_STYLES = {
-  Pending: "bg-[#FEF3C7] text-[#D97706]",
-  Accepted: "bg-[#F3F4F6] text-gray",
-  "In Progress": "bg-blue-50 text-blue-600",
-  Completed: "bg-emerald-50 text-emerald-600",
-  Rejected: "bg-red-50 text-red-500",
-  Extension: "bg-purple-50 text-purple-600",
-  Delivered: "bg-gray-100 text-gray",
+  pending: "bg-[#FEF3C7] text-[#D97706]",
+  accepted: "bg-blue-50 text-blue-500",
+  active: "bg-blue-50 text-blue-500",
+  "in progress": "bg-blue-50 text-blue-500",
+  completed: "bg-emerald-50 text-emerald-500",
+  rejected: "bg-red-50 text-red-500",
+  extension: "bg-purple-50 text-purple-500",
+  delivered: "bg-indigo-50 text-indigo-500",
+  draft: "bg-gray-100 text-gray-500",
+  closed: "bg-gray-100 text-gray-500",
 };
 
 export default function StatusBadge({ status, className = "" }) {
+  const normalizedStatus = status?.toLowerCase?.() || "";
+  
   return (
     <span
       className={`
         inline-block capitalize text-xs font-medium px-3 py-1 rounded-full whitespace-nowrap
-        ${STATUS_STYLES[status] ?? "bg-gray-100 text-gray"}
+        ${STATUS_STYLES[normalizedStatus] ?? "bg-gray-100 text-gray-500"}
         ${className}
       `}
     >
-      {status}
+      {status || "Unknown"}
     </span>
   );
 }
