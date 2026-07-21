@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { Heart, Bookmark, Share2, Eye, VolumeX, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import { Bookmark, Eye, Heart, Share2, Volume2, VolumeX } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 
 export default function ExploreFeedCard({
   ad,
@@ -37,7 +37,7 @@ export default function ExploreFeedCard({
           videoRef.current?.pause();
         }
       },
-      { threshold: 0.6 }
+      { threshold: 0.6 },
     );
 
     if (containerRef.current) {
@@ -48,7 +48,6 @@ export default function ExploreFeedCard({
       observer.disconnect();
     };
   }, [ad.id, storeInteraction]);
-
 
   const toggleMute = (e) => {
     e.stopPropagation();
@@ -69,7 +68,10 @@ export default function ExploreFeedCard({
 
   // Render media
   const renderMedia = () => {
-    if (mediaType === "video" || imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)) {
+    if (
+      mediaType === "video" ||
+      imageUrl?.match(/\.(mp4|webm|mov|ogg)(\?.*)?$/i)
+    ) {
       return (
         <div className="relative w-full aspect-[4/5] max-h-[65vh] bg-black overflow-hidden rounded-md mt-4 group">
           <video
@@ -80,7 +82,7 @@ export default function ExploreFeedCard({
             muted={isMuted}
             playsInline
           />
-          
+
           {/* Sound Toggle */}
           <button
             onClick={toggleMute}
@@ -88,7 +90,7 @@ export default function ExploreFeedCard({
           >
             {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
-          
+
           {/* Play/Pause Area */}
           <div
             className="absolute inset-0 z-0 cursor-pointer"
@@ -100,7 +102,7 @@ export default function ExploreFeedCard({
         </div>
       );
     }
-    
+
     return (
       <div className="relative w-full aspect-[16/9] md:aspect-[2/1] max-h-[65vh] bg-black overflow-hidden rounded-md mt-4">
         <Image
@@ -115,7 +117,10 @@ export default function ExploreFeedCard({
   };
 
   return (
-    <div ref={containerRef} className="w-full flex flex-col pt-6 pb-4 border-b border-gray-100">
+    <div
+      ref={containerRef}
+      className="w-full flex flex-col pt-6 pb-4 border-b border-gray-100"
+    >
       {/* Header */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
@@ -143,7 +148,7 @@ export default function ExploreFeedCard({
         <p className={cn("whitespace-pre-wrap", !isExpanded && "line-clamp-3")}>
           {description}
         </p>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             onAdClick?.(id);
@@ -163,14 +168,20 @@ export default function ExploreFeedCard({
           onClick={() => onLikeToggle?.(id)}
           className="text-gray-500 hover:text-primary transition-colors cursor-pointer"
         >
-          <Heart size={22} className={is_liked ? "fill-primary text-primary" : ""} />
+          <Heart
+            size={22}
+            className={is_liked ? "fill-primary text-primary" : ""}
+          />
         </button>
-        
+
         <button
           onClick={() => onBookmarkToggle?.(id)}
           className="text-gray-500 hover:text-primary transition-colors cursor-pointer"
         >
-          <Bookmark size={22} className={isBookmarked ? "fill-primary text-primary" : ""} />
+          <Bookmark
+            size={22}
+            className={isBookmarked ? "fill-primary text-primary" : ""}
+          />
         </button>
 
         <button className="text-gray-500 hover:text-black transition-colors cursor-pointer">
