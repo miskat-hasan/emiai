@@ -691,14 +691,16 @@ export const BookmarkFilledSVG2 = ({ className = "", ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      className={className}
       width="14"
       height="18"
       viewBox="0 0 14 18"
       fill="none"
+      {...props}
     >
       <path
         d="M0 18V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H12C12.55 0 13.0208 0.195833 13.4125 0.5875C13.8042 0.979167 14 1.45 14 2V18L7 15L0 18Z"
-        fill="#707070"
+        fill="currentColor"
       />
     </svg>
   );

@@ -65,7 +65,7 @@ const EventCard = ({
       </div>
 
       {/* Action Button */}
-      <button
+      {/* <button
         onClick={e => {
           e.stopPropagation();
           onButtonClick?.();
@@ -73,7 +73,7 @@ const EventCard = ({
         className="mt-3 w-full bg-gradient-to-b from-primary to-secondary hover:opacity-90 text-white py-3.5 rounded-2xl font-medium text-[17px] transition-all duration-200 active:scale-[0.98] cursor-pointer"
       >
         {buttonText}
-      </button>
+      </button> */}
     </div>
   );
 };

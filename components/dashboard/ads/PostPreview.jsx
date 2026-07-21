@@ -21,11 +21,15 @@ export default function PostPreview() {
     user?.name ||
     (user?.first_name
       ? `${user.first_name} ${user.last_name || ""}`.trim()
-      : "Jane Smith");
+      : "User");
+  
   const userAvatar =
     user?.profile_photo_url ||
     user?.avatar ||
-    "https://i.pravatar.cc/150?u=jane";
+    null;
+
+
+  const avatarBgColor = "bg-primary";
 
   const [createAd, { isLoading: isCreating }] = useCreateAdMutation();
   const [updateAd, { isLoading: isUpdating }] = useUpdateAdMutation();
@@ -63,14 +67,19 @@ export default function PostPreview() {
 
     fd.append("prize_type", draft.prizeType);
 
-    if (draft.prizeType === "cash" && draft.prizes && draft.prizes.length > 0) {
+    if (draft.prizes && draft.prizes.length > 0) {
       draft.prizes.forEach((prize, index) => {
-        fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
-        fd.append(`prizes[${index}][value]`, prize.value);
+        if (draft.prizeType === "cash") {
+          fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
+          fd.append(`prizes[${index}][value]`, prize.value);
+        } else if (draft.prizeType === "coupon") {
+          fd.append(`prizes[${index}][rank]`, prize.rank || index + 1);
+          fd.append(`prizes[${index}][title]`, prize.value);
+        }
       });
     }
 
-    if (draft.prizeType === "coupon" && draft.promoCode) {
+    if (draft.promoCode) {
       fd.append("promo_code[code]", draft.promoCode);
       if (draft.promoCodeDiscount) {
         fd.append("promo_code[discount_percentage]", draft.promoCodeDiscount);
@@ -148,7 +157,7 @@ export default function PostPreview() {
         <div className="flex-1 flex flex-col gap-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full overflow-hidden relative bg-primary flex items-center justify-center text-white font-bold text-xl uppercase">
+              <div className={`w-14 h-14 rounded-full overflow-hidden relative ${avatarBgColor} flex items-center justify-center text-white font-bold text-xl uppercase`}>
                 {userAvatar && userAvatar !== "null" ? (
                   <Image
                     src={getImageUrl(userAvatar)}
@@ -221,19 +230,17 @@ export default function PostPreview() {
               </>
             )}
 
-            {draft.prizeType === "cash" && (
-              <>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Prize Number</span>
-                  <span className="font-semibold text-black">
-                    {String(draft.prizes?.length || 0).padStart(2, "0")}
-                  </span>
-                </div>
-                <div className="w-full h-[1px] bg-gray-200" />
-              </>
-            )}
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-500">Prize Number</span>
+                <span className="font-semibold text-black">
+                  {String(draft.prizes?.length || 0).padStart(2, "0")}
+                </span>
+              </div>
+              <div className="w-full h-[1px] bg-gray-200" />
+            </>
 
-            {draft.prizeType === "coupon" && (
+            {draft.promoCode && (
               <>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-500">Promo Code</span>

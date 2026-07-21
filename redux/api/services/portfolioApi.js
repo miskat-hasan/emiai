@@ -12,7 +12,7 @@ const portfolioApi = apiSlice.injectEndpoints({
 
     getInfluencerPortfolios: builder.query({
       query: () => ({
-        url: "/api/portfolios?role=influencer",
+        url: "/api/portfolios?role=agency",
         method: "GET",
       }),
       providesTags: ["Portfolio"],

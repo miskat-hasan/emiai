@@ -124,11 +124,16 @@ export default function CreateEventModal({
         event_date: (() => {
           if (!editingEvent.start_date && !editingEvent.date) return "";
           const dateStr = editingEvent.start_date || editingEvent.date;
-          if (typeof dateStr === "string" && dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
-            return dateStr.substring(0, 10);
+          if (typeof dateStr === "string" && dateStr.includes(' ')) {
+            return dateStr.replace(' ', 'T').slice(0, 16);
+          } else if (typeof dateStr === "string" && dateStr.includes('T')) {
+            return dateStr.slice(0, 16);
           }
           try {
-            return new Date(dateStr).toISOString().split("T")[0];
+            const d = new Date(dateStr);
+            if(isNaN(d)) return "";
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
           } catch (e) {
             return "";
           }
@@ -185,7 +190,12 @@ export default function CreateEventModal({
     fd.append("title", data.title);
     fd.append("type", data.event_type);
     fd.append("entry_fee", data.entry_fee ?? "");
-    fd.append("date", data.event_date);
+    
+    let formattedDate = data.event_date.replace("T", " ");
+    if (formattedDate.length === 16) {
+      formattedDate += ":00";
+    }
+    fd.append("date", formattedDate);
     fd.append("location", data.location);
     fd.append("full_location", data.full_location);
     fd.append("description", data.description);
@@ -303,10 +313,10 @@ export default function CreateEventModal({
                 />
               </Field>
 
-              {/* Date*/}
-              <Field label="Event Date" error={errors.event_date?.message}>
+              {/* Date & Time */}
+              <Field label="Event Date & Time" error={errors.event_date?.message}>
                 <Input
-                  type="date"
+                  type="datetime-local"
                   {...register("event_date", {
                     required: "Event date is required",
                   })}
@@ -327,7 +337,7 @@ export default function CreateEventModal({
 
               <Field label="Event Full Location" error={errors.full_location?.message}>
                 <Input
-                  placeholder="Event Full location here..."
+                  placeholder="https://maps.app.goo.gl/..."
                   {...register("full_location", {
                     validate: (value) => {
                       if (!value) return true;
