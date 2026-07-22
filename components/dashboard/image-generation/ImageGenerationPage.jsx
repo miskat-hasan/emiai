@@ -1,9 +1,14 @@
+// components/dashboard/image-generation/ImageGenerationPage.jsx
 "use client";
 import { getImageUrl } from "@/helper/getImageUrl";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { ArrowUpRight, Download, RotateCcw, Sparkles } from "lucide-react";
+import {
+  useGenerateImageMutation,
+  useGetImageHistoryQuery,
+} from "@/redux/api/services/aiImageApi";
 
 let idCounter = 0;
 const nextId = () => `msg-${Date.now()}-${idCounter++}`;
@@ -11,9 +16,32 @@ const nextId = () => `msg-${Date.now()}-${idCounter++}`;
 export default function ImageGenerationPage({ role }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [hasSeededHistory, setHasSeededHistory] = useState(false);
   const textareaRef = useRef(null);
   const scrollRef = useRef(null);
+
+  const { data: historyResponse, isLoading: isLoadingHistory } = useGetImageHistoryQuery(1);
+  const [generateImage, { isLoading: isGenerating }] = useGenerateImageMutation();
+
+  useEffect(() => {
+    if (hasSeededHistory || !historyResponse?.data?.data) return;
+
+    const historyItems = [...historyResponse.data.data]
+      .reverse()
+      .flatMap(item => [
+        { id: `history-user-${item.id}`, role: "user", text: item.prompt },
+        {
+          id: `history-${item.id}`,
+          role: "assistant",
+          status: "done",
+          imageUrl: item.image_url,
+          prompt: item.prompt,
+        },
+      ]);
+
+    setMessages(prev => [...historyItems, ...prev]);
+    setHasSeededHistory(true);
+  }, [historyResponse, hasSeededHistory]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -33,40 +61,17 @@ export default function ImageGenerationPage({ role }) {
     }
   }, [messages]);
 
-  const requestImage = async prompt => {
-    try {
-      const sanitizedPrompt = encodeURIComponent(prompt.trim());
-
-      const randomSeed = Math.floor(Math.random() * 1000000);
-
-      const pollinationsUrl = `https://image.pollinations.ai/p/${sanitizedPrompt}?seed=${randomSeed}&enhance=true`;
-
-      const testRes = await fetch(pollinationsUrl, { method: "HEAD" });
-      if (!testRes.ok) {
-        throw new Error("Pollinations server is temporarily busy");
-      }
-
-      return pollinationsUrl;
-    } catch (error) {
-      console.error("Pollinations Integration Error: ", error);
-      return null;
-    }
-  };
-
   const runGeneration = async (prompt, assistantId) => {
-    setIsLoading(true);
     try {
-      const imageUrl = await requestImage(prompt);
+      const response = await generateImage(prompt).unwrap();
+      const imageUrl = response?.data?.image_url;
+
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
             ? imageUrl
               ? { ...m, status: "done", imageUrl }
-              : {
-                  ...m,
-                  status: "error",
-                  error: "Failed to generate image. Please try again.",
-                }
+              : { ...m, status: "error", error: "Failed to generate image. Please try again." }
             : m,
         ),
       );
@@ -74,22 +79,16 @@ export default function ImageGenerationPage({ role }) {
       setMessages(prev =>
         prev.map(m =>
           m.id === assistantId
-            ? {
-                ...m,
-                status: "error",
-                error: "Something went wrong. Please try again.",
-              }
+            ? { ...m, status: "error", error: err?.data?.message || "Something went wrong. Please try again." }
             : m,
         ),
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleGenerate = () => {
     const text = inputText.trim();
-    if (!text || isLoading) return;
+    if (!text || isGenerating) return;
 
     setInputText("");
     const userMsg = { id: nextId(), role: "user", text };
@@ -105,13 +104,11 @@ export default function ImageGenerationPage({ role }) {
   };
 
   const handleRetry = assistantId => {
-    if (isLoading) return;
+    if (isGenerating) return;
     const target = messages.find(m => m.id === assistantId);
-    if (!target) return;
+    if (!target?.prompt) return;
     setMessages(prev =>
-      prev.map(m =>
-        m.id === assistantId ? { ...m, status: "loading", error: null } : m,
-      ),
+      prev.map(m => (m.id === assistantId ? { ...m, status: "loading", error: null } : m)),
     );
     runGeneration(target.prompt, assistantId);
   };
@@ -134,29 +131,27 @@ export default function ImageGenerationPage({ role }) {
           {" / "}
           <span>Image Generation</span>
         </p>
-        <h1 className="text-3xl font-bold text-[#203430]">
-          AI Image Generation
-        </h1>
+        <h1 className="text-3xl font-bold text-[#203430]">AI Image Generation</h1>
         <p className="text-[#63716E] mt-2">
           Describe what you want to see, and keep refining it turn by turn.
         </p>
       </div>
 
       {/* Chat thread */}
-      <div
-        ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto mt-6 space-y-6 px-1 -mx-1"
-      >
-        {!hasMessages ? (
+      <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto mt-6 space-y-6 px-1 -mx-1">
+        {isLoadingHistory ? (
+          <div className="h-full flex items-center justify-center">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          </div>
+        ) : !hasMessages ? (
           <div className="h-full flex flex-col items-center justify-center text-center gap-3 py-16">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
               <Sparkles size={20} className="text-white" />
             </div>
             <p className="text-[#203430] font-medium">Nothing here yet</p>
             <p className="text-sm text-[#63716E] max-w-sm">
-              Type a prompt below to generate your first image. Try something
-              specific, like &quot;a golden retriever running on a beach at
-              sunset.&quot;
+              Type a prompt below to generate your first image. Try something specific, like
+              &quot;a golden retriever running on a beach at sunset.&quot;
             </p>
           </div>
         ) : (
@@ -172,16 +167,12 @@ export default function ImageGenerationPage({ role }) {
                 <div className="max-w-[80%] w-full sm:w-auto">
                   <div
                     className="relative rounded-2xl rounded-bl-sm overflow-hidden border border-white/60 bg-white/70 backdrop-blur-sm"
-                    style={{
-                      minHeight: msg.status === "loading" ? 220 : "auto",
-                    }}
+                    style={{ minHeight: msg.status === "loading" ? 220 : "auto" }}
                   >
                     {msg.status === "loading" ? (
                       <div className="flex flex-col items-center justify-center h-56 w-full sm:w-[420px] gap-3">
                         <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                        <p className="text-sm text-[#63716E]">
-                          Generating your image...
-                        </p>
+                        <p className="text-sm text-[#63716E]">Generating your image...</p>
                       </div>
                     ) : msg.status === "error" ? (
                       <div className="flex flex-col items-center justify-center h-56 w-full sm:w-[420px] gap-3 px-4 text-center">
@@ -197,7 +188,7 @@ export default function ImageGenerationPage({ role }) {
                       <>
                         <Image
                           src={getImageUrl(msg.imageUrl)}
-                          alt={msg.prompt}
+                          alt={msg.prompt || "Generated image"}
                           width={800}
                           height={500}
                           className="w-full h-auto sm:max-w-[420px]"
@@ -238,7 +229,7 @@ export default function ImageGenerationPage({ role }) {
           <div className="absolute bottom-3 right-3">
             <button
               onClick={handleGenerate}
-              disabled={isLoading || !inputText.trim()}
+              disabled={isGenerating || !inputText.trim()}
               className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-opacity shadow-sm cursor-pointer"
             >
               <ArrowUpRight size={16} />

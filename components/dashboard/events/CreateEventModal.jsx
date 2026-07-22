@@ -125,15 +125,32 @@ export default function CreateEventModal({
           if (!editingEvent.start_date && !editingEvent.date) return "";
           const dateStr = editingEvent.start_date || editingEvent.date;
           if (typeof dateStr === "string" && dateStr.includes(' ')) {
-            return dateStr.replace(' ', 'T').slice(0, 16);
+            return dateStr.split(' ')[0];
           } else if (typeof dateStr === "string" && dateStr.includes('T')) {
-            return dateStr.slice(0, 16);
+            return dateStr.split('T')[0];
           }
           try {
             const d = new Date(dateStr);
             if(isNaN(d)) return "";
             const pad = (n) => n.toString().padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+          } catch (e) {
+            return "";
+          }
+        })(),
+        event_time: (() => {
+          if (!editingEvent.start_date && !editingEvent.date) return "";
+          const dateStr = editingEvent.start_date || editingEvent.date;
+          if (typeof dateStr === "string" && dateStr.includes(' ')) {
+            return dateStr.split(' ')[1]?.slice(0, 5) || "";
+          } else if (typeof dateStr === "string" && dateStr.includes('T')) {
+            return dateStr.split('T')[1]?.slice(0, 5) || "";
+          }
+          try {
+            const d = new Date(dateStr);
+            if(isNaN(d)) return "";
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
           } catch (e) {
             return "";
           }
@@ -191,10 +208,7 @@ export default function CreateEventModal({
     fd.append("type", data.event_type);
     fd.append("entry_fee", data.entry_fee ?? "");
     
-    let formattedDate = data.event_date.replace("T", " ");
-    if (formattedDate.length === 16) {
-      formattedDate += ":00";
-    }
+    const formattedDate = `${data.event_date} ${data.event_time}:00`;
     fd.append("date", formattedDate);
     fd.append("location", data.location);
     fd.append("full_location", data.full_location);
@@ -286,8 +300,8 @@ export default function CreateEventModal({
               />
             </Field>
 
-            {/* Event Type | Entry Fee | Event Date */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Event Details Grid */}
+            <div className="grid grid-cols-2 gap-3">
               <Field label="Event Type" error={errors.event_type?.message}>
                 <div className="relative">
                   <select
@@ -313,12 +327,20 @@ export default function CreateEventModal({
                 />
               </Field>
 
-              {/* Date & Time */}
-              <Field label="Event Date & Time" error={errors.event_date?.message}>
+              <Field label="Event Date" error={errors.event_date?.message}>
                 <Input
-                  type="datetime-local"
+                  type="date"
                   {...register("event_date", {
                     required: "Event date is required",
+                  })}
+                />
+              </Field>
+
+              <Field label="Event Time" error={errors.event_time?.message}>
+                <Input
+                  type="time"
+                  {...register("event_time", {
+                    required: "Event time is required",
                   })}
                 />
               </Field>
