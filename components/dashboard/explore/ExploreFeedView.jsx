@@ -1,7 +1,11 @@
-import React from "react";
 import ExploreFeedCard from "./ExploreFeedCard";
 
-export default function ExploreFeedView({ ads, onAdClick, onBookmarkToggle, onLikeToggle }) {
+export default function ExploreFeedView({
+  ads,
+  onAdClick,
+  onBookmarkToggle,
+  onLikeToggle,
+}) {
   if (!ads || ads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
