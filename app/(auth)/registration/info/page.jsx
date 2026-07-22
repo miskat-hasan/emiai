@@ -89,7 +89,7 @@ export default function RegistrationInfoPage() {
         <AuthInput
           label={requiresBusinessFields ? "Company Name" : "Name"}
           type="text"
-          placeholder={requiresBusinessFields ? "e.g. Company" : "e.g. Johnson"}
+          placeholder={requiresBusinessFields ? "company name" : "e.g. Johnson"}
           error={errors.name?.message}
           registration={register("name", {
             required: "This field is required",
@@ -101,7 +101,7 @@ export default function RegistrationInfoPage() {
           <AuthInput
             label="Company Address"
             type="text"
-            placeholder="e.g. Dhaka, Bangladesh"
+            placeholder="e.g. Amman, Jordan"
             error={errors.company_address?.message}
             registration={register("company_address", {
               required: "Company address is required",
@@ -112,7 +112,7 @@ export default function RegistrationInfoPage() {
         <AuthInput
           label="Email Address"
           type="email"
-          placeholder="e.g. jonson@gmail.com"
+          placeholder="email address"
           error={errors.email?.message}
           registration={register("email", {
             required: "Email is required",
@@ -142,7 +142,7 @@ export default function RegistrationInfoPage() {
             />
             <input
               type="tel"
-              placeholder="123 654 7896"
+              placeholder="phone number"
               {...register("phone", { required: "Phone number is required" })}
               className="flex-1 bg-gray-50 border border-gray-100 text-black text-sm rounded-xl px-4 py-3 outline-none focus:border-primary/40 focus:bg-white transition-all"
             />
