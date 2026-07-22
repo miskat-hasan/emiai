@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import TabSwitcher from "@/components/common/TabSwitcher";
-import { Search, Calendar, Filter } from "lucide-react";
-import ExploreReelsView from "./ExploreReelsView";
-import ExploreFilterModal from "./ExploreFilterModal";
-import ExploreFeedView from "./ExploreFeedView";
-import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
-import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
-import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
-import { getImageUrl } from "@/helper/getImageUrl";
 import Pagination from "@/components/ui/Pagination";
+import { getImageUrl } from "@/helper/getImageUrl";
+import { useGetGuestExploreAdsQuery } from "@/redux/api/services/adApi";
+import { useToggleBookmarkMutation } from "@/redux/api/services/bookmarkApi";
+import { useStoreInteractionMutation } from "@/redux/api/services/interactionApi";
+import { Calendar, Filter } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import ExploreFeedView from "./ExploreFeedView";
+import ExploreFilterModal from "./ExploreFilterModal";
+import ExploreReelsView from "./ExploreReelsView";
 
 const DEFAULT_PER_PAGE = 12;
 
@@ -26,11 +26,29 @@ function timeSince(dateString) {
   const prefix = isFuture ? "in " : "";
 
   let interval = absDiff / 31536000;
-  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " year" : " years") + suffix;
+  if (interval > 1)
+    return (
+      prefix +
+      Math.floor(interval) +
+      (Math.floor(interval) === 1 ? " year" : " years") +
+      suffix
+    );
   interval = absDiff / 2592000;
-  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " month" : " months") + suffix;
+  if (interval > 1)
+    return (
+      prefix +
+      Math.floor(interval) +
+      (Math.floor(interval) === 1 ? " month" : " months") +
+      suffix
+    );
   interval = absDiff / 86400;
-  if (interval > 1) return prefix + Math.floor(interval) + (Math.floor(interval) === 1 ? " day" : " days") + suffix;
+  if (interval > 1)
+    return (
+      prefix +
+      Math.floor(interval) +
+      (Math.floor(interval) === 1 ? " day" : " days") +
+      suffix
+    );
   interval = absDiff / 3600;
   if (interval > 1) return prefix + Math.floor(interval) + " hrs" + suffix;
   interval = absDiff / 60;
@@ -84,8 +102,11 @@ export default function ExplorePage({ role }) {
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
 
   const queryType = "all"; // Show all types of ads for the guest user
-  const { data: exploreAdsResponse, isLoading } =
-    useGetGuestExploreAdsQuery({ type: queryType, page, per_page: perPage });
+  const { data: exploreAdsResponse, isLoading } = useGetGuestExploreAdsQuery({
+    type: queryType,
+    page,
+    per_page: perPage,
+  });
 
   const [bookmarkedApiAds, setBookmarkedApiAds] = useState([]);
   const [likedAds, setLikedAds] = useState([]);
@@ -123,7 +144,10 @@ export default function ExplorePage({ role }) {
     // Find the first active prize window (ascending by rank/index)
     const activePrize = ad.prizes
       ?.slice()
-      .sort((a, b) => (a.rank ?? a.queue_order ?? 0) - (b.rank ?? b.queue_order ?? 0))
+      .sort(
+        (a, b) =>
+          (a.rank ?? a.queue_order ?? 0) - (b.rank ?? b.queue_order ?? 0),
+      )
       .find((p) => p.window_status === "active" && p.window_ends_at);
 
     // Format precise date for feed view
@@ -131,15 +155,18 @@ export default function ExplorePage({ role }) {
     let createdAtFormatted = "";
     if (rawDate) {
       const d = new Date(rawDate);
-      createdAtFormatted = d.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }) + " " + d.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-      });
+      createdAtFormatted =
+        d.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }) +
+        " " +
+        d.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
     }
 
     return {
@@ -163,9 +190,7 @@ export default function ExplorePage({ role }) {
       setBookmarkedApiAds(
         rawAds.filter((ad) => ad.is_bookmarked).map((ad) => ad.id),
       );
-      setLikedAds(
-        rawAds.filter((ad) => ad.is_liked).map((ad) => ad.id),
-      );
+      setLikedAds(rawAds.filter((ad) => ad.is_liked).map((ad) => ad.id));
     }
   }, [rawAds]);
 
@@ -320,8 +345,8 @@ export default function ExplorePage({ role }) {
                 totalPages={totalPages}
                 perPage={perPage}
                 totalResults={totalResults}
-                onPageChange={p => setPage(p)}
-                onPerPageChange={pp => {
+                onPageChange={(p) => setPage(p)}
+                onPerPageChange={(pp) => {
                   setPerPage(pp);
                   setPage(1);
                 }}
