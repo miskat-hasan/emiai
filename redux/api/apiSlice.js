@@ -29,6 +29,7 @@ export const apiSlice = createApi({
     "GroupMembers",
     "Collaborators",
     "Portfolio",
+    "PeerInvitations",
   ],
 
   endpoints: () => ({}),
