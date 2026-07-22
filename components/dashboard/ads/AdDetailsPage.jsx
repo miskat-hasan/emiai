@@ -148,7 +148,7 @@ export default function AdDetailsPage({
               <div className="h-4 w-4/6 bg-gray-200 rounded"></div>
             </div>
           </div>
-          
+
           {/* Right Column */}
           <div className="lg:col-span-1">
             <div className="h-64 bg-gray-200 rounded-3xl"></div>
@@ -208,7 +208,9 @@ export default function AdDetailsPage({
                   let safePublishAt = "";
                   if (ad.publishAt) {
                     try {
-                      safePublishAt = new Date(ad.publishAt).toISOString().slice(0, 16);
+                      safePublishAt = new Date(ad.publishAt)
+                        .toISOString()
+                        .slice(0, 16);
                     } catch (e) {
                       safePublishAt = "";
                     }
@@ -217,19 +219,28 @@ export default function AdDetailsPage({
                   let safeExpiryDate = "";
                   if (ad.rawAd.promo_code?.expiry_date) {
                     try {
-                      safeExpiryDate = new Date(ad.rawAd.promo_code.expiry_date).toISOString().split("T")[0];
+                      safeExpiryDate = new Date(ad.rawAd.promo_code.expiry_date)
+                        .toISOString()
+                        .split("T")[0];
                     } catch (e) {
                       safeExpiryDate = "";
                     }
                   }
 
-                  const prizes = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 
-                    ? ad.rawAd.prizes.map((p) => ({ rank: p.rank, value: p.prize_value }))
-                    : [];
+                  const prizes =
+                    ad.rawAd.prizes && ad.rawAd.prizes.length > 0
+                      ? ad.rawAd.prizes.map((p) => ({
+                          rank: p.rank,
+                          value: p.prize_value || p.title,
+                        }))
+                      : [];
 
-                  const prizeType = ad.rawAd.prizes && ad.rawAd.prizes.length > 0 
-                    ? ad.rawAd.prizes[0].prize_type 
-                    : (ad.rawAd.promo_code ? "coupon" : "cash");
+                  const prizeType =
+                    ad.rawAd.prizes && ad.rawAd.prizes.length > 0
+                      ? ad.rawAd.prizes[0].prize_type
+                      : ad.rawAd.promo_code
+                        ? "coupon"
+                        : "cash";
 
                   const editData = {
                     id: ad.id,
@@ -237,14 +248,17 @@ export default function AdDetailsPage({
                     category_id: ad.category_id,
                     publishAt: safePublishAt,
                     imageUrl: ad.imageUrl,
-                    countries: ad.rawAd.target_countries?.map((c) => c.country_code) || [],
+                    countries:
+                      ad.rawAd.target_countries?.map((c) => c.country_code) ||
+                      [],
                     prizeType,
                     prizes,
                     promoCode: ad.rawAd.promo_code?.code || "",
-                    promoCodeDiscount: ad.rawAd.promo_code?.discount_percentage || "",
+                    promoCodeDiscount:
+                      ad.rawAd.promo_code?.discount_percentage || "",
                     promoCodeExpiry: safeExpiryDate,
                   };
-                  
+
                   setEditingAd(editData);
                   dispatch(setStep("create_ad"));
                 }
@@ -277,7 +291,10 @@ export default function AdDetailsPage({
           <AdDescription description={ad.description} />
 
           <div className="md:w-1/2 mt-2">
-            <AdTopRanking adId={ad.id} rankings={ad.topRankings?.length > 0 ? ad.topRankings : undefined} />
+            <AdTopRanking
+              adId={ad.id}
+              rankings={ad.topRankings?.length > 0 ? ad.topRankings : undefined}
+            />
           </div>
         </div>
 

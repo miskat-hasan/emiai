@@ -101,7 +101,7 @@ function ReelCard({ ad }) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-primary/10"
+      className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-black"
     >
       {/* Background Media */}
       {isVideo ? (
@@ -111,13 +111,13 @@ function ReelCard({ ad }) {
           loop
           muted={isMuted}
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       ) : (
         <img
           src={ad.imageUrl}
           alt="Reel"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain"
         />
       )}
 

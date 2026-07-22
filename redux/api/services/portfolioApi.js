@@ -12,7 +12,7 @@ const portfolioApi = apiSlice.injectEndpoints({
 
     getInfluencerPortfolios: builder.query({
       query: () => ({
-        url: "/api/portfolios?role=influencer",
+        url: "/api/portfolios?role=agency",
         method: "GET",
       }),
       providesTags: ["Portfolio"],
@@ -77,6 +77,13 @@ const portfolioApi = apiSlice.injectEndpoints({
           fd.append(`new_media[${index}][media_type]`, item.media_type);
           fd.append(`new_media[${index}][title]`, item.title);
           fd.append(`new_media[${index}][file]`, item.file);
+        });
+
+        // Add delete_media (removed existing files)
+        (data.delete_media || []).forEach((id) => {
+          fd.append(`delete_media[]`, id);
+          fd.append(`deleted_media[]`, id);
+          fd.append(`delete_media_ids[]`, id);
         });
 
         return {

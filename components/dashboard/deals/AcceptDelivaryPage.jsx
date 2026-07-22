@@ -6,8 +6,15 @@ import { useRouter } from "next/navigation";
 
 import { formatDate } from "@/helper/formatDate";
 import { getImageUrl } from "@/helper/getImageUrl";
-import { useUpdateDealStatusMutation } from "@/redux/api/services/dealApi";
+import {
+  useUpdateDealStatusMutation,
+  useRateDealMutation,
+  useGetDealDeliveriesQuery,
+} from "@/redux/api/services/dealApi";
 import { toast } from "react-toastify";
+import { RatingModal } from "./RatingModal";
+import { useState } from "react";
+import StatusBadge from "@/components/common/StatusBadge";
 
 export default function AcceptDelivaryPage({
   role = "influencer",
@@ -16,7 +23,13 @@ export default function AcceptDelivaryPage({
   const router = useRouter();
   const [updateDealStatus, { isLoading: isUpdating }] =
     useUpdateDealStatusMutation();
+  const [rateDeal, { isLoading: isRating }] = useRateDealMutation();
   const deal = dealDetails?.data;
+  
+  const { data: deliveriesResponse, isLoading: isDeliveriesLoading } = useGetDealDeliveriesQuery(deal?.id, { skip: !deal?.id });
+  const deliveryData = deliveriesResponse?.data?.[0] || deliveriesResponse?.data;
+  
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
   const handleUpdateStatus = async (status) => {
     try {
@@ -99,9 +112,7 @@ export default function AcceptDelivaryPage({
               <MessageSquare size={15} />
             </button>
 
-            <div className="px-5 py-2 rounded-xl bg-blue-100 text-blue-500 text-xs font-bold ml-2">
-              {deal?.status}
-            </div>
+            <StatusBadge status={deal?.status} className="ml-2" />
           </div>
         </div>
 
@@ -155,13 +166,18 @@ export default function AcceptDelivaryPage({
         {/* Description + payout */}
         <div className="flex items-start justify-between gap-8 px-6 py-6 border-b border-gray-100">
           <div className="flex-1 min-w-0">
-            {deal?.delivery_message ? (
+            {isDeliveriesLoading ? (
+              <div className="animate-pulse">
+                <div className="h-4 w-32 bg-gray-200 rounded mb-2.5"></div>
+                <div className="h-4 w-full max-w-4xl bg-gray-200 rounded"></div>
+              </div>
+            ) : deliveryData?.delivery_message || deal?.delivery_message ? (
               <>
                 <p className="text-[15px] font-bold text-black mb-2.5">
                   Delivery Message
                 </p>
                 <p className="text-[14px] text-gray leading-relaxed max-w-4xl whitespace-pre-wrap">
-                  {deal.delivery_message}
+                  {deliveryData?.delivery_message || deal?.delivery_message}
                 </p>
               </>
             ) : (
@@ -186,18 +202,18 @@ export default function AcceptDelivaryPage({
         </div>
 
         {/* Delivery Attachment */}
-        {deal?.attachment && (
+        {(deliveryData?.attachment || deal?.attachment) && (
           <div className="px-6 pb-8 pt-6">
             <div className="w-full h-[240px] md:h-[340px] rounded-[20px] overflow-hidden relative shadow-sm border border-gray-100 bg-gray-50">
-              {deal.attachment.match(/\.(mp4|webm|ogg|mov)$/i) ? (
+              {(deliveryData?.attachment || deal?.attachment).match(/\.(mp4|webm|ogg|mov)$/i) ? (
                 <video
-                  src={getImageUrl(deal.attachment)}
+                  src={getImageUrl(deliveryData?.attachment || deal?.attachment)}
                   controls
                   className="w-full h-full object-contain"
                 />
               ) : (
                 <Image
-                  src={getImageUrl(deal.attachment)}
+                  src={getImageUrl(deliveryData?.attachment || deal?.attachment)}
                   alt="Delivery content"
                   fill
                   className="object-contain"
@@ -210,21 +226,57 @@ export default function AcceptDelivaryPage({
 
       {/* Actions */}
       <div className="flex items-center justify-between py-1 px-2">
-        <button
-          disabled={isUpdating}
-          onClick={() => handleUpdateStatus("rejected")}
-          className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
-        >
-          Cancel Delivery
-        </button>
-        <button
-          disabled={isUpdating}
-          onClick={() => handleUpdateStatus("completed")}
-          className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
-        >
-          {isUpdating ? "Updating..." : "Accept Delivery"}
-        </button>
+        {deal?.status === "completed" ? (
+          <div className="flex w-full justify-end">
+            <button
+              onClick={() => setIsRatingModalOpen(true)}
+              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+            >
+              Rate now
+            </button>
+          </div>
+        ) : (
+          <>
+            <button
+              disabled={isUpdating}
+              onClick={() => handleUpdateStatus("rejected")}
+              className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
+            >
+              Cancel Delivery
+            </button>
+            <button
+              disabled={isUpdating}
+              onClick={() => handleUpdateStatus("completed")}
+              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
+            >
+              {isUpdating ? "Updating..." : "Accept Delivery"}
+            </button>
+          </>
+        )}
       </div>
+
+      <RatingModal
+        isOpen={isRatingModalOpen}
+        isLoading={isRating}
+        onClose={() => setIsRatingModalOpen(false)}
+        onSubmit={async (data) => {
+          try {
+            await rateDeal({
+              deal_id: deal.id,
+              rating: data.rating,
+              message: data.message,
+            }).unwrap();
+            
+            toast.success("Rating submitted successfully!");
+            setIsRatingModalOpen(false);
+          } catch (error) {
+            console.error("Failed to submit rating", error);
+            toast.error(
+              error?.data?.message || error?.message || "Failed to submit rating"
+            );
+          }
+        }}
+      />
     </div>
   );
 }

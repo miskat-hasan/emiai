@@ -22,6 +22,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
   });
   const influencers = clientsRes?.data || [];
   const [portfolioType, setPortfolioType] = useState("personal");
+  const [deletedMediaIds, setDeletedMediaIds] = useState([]);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
@@ -52,7 +53,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
       const existingItems = (editData.media || []).map((m) => ({
         id: m.id,
         photo: null,
-        preview: `${apiUrl}/${m.media_url}`,
+        preview: m.media_url,
         details: m.title || "",
         isExisting: true,
       }));
@@ -60,12 +61,14 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
 
       // Replace form items
       setValue("items", newItems);
+      setDeletedMediaIds([]);
     }
-  }, [isEditMode, editData, setValue, apiUrl]);
+  }, [isEditMode, editData, setValue]);
 
   const handleClose = () => {
     reset();
     setPortfolioType("personal");
+    setDeletedMediaIds([]);
     onClose?.();
   };
 
@@ -114,6 +117,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
         if (userId) payload.user_id = userId;
         if (updateMedia.length > 0) payload.update_media = updateMedia;
         if (newMedia.length > 0) payload.new_media = newMedia;
+        if (deletedMediaIds.length > 0) payload.delete_media = deletedMediaIds;
 
         const res = await updatePortfolio(payload).unwrap();
 
@@ -255,10 +259,16 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                   <label className="text-sm font-medium text-[#737D7A]">
                     {isExisting ? `Existing Photo ${idx + 1}` : `Photo ${idx + 1}`}
                   </label>
-                  {fields.length > 1 && !isExisting && (
+                  {fields.length > 1 && (
                     <button
                       type="button"
-                      onClick={() => remove(idx)}
+                      onClick={() => {
+                        const item = watch(`items.${idx}`);
+                        if (item.isExisting && item.id) {
+                          setDeletedMediaIds((prev) => [...prev, item.id]);
+                        }
+                        remove(idx);
+                      }}
                       className="cursor-pointer rounded-lg bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200 transition-colors"
                     >
                       Remove

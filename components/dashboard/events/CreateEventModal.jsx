@@ -44,39 +44,7 @@ function Textarea({ className = "", ...props }) {
   );
 }
 
-function UploadBox({ label, accept, hint, onChange, fileName }) {
-  const ref = useRef(null);
-  return (
-    <Field label={label}>
-      <div
-        onClick={() => ref.current?.click()}
-        className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray/20 bg-gray/5 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
-      >
-        <Upload size={18} className="text-primary shrink-0" />
-        <div className="text-sm">
-          {fileName ? (
-            <span className="font-medium text-black">{fileName}</span>
-          ) : (
-            <>
-              <span className="font-semibold text-primary underline underline-offset-2">
-                Click to Upload
-              </span>
-              <span className="text-gray"> or drag &amp; drop</span>
-            </>
-          )}
-          {!fileName && <p className="text-xs text-gray mt-0.5">{hint}</p>}
-        </div>
-      </div>
-      <input
-        ref={ref}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-      />
-    </Field>
-  );
-}
+import UploadBox from "@/components/ui/UploadBox";
 
 //Visibility options
 
@@ -122,7 +90,9 @@ export default function CreateEventModal({
   } = useForm();
 
   const [eventPhoto, setEventPhoto] = useState(null);
+  const [eventPhotoPreview, setEventPhotoPreview] = useState(null);
   const [legalDoc, setLegalDoc] = useState(null);
+  const [legalDocPreview, setLegalDocPreview] = useState(null);
   const [isPublished, setIsPublished] = useState(false);
   const [visibility, setVisibility] = useState("public");
   const [generatingAI, setGeneratingAI] = useState(false);
@@ -137,7 +107,9 @@ export default function CreateEventModal({
     if (!open) {
       reset();
       setEventPhoto(null);
+      setEventPhotoPreview(null);
       setLegalDoc(null);
+      setLegalDocPreview(null);
       setIsPublished(false);
       setVisibility("public");
       setInvitationMessage("");
@@ -152,11 +124,16 @@ export default function CreateEventModal({
         event_date: (() => {
           if (!editingEvent.start_date && !editingEvent.date) return "";
           const dateStr = editingEvent.start_date || editingEvent.date;
-          if (typeof dateStr === "string" && dateStr.match(/^\d{4}-\d{2}-\d{2}/)) {
-            return dateStr.substring(0, 10);
+          if (typeof dateStr === "string" && dateStr.includes(' ')) {
+            return dateStr.replace(' ', 'T').slice(0, 16);
+          } else if (typeof dateStr === "string" && dateStr.includes('T')) {
+            return dateStr.slice(0, 16);
           }
           try {
-            return new Date(dateStr).toISOString().split("T")[0];
+            const d = new Date(dateStr);
+            if(isNaN(d)) return "";
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
           } catch (e) {
             return "";
           }
@@ -167,6 +144,8 @@ export default function CreateEventModal({
         legal_approvals_description:
           editingEvent.legal_approvals_description || "",
       });
+      setEventPhotoPreview(editingEvent.photo || null);
+      setLegalDocPreview(editingEvent.legal_doc || null);
       setIsPublished(
         editingEvent.is_published === 1 || editingEvent.is_published === true,
       );
@@ -211,7 +190,12 @@ export default function CreateEventModal({
     fd.append("title", data.title);
     fd.append("type", data.event_type);
     fd.append("entry_fee", data.entry_fee ?? "");
-    fd.append("date", data.event_date);
+    
+    let formattedDate = data.event_date.replace("T", " ");
+    if (formattedDate.length === 16) {
+      formattedDate += ":00";
+    }
+    fd.append("date", formattedDate);
     fd.append("location", data.location);
     fd.append("full_location", data.full_location);
     fd.append("description", data.description);
@@ -329,10 +313,10 @@ export default function CreateEventModal({
                 />
               </Field>
 
-              {/* Date*/}
-              <Field label="Event Date" error={errors.event_date?.message}>
+              {/* Date & Time */}
+              <Field label="Event Date & Time" error={errors.event_date?.message}>
                 <Input
-                  type="date"
+                  type="datetime-local"
                   {...register("event_date", {
                     required: "Event date is required",
                   })}
@@ -353,7 +337,7 @@ export default function CreateEventModal({
 
               <Field label="Event Full Location" error={errors.full_location?.message}>
                 <Input
-                  placeholder="Event Full location here..."
+                  placeholder="https://maps.app.goo.gl/..."
                   {...register("full_location", {
                     validate: (value) => {
                       if (!value) return true;
@@ -370,8 +354,16 @@ export default function CreateEventModal({
               label="Event Photo"
               accept="image/png,image/jpeg,image/jpg"
               hint="PNG, JPG"
-              onChange={setEventPhoto}
-              fileName={eventPhoto?.name}
+              file={eventPhoto}
+              previewUrl={eventPhotoPreview}
+              onChange={(file) => {
+                setEventPhoto(file);
+                if (file) setEventPhotoPreview(URL.createObjectURL(file));
+              }}
+              onRemove={() => {
+                setEventPhoto(null);
+                setEventPhotoPreview(null);
+              }}
             />
 
             {/* Event Description */}
@@ -393,8 +385,16 @@ export default function CreateEventModal({
               label="Legal Approvals"
               accept=".doc,.docx,.pdf"
               hint="DOC, PDF"
-              onChange={setLegalDoc}
-              fileName={legalDoc?.name}
+              file={legalDoc}
+              previewUrl={legalDocPreview}
+              onChange={(file) => {
+                setLegalDoc(file);
+                if (file) setLegalDocPreview(URL.createObjectURL(file));
+              }}
+              onRemove={() => {
+                setLegalDoc(null);
+                setLegalDocPreview(null);
+              }}
             />
 
             {/* Legal Approvals Description */}

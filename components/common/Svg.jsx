@@ -691,14 +691,16 @@ export const BookmarkFilledSVG2 = ({ className = "", ...props }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      className={className}
       width="14"
       height="18"
       viewBox="0 0 14 18"
       fill="none"
+      {...props}
     >
       <path
         d="M0 18V2C0 1.45 0.195833 0.979167 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0H12C12.55 0 13.0208 0.195833 13.4125 0.5875C13.8042 0.979167 14 1.45 14 2V18L7 15L0 18Z"
-        fill="#707070"
+        fill="currentColor"
       />
     </svg>
   );
@@ -936,3 +938,60 @@ export const ExclamationCircleSVG = ({ className, ...props }) => {
   );
 };
 
+export const RatingFace1SVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <line x1="30" y1="35" x2="45" y2="20" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+    <line x1="70" y1="35" x2="55" y2="20" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+    <path d="M 25 70 Q 50 40 75 70" stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+export const RatingFace2SVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <circle cx="35" cy="30" r="12" fill="currentColor" />
+    <circle cx="65" cy="30" r="12" fill="currentColor" />
+    <path d="M 30 65 Q 50 50 70 65" stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+export const RatingFace3SVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <circle cx="35" cy="30" r="12" fill="currentColor" />
+    <circle cx="65" cy="30" r="12" fill="currentColor" />
+    <line x1="30" y1="60" x2="70" y2="60" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+  </svg>
+);
+
+export const RatingFace4SVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <circle cx="35" cy="30" r="12" fill="currentColor" />
+    <circle cx="65" cy="30" r="12" fill="currentColor" />
+    <path d="M 30 55 Q 50 70 70 55" stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+export const RatingFace5SVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <circle cx="35" cy="30" r="12" fill="currentColor" />
+    <circle cx="65" cy="30" r="12" fill="currentColor" />
+    <path d="M 25 50 Q 50 80 75 50" stroke="currentColor" strokeWidth="8" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+export const RatingThumbFrownSVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <path d="M 25 65 Q 50 35 75 65" stroke="currentColor" strokeWidth="12" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+export const RatingThumbStraightSVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <line x1="25" y1="50" x2="75" y2="50" stroke="currentColor" strokeWidth="12" strokeLinecap="round" />
+  </svg>
+);
+
+export const RatingThumbSmileSVG = ({ className, ...props }) => (
+  <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={cn("w-full h-full", className)} {...props}>
+    <path d="M 25 35 Q 50 65 75 35" stroke="currentColor" strokeWidth="12" strokeLinecap="round" fill="none" />
+  </svg>
+);

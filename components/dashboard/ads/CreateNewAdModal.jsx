@@ -50,68 +50,7 @@ const Textarea = forwardRef(({ className = "", ...props }, ref) => {
 });
 Textarea.displayName = "Textarea";
 
-function UploadBox({
-  label,
-  accept,
-  hint,
-  onChange,
-  fileName,
-  previewUrl,
-  mediaType,
-}) {
-  const ref = useRef(null);
-  return (
-    <Field label={label}>
-      <div
-        onClick={() => ref.current?.click()}
-        className="flex items-center gap-3 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all"
-      >
-        <Upload size={18} className="text-primary shrink-0" />
-        <div className="text-sm">
-          {fileName ? (
-            <span className="font-medium text-black">{fileName}</span>
-          ) : (
-            <>
-              <span className="font-semibold text-primary underline underline-offset-2">
-                Click to Upload
-              </span>
-              <span className="text-gray"> or drag & drop</span>
-            </>
-          )}
-          {!fileName && <p className="text-xs text-gray mt-0.5">{hint}</p>}
-        </div>
-      </div>
-      <input
-        ref={ref}
-        type="file"
-        accept={accept}
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0] ?? null;
-          onChange(file);
-        }}
-      />
-      {previewUrl && (
-        <div className="relative w-full h-40 rounded-xl overflow-hidden mt-3">
-          {mediaType?.startsWith("video/") ? (
-            <video
-              src={previewUrl}
-              controls
-              className="w-full h-full object-cover bg-black"
-            />
-          ) : (
-            <Image
-              src={getImageUrl(previewUrl)}
-              alt="Preview"
-              fill
-              className="object-cover"
-            />
-          )}
-        </div>
-      )}
-    </Field>
-  );
-}
+import UploadBox from "@/components/ui/UploadBox";
 
 const getOrdinalNumber = (n) => {
   const s = ["th", "st", "nd", "rd"];
@@ -206,7 +145,7 @@ export default function CreateNewAdModal({
   };
 
   const onSubmit = async (data) => {
-    if (prizeType === "coupon") {
+    if (data.prizeType === "coupon") {
       try {
         const fd = new FormData();
         const countriesList = data.countries || [];
@@ -215,16 +154,16 @@ export default function CreateNewAdModal({
         });
         const res = await checkCouponPermission(fd).unwrap();
         if (res?.data?.allowed === false) {
-          setError("promoCode", {
+          setError("prizeType", {
             type: "manual",
-            message: res.data.reason || "Coupon permission denied",
+            message: res.data.reason || "You need system permission to create coupon prizes.",
           });
           return;
         }
       } catch (err) {
-        setError("promoCode", {
+        setError("prizeType", {
           type: "manual",
-          message: err?.data?.message || err?.message || "Coupon permission denied for selected countries",
+          message: err?.data?.reason || err?.data?.message || err?.message || "Coupon permission denied",
         });
         return;
       }
@@ -332,7 +271,7 @@ export default function CreateNewAdModal({
           />
 
           {/* Prize Type */}
-          <Field label="Prize Type">
+          <Field label="Prize Type" error={errors.prizeType?.message}>
             <div className="relative">
               <select
                 defaultValue=""
@@ -353,9 +292,8 @@ export default function CreateNewAdModal({
           </Field>
 
           {/* Dynamic Prizes */}
-          {prizeType !== "coupon" &&
-            Array.from({ length: prizesCount }).map((_, index) => (
-              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`}>
+          {Array.from({ length: prizesCount }).map((_, index) => (
+              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`} error={errors?.prizes?.[index]?.value?.message}>
                 <div className="flex gap-3 items-center">
                   <input
                     type="hidden"
@@ -363,8 +301,20 @@ export default function CreateNewAdModal({
                     {...register(`prizes.${index}.rank`)}
                   />
                   <Input
-                    placeholder="Write prize value..."
-                    {...register(`prizes.${index}.value`)}
+                    type={prizeType === "cash" ? "number" : "text"}
+                    min={prizeType === "cash" ? "0" : undefined}
+                    step={prizeType === "cash" ? "any" : undefined}
+                    placeholder={prizeType === "cash" ? "Write prize amount..." : "Write prize title..."}
+                    {...register(`prizes.${index}.value`, {
+                      required: "Prize is required",
+                      validate: (val) => {
+                        if (prizeType === "cash" && Number(val) <= 0) {
+                          return "Must be a positive number";
+                        }
+                        return true;
+                      }
+                    })}
+                    className={errors?.prizes?.[index]?.value ? "border-red-500" : ""}
                   />
                   {index > 0 && (
                     <button
@@ -389,8 +339,7 @@ export default function CreateNewAdModal({
             ))}
 
           {/* Promo Code Fields */}
-          {prizeType === "coupon" && (
-            <>
+          <>
               {/* Create Promo Code */}
               <Field label="Create Promo Code" error={errors.promoCode?.message}>
                 <Input
@@ -414,13 +363,14 @@ export default function CreateNewAdModal({
                 </Field>
               </div>
             </>
-          )}
 
           {/* Photo/Video */}
           <UploadBox
             label="Photo/Video"
             accept="image/png,image/jpeg,video/mp4"
             hint="PNG, JPG or MP4"
+            file={mediaFile}
+            previewUrl={previewUrl}
             onChange={(file) => {
               if (file) {
                 setMediaFile(file);
@@ -432,8 +382,11 @@ export default function CreateNewAdModal({
                 setPreviewUrl(null);
               }
             }}
-            fileName={mediaFile?.name}
-            previewUrl={previewUrl}
+            onRemove={() => {
+              setMediaFile(null);
+              setValue("media", null);
+              setPreviewUrl(null);
+            }}
             mediaType={
               mediaFile?.type ||
               (mediaFile?.name?.match(/\.(mp4|webm|mov|ogg)$/i)

@@ -6,7 +6,6 @@ import {
   DeliveryModal,
 } from "@/components/dashboard/deals";
 import { formatDate } from "@/helper/formatDate";
-import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetDealDetailsQuery,
   useSubmitDeliveryMutation,
@@ -55,7 +54,20 @@ export default function DealDetailPage({ role }) {
 
   const isOwner = user?.id === dealDetails?.data?.requested_by?.id;
 
-  if (isOwner && dealDetails?.data?.status === "delivered") {
+  const handleReject = async (dealId) => {
+    try {
+      await updateDealStatus({ id: dealId, status: "rejected" }).unwrap();
+      toast.success("Deal rejected successfully");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to reject deal");
+    }
+  };
+
+  if (
+    isOwner &&
+    (dealDetails?.data?.status === "delivered" ||
+      dealDetails?.data?.status === "completed")
+  ) {
     return <AcceptDelivaryPage role={role} dealDetails={dealDetails} />;
   }
 
@@ -157,26 +169,20 @@ export default function DealDetailPage({ role }) {
           </div>
         </div>
 
-        {/* <div className="flex items-center justify-between px-6 pb-6">
-          <button
-            onClick={() => console.log("reject", deal.id)}
-            className="text-sm font-semibold text-primary hover:underline transition-colors"
-          >
-            Reject
-          </button>
-          <button
         {/* Actions */}
         {!isOwner && dealDetails?.data?.status === "pending" && (
           <div className="flex items-center justify-between px-6 pb-6">
             <button
-              onClick={() => console.log("reject", deal.id)}
-              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
+              onClick={() => handleReject(dealDetails?.data?.id)}
+              disabled={isUpdating}
+              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer disabled:opacity-50"
             >
               Reject
             </button>
             <button
               onClick={() => setIsAcceptModalOpen(true)}
-              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
+              disabled={isUpdating}
+              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer disabled:opacity-50"
             >
               Accept
             </button>
@@ -196,23 +202,6 @@ export default function DealDetailPage({ role }) {
               className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
             >
               Mark as Completed
-            </button>
-          </div>
-        )}
-        
-        {!isOwner && dealDetails?.data?.status === "rejected" && (
-          <div className="flex items-center justify-between px-6 pb-6">
-            <button
-              onClick={() => console.log("reject", deal.id)}
-              className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => setIsDeliveryModalOpen(true)}
-              className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
-            >
-              Deliver Again
             </button>
           </div>
         )}
@@ -243,7 +232,7 @@ export default function DealDetailPage({ role }) {
           }}
         >
           {/* Sponsor logo */}
-          <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white border border-gray-100 flex items-center justify-center">
+          {/* <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white border border-gray-100 flex items-center justify-center">
             {deal.sponsor.logo ? (
               <Image
                 src={getImageUrl(deal.sponsor.logo)}
@@ -257,10 +246,66 @@ export default function DealDetailPage({ role }) {
                 <span className="text-xl">🎯</span>
               </div>
             )}
-          </div>
-          <p className="text-base font-semibold text-black">
+          </div> */}
+          {/* <p className="text-base font-semibold text-black">
             {deal.sponsor.name}
-          </p>
+          </p> */}
+
+          {/* if deal status is pending and user is the owner */}
+          {dealDetails?.data?.status === "pending" && isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              Waiting for approval from{" "}
+              <span className="text-primary px-1.5">
+                {dealDetails?.data?.partner?.name}
+              </span>
+              to move forward
+            </p>
+          )}
+
+          {dealDetails?.data?.status === "pending" && !isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              Accept the deal to move forward.
+            </p>
+          )}
+
+          {/* if deal status is rejected */}
+          {dealDetails?.data?.status === "rejected" && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              Deal has been Rejected. Contact Support for assistance if you
+              think this is a mistake.
+            </p>
+          )}
+
+          {/* if deal status is active and user is not the owner */}
+          {dealDetails?.data?.status === "active" && !isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              This deal is in progress. Please complete the deal within the
+              deadline.
+            </p>
+          )}
+
+          {/* if deal status is active and user is the owner */}
+          {dealDetails?.data?.status === "active" && isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              This deal is in progress. Please wait for the delivery
+              confirmation.
+            </p>
+          )}
+
+          {/* if deal status is delivered and user is not the owner */}
+          {dealDetails?.data?.status === "delivered" && !isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              This deal is delivered. Wait for the confirmation.
+            </p>
+          )}
+
+
+                    {/* if deal status is completed and user is not the owner */}
+          {dealDetails?.data?.status === "completed" && !isOwner && (
+            <p className="flex justify-center items-center w-full text-sm font-semibold text-black">
+              Deal is completed . Your Delivary Rating will appear here if they have rated your work.
+            </p>
+          )}
         </div>
       </div>
 
