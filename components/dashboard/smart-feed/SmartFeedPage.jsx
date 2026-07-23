@@ -151,7 +151,7 @@ export default function SmartFeedPage() {
                       key={goal.id}
                       type="button"
                       onClick={() => setActiveGoal(goal.value)}
-                      className={`h-[52px] rounded-[9px] border bg-white text-[15px] font-medium text-[#202326] transition-all duration-300 ${
+                      className={`h-[52px] rounded-[9px] border bg-white text-[15px] font-medium text-[#202326] transition-all duration-300 cursor-pointer ${
                         isActive
                           ? "border-primary text-primary shadow-[0_8px_24px_rgba(0,0,0,0.03)]"
                           : "border-[#E7E7E7] hover:border-primary hover:text-primary"

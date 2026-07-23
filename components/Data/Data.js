@@ -17,7 +17,6 @@ import {
   Compass,
   Megaphone,
   Radio,
-  Share2,
   Building2,
   SlidersHorizontal,
 } from "lucide-react";
@@ -44,14 +43,19 @@ export const NAV_ITEMS = {
       href: "/dashboard/influencer/peer-invitations",
     },
     {
-      label: "Agencies",
-      icon: Building2,
-      href: "/dashboard/influencer/agencies",
-    },
-    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/influencer/collaborations",
+    },
+    {
+      label: "Influencers",
+      icon: Users,
+      href: "/dashboard/influencer/influencers",
+    },
+    {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/influencer/agencies",
     },
     {
       label: "Smart Feed",
@@ -107,6 +111,11 @@ export const NAV_ITEMS = {
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/advertiser/wallet" },
     {
+      label: "Peer Invitations",
+      icon: Users,
+      href: "/dashboard/advertiser/peer-invitations",
+    },
+    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/advertiser/collaborations",
@@ -125,6 +134,11 @@ export const NAV_ITEMS = {
       label: "Smart Matching",
       icon: SlidersHorizontal,
       href: "/dashboard/advertiser/smart-matching",
+    },
+    {
+      label: "Smart Feed",
+      icon: Zap,
+      href: "/dashboard/advertiser/smart-feed",
     },
     {
       label: "Image Generation",
@@ -172,14 +186,34 @@ export const NAV_ITEMS = {
     },
     { label: "Wallet", icon: Wallet, href: "/dashboard/agency/wallet" },
     {
+      label: "Peer Invitations",
+      icon: Users,
+      href: "/dashboard/agency/peer-invitations",
+    },
+    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/agency/collaborations",
     },
     {
+      label: "Influencers",
+      icon: Users,
+      href: "/dashboard/agency/influencers",
+    },
+    {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/agency/agencies",
+    },
+    {
       label: "Smart Matching",
       icon: SlidersHorizontal,
       href: "/dashboard/agency/smart-matching",
+    },
+    {
+      label: "Smart Feed",
+      icon: Zap,
+      href: "/dashboard/agency/smart-feed",
     },
     {
       label: "Image Generation",
@@ -220,6 +254,11 @@ export const NAV_ITEMS = {
       href: "/dashboard/business_manager/wallet",
     },
     {
+      label: "Peer Invitations",
+      icon: Users,
+      href: "/dashboard/business_manager/peer-invitations",
+    },
+    {
       label: "Collaborations",
       icon: Handshake,
       href: "/dashboard/business_manager/collaborations",
@@ -230,9 +269,24 @@ export const NAV_ITEMS = {
       href: "/dashboard/business_manager/influencers",
     },
     {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/business_manager/agencies",
+    },
+    {
+      label: "Smart Feed",
+      icon: Zap,
+      href: "/dashboard/business_manager/smart-feed",
+    },
+    {
       label: "Image Generation",
       icon: Wand2,
       href: "/dashboard/business_manager/image-generation",
+    },
+    {
+      label: "Events",
+      icon: CalendarDays,
+      href: "/dashboard/business_manager/events",
     },
     { label: "Ads", icon: Megaphone, href: "/dashboard/business_manager/ads" },
     {
@@ -260,7 +314,17 @@ export const NAV_ITEMS = {
     { label: "Explore", icon: Compass, href: "/dashboard/guest/explore" },
     { label: "Inbox", icon: Inbox, href: "/dashboard/guest/inbox" },
     { label: "Wallet", icon: Wallet, href: "/dashboard/guest/wallet" },
+    {
+      label: "Peer Invitations",
+      icon: Users,
+      href: "/dashboard/guest/peer-invitations",
+    },
     { label: "Influencers", icon: Users, href: "/dashboard/guest/influencers" },
+    {
+      label: "Agencies",
+      icon: Building2,
+      href: "/dashboard/guest/agencies",
+    },
     {
       label: "Image Generation",
       icon: Wand2,

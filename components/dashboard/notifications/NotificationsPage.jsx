@@ -1,86 +1,58 @@
+// components/dashboard/notifications/NotificationsPage.jsx
 "use client";
 
 import { Bell, Check } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "react-toastify";
+import {
+  useGetNotificationsQuery,
+  useMarkNotificationsReadMutation,
+} from "@/redux/api/services/notificationsApi";
 
-// ─── Mock data ────────────────────────────────────────────────────────────────
-
-const MOCK_NOTIFICATIONS = [
-  {
-    id: 1,
-    title: "You have new notification",
-    body: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud",
-    time: "03:11 PM",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "New message from John",
-    body: "Curabitur pretium tincidunt lacus, ut ultrices neque. Proin ullamcorper pharetra justo, a venenatis orci malesuada eget.",
-    time: "04:22 PM",
-    read: false,
-  },
-  {
-    id: 3,
-    title: "System update available",
-    body: "Fusce at massa vel odio volutpat malesuada non sed libero. Nulla facilisi. Sed vestibulum felis vel metus rhoncus, at sagittis ante suscipit.",
-    time: "05:45 PM",
-    read: false,
-  },
-  {
-    id: 4,
-    title: "Meeting reminder",
-    body: "Praesent tincidunt, magna eget dapibus fringilla, sapien nisi dignissim nunc, ac elementum arcu eros a ante.",
-    time: "06:30 PM",
-    read: false,
-  },
-  {
-    id: 5,
-    title: "Friend request received",
-    body: "Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Integer non tincidunt mauris.",
-    time: "07:15 PM",
-    read: false,
-  },
-  {
-    id: 6,
-    title: "Password change confirmation",
-    body: "Mauris sed felis vitae libero dapibus gravida. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.",
-    time: "08:50 PM",
-    read: false,
-  },
-  {
-    id: 7,
-    title: "New event added to calendar",
-    body: "Nam convallis, dolor ac vehicula venenatis, libero massa aliquet mauris, a tempor leo diam sed nulla.",
-    time: "09:05 PM",
-    read: false,
-  },
-  {
-    id: 8,
-    title: "Weekly report available",
-    body: "In non quam sit amet nulla fermentum laoreet. Sed ac justo non libero semper viverra.",
-    time: "10:00 PM",
-    read: false,
-  },
-];
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
+const formatTime = dateStr => {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
 export default function NotificationsPage({ role }) {
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [page, setPage] = useState(1);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const {
+    data: response,
+    isLoading,
+    isFetching,
+  } = useGetNotificationsQuery(page);
+  const [markRead, { isLoading: isMarking }] =
+    useMarkNotificationsReadMutation();
+
+  const notifications = response?.data?.data || [];
+  const lastPage = response?.data?.last_page || 1;
+  const unreadCount = notifications.filter(n => !n.read_at).length;
+
+  const markAllRead = async () => {
+    try {
+      await markRead({}).unwrap();
+    } catch (error) {
+      toast.error(
+        error?.data?.message || "Failed to mark notifications as read",
+      );
+    }
   };
 
-  const markOneRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-    );
+  const markOneRead = async n => {
+    if (n.read_at) return;
+    try {
+      await markRead({ notification_id: n.id }).unwrap();
+    } catch (error) {
+      toast.error(
+        error?.data?.message || "Failed to mark notification as read",
+      );
+    }
   };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <div className="space-y-6">
@@ -115,57 +87,93 @@ export default function NotificationsPage({ role }) {
           </div>
           <button
             onClick={markAllRead}
-            disabled={unreadCount === 0}
+            disabled={unreadCount === 0 || isMarking}
             className="flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline disabled:opacity-40 disabled:no-underline transition-all cursor-pointer"
           >
-            Make as view
+            Mark all as read
             <Check size={14} />
           </button>
         </div>
 
         {/* List */}
-        <div className="divide-y divide-gray-100">
-          {notifications.map((n) => (
-            <div
-              key={n.id}
-              onClick={() => markOneRead(n.id)}
-              className={`
-                flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors
-                ${n.read ? "bg-transparent hover:bg-gray-50/40" : "bg-primary/[0.03] hover:bg-primary/[0.06]"}
-              `}
-            >
-              {/* Bell icon */}
-              <div
-                className={`
-                w-10 h-10 rounded-full shrink-0 flex items-center justify-center mt-0.5
-                ${n.read ? "bg-gray-100 text-gray-500" : "bg-primary/10 text-primary"}
-              `}
-              >
-                <Bell size={16} />
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <p
-                  className={`text-sm font-semibold leading-tight mb-1 ${n.read ? "text-gray-500" : "text-gray-900"}`}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          </div>
+        ) : notifications.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {notifications.map(n => {
+              const isRead = Boolean(n.read_at);
+              return (
+                <div
+                  key={n.id}
+                  onClick={() => markOneRead(n)}
+                  className={`
+                    flex items-start gap-4 px-5 py-4 cursor-pointer transition-colors
+                    ${isRead ? "bg-transparent hover:bg-gray-50/40" : "bg-primary/[0.03] hover:bg-primary/[0.06]"}
+                  `}
                 >
-                  {n.title}
-                  {!n.read && (
-                    <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-primary align-middle" />
-                  )}
-                </p>
-                <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
-                  {n.body}
-                </p>
-              </div>
+                  <div
+                    className={`
+                      w-10 h-10 rounded-full shrink-0 flex items-center justify-center mt-0.5
+                      ${isRead ? "bg-gray-100 text-gray-500" : "bg-primary/10 text-primary"}
+                    `}
+                  >
+                    <Bell size={16} />
+                  </div>
 
-              {/* Time */}
-              <span className="text-xs text-gray-500 shrink-0 mt-0.5 whitespace-nowrap">
-                {n.time}
-              </span>
-            </div>
-          ))}
-        </div>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-semibold leading-tight mb-1 ${isRead ? "text-gray-500" : "text-gray-900"}`}
+                    >
+                      {n.data?.title || "Notification"}
+                      {!isRead && (
+                        <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-primary align-middle" />
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2">
+                      {n.data?.message}
+                    </p>
+                  </div>
+
+                  <span className="text-xs text-gray-500 shrink-0 mt-0.5 whitespace-nowrap">
+                    {formatTime(n.created_at)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+            <Bell size={28} className="text-gray-300" />
+            <p className="text-sm font-medium text-gray-500">
+              No notifications yet
+            </p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {lastPage > 1 && (
+          <div className="flex items-center justify-center gap-2 px-5 py-4 border-t border-gray-100">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1 || isFetching}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-xs font-medium text-gray-500">
+              Page {page} of {lastPage}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(lastPage, p + 1))}
+              disabled={page === lastPage || isFetching}
+              className="px-3 py-1.5 text-xs font-semibold text-gray-600 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
