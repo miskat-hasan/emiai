@@ -11,6 +11,8 @@ import {
   useUpdatePortfolioMutation,
   useGetMyClientsQuery,
 } from "@/redux/api/services/portfolioApi";
+import Modal from "@/components/common/Modal";
+import UploadBox from "@/components/ui/UploadBox";
 
 export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, role, editData }) {
   const isEditMode = !!editData;
@@ -26,7 +28,7 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const { register, control, handleSubmit, watch, setValue, reset } = useForm({
+  const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm({
     defaultValues: {
       portfolioTitle: "",
       portfolioDescription: "",
@@ -146,12 +148,13 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
     }
   };
 
-  if (!open) return null;
-
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 px-4 py-6">
-      <div className="w-full max-w-[600px] rounded-[22px] bg-white px-6 py-8 shadow-2xl sm:px-10 sm:py-10 overflow-y-auto max-h-[90vh]">
-        <h2 className="mb-6 text-2xl font-bold text-[#202626]">
+    <Modal 
+      open={open} 
+      onClose={handleClose} 
+      panelClassName="max-w-[600px] bg-white rounded-[22px] px-6 py-8 sm:px-10 sm:py-10"
+    >
+      <h2 className="mb-6 pr-8 text-2xl font-bold text-[#202626]">
           {isEditMode ? "Update Portfolio" : "Add New Portfolio"}
         </h2>
 
@@ -292,40 +295,46 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
                     </div>
                   </div>
                 ) : (
-                  <input
-                    type="file"
-                    accept="image/*,video/mp4"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
+                  <UploadBox
+                    accept="image/png, image/jpeg, image/jpg"
+                    hint="Accepts png, jpg, jpeg only"
+                    file={watch(`items.${idx}.photo`)}
+                    previewUrl={photoPreview}
+                    onChange={(file) => {
                       if (file) {
                         const preview = URL.createObjectURL(file);
                         setValue(`items.${idx}.preview`, preview);
                         setValue(`items.${idx}.photo`, file);
                       }
                     }}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#202626] file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-primary"
-                  />
-                )}
-
-                {photoPreview && !isExisting && (
-                  <Image
-                    src={getImageUrl(photoPreview)}
-                    alt="Preview"
-                    width={560}
-                    height={200}
-                    className="mt-3 h-40 w-full rounded-lg object-contain object-center"
+                    onRemove={() => {
+                      setValue(`items.${idx}.preview`, "");
+                      setValue(`items.${idx}.photo`, null);
+                    }}
                   />
                 )}
 
                 <label className="mt-3 mb-2 block text-sm font-medium text-[#737D7A]">
-                  Photo Details
+                  Photo Description
                 </label>
                 <textarea
-                  {...register(`items.${idx}.details`)}
+                  {...register(`items.${idx}.details`, {
+                    maxLength: {
+                      value: 255,
+                      message: "Photo description cannot exceed 255 characters.",
+                    },
+                  })}
                   placeholder="Describe this photo..."
                   rows={2}
-                  className="w-full resize-none rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-[#202626] outline-none"
+                  className={`w-full resize-none rounded-lg border bg-white px-4 py-2 text-sm font-medium text-[#202626] outline-none ${
+                    errors?.items?.[idx]?.details ? "border-red-500 focus:border-red-500" : "border-gray-200"
+                  }`}
                 />
+                {errors?.items?.[idx]?.details && (
+                  <p className="mt-1 text-xs text-red-500 font-medium">
+                    {errors.items[idx].details.message}
+                  </p>
+                )}
               </div>
             );
           })}
@@ -375,7 +384,6 @@ export default function AddPortfolioModal({ open, onClose, onSubmitPortfolio, ro
           </div>
 
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

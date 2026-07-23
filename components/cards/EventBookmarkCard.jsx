@@ -12,9 +12,13 @@ export default function EventBookmarkCard({
   date,
   bookmarked = true,
   onBookmark,
+  onClick,
 }) {
   return (
-    <div className="relative rounded-xl overflow-hidden aspect-[11/12] group">
+    <div 
+      onClick={onClick}
+      className={`relative rounded-xl overflow-hidden aspect-[11/12] group ${onClick ? 'cursor-pointer' : ''}`}
+    >
       {/* Background image */}
       {/* {image ? ( */}
       <Image
@@ -40,7 +44,13 @@ export default function EventBookmarkCard({
             {title}
           </p>
           {/* Bookmark button */}
-          <button onClick={onBookmark} aria-label="Bookmark">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              onBookmark?.();
+            }} 
+            aria-label="Bookmark"
+          >
             <BookmarkSVG
               className={
                 bookmarked ? "fill-primary text-primary" : "text-white"

@@ -1,18 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Ticket } from "@/components/common/Ticket";
+import { PrintTicketManager } from "@/components/common/PrintTicketManager";
 
 // ── Mock data ───────────────────────────────────────────────────────────────
 const MY_TICKETS = Array.from({ length: 6 }, (_, i) => ({
   id: i + 1,
   title: "Digital Marketing Forum 2025",
-  ticketNumber: "1234567890",
+  ticketNumber: "JB7UVQKWLO[test]",
   qrCode: "/images/demo-qrcode.png",
 }));
 
 export default function TicketsPage({ role }) {
   const tickets = MY_TICKETS;
+  const [printingTicketCode, setPrintingTicketCode] = useState(null);
 
   return (
     <div className="space-y-6 font-dm-sans">
@@ -45,9 +47,18 @@ export default function TicketsPage({ role }) {
               title={ticket.title}
               ticketNumber={ticket.ticketNumber}
               qrCode={ticket.qrCode}
+              onDownload={() => setPrintingTicketCode(ticket.ticketNumber)}
             />
           ))}
         </div>
+      )}
+
+      {/* Print Manager handles fetching and print dialog */}
+      {printingTicketCode && (
+        <PrintTicketManager 
+          ticketCode={printingTicketCode} 
+          onReset={() => setPrintingTicketCode(null)} 
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Headphones, Info, MessageSquare } from "lucide-react";
+import { Headphones, Info, MessageSquare, Download, Star } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +19,7 @@ import StatusBadge from "@/components/common/StatusBadge";
 export default function AcceptDelivaryPage({
   role = "influencer",
   dealDetails,
+  isOwner,
 }) {
   const router = useRouter();
   const [updateDealStatus, { isLoading: isUpdating }] =
@@ -27,7 +28,10 @@ export default function AcceptDelivaryPage({
   const deal = dealDetails?.data;
   
   const { data: deliveriesResponse, isLoading: isDeliveriesLoading } = useGetDealDeliveriesQuery(deal?.id, { skip: !deal?.id });
-  const deliveryData = deliveriesResponse?.data?.[0] || deliveriesResponse?.data;
+  const deliveryData = deliveriesResponse?.data?.deliveries?.[0] || deliveriesResponse?.data?.[0] || deliveriesResponse?.data;
+  
+  const ratingData = deliveriesResponse?.data?.ratings?.[0];
+  const isRated = deliveriesResponse?.data?.is_rated;
   
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
 
@@ -171,13 +175,13 @@ export default function AcceptDelivaryPage({
                 <div className="h-4 w-32 bg-gray-200 rounded mb-2.5"></div>
                 <div className="h-4 w-full max-w-4xl bg-gray-200 rounded"></div>
               </div>
-            ) : deliveryData?.delivery_message || deal?.delivery_message ? (
+            ) : deliveryData?.message ? (
               <>
                 <p className="text-[15px] font-bold text-black mb-2.5">
                   Delivery Message
                 </p>
                 <p className="text-[14px] text-gray leading-relaxed max-w-4xl whitespace-pre-wrap">
-                  {deliveryData?.delivery_message || deal?.delivery_message}
+                  {deliveryData?.message}
                 </p>
               </>
             ) : (
@@ -186,7 +190,7 @@ export default function AcceptDelivaryPage({
                   Delivary Message
                 </p>
                 <p className="text-[14px] text-gray leading-relaxed max-w-4xl whitespace-pre-wrap">
-                  {deal?.description}
+                  {deal?.message}
                 </p>
               </>
             )}
@@ -204,7 +208,19 @@ export default function AcceptDelivaryPage({
         {/* Delivery Attachment */}
         {(deliveryData?.attachment || deal?.attachment) && (
           <div className="px-6 pb-8 pt-6">
-            <div className="w-full h-[240px] md:h-[340px] rounded-[20px] overflow-hidden relative shadow-sm border border-gray-100 bg-gray-50">
+            <div className="w-full h-[240px] md:h-[340px] rounded-[20px] overflow-hidden relative shadow-sm border border-gray-100 bg-gray-50 group">
+              {/* Download Button */}
+              <a
+                href={getImageUrl(deliveryData?.attachment || deal?.attachment)}
+                download
+                target="_blank"
+                rel="noreferrer"
+                className="absolute top-4 right-4 z-10 p-2.5 bg-white/80 hover:bg-white text-gray-800 rounded-full shadow-md transition-all backdrop-blur-sm flex items-center justify-center opacity-100 cursor-pointer"
+                title="Download Attachment"
+              >
+                <Download size={20} strokeWidth={2.5} />
+              </a>
+
               {(deliveryData?.attachment || deal?.attachment).match(/\.(mp4|webm|ogg|mov)$/i) ? (
                 <video
                   src={getImageUrl(deliveryData?.attachment || deal?.attachment)}
@@ -224,34 +240,107 @@ export default function AcceptDelivaryPage({
         )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center justify-between py-1 px-2">
+      {/* Actions & Reviews */}
+      <div className="py-1 px-2">
         {deal?.status === "completed" ? (
-          <div className="flex w-full justify-end">
-            <button
-              onClick={() => setIsRatingModalOpen(true)}
-              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
-            >
-              Rate now
-            </button>
+          <div className="w-full mt-4">
+            {isOwner ? (
+              !isRated ? (
+                <div className="flex w-full justify-end">
+                  <button
+                    onClick={() => setIsRatingModalOpen(true)}
+                    className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
+                  >
+                    Rate now
+                  </button>
+                </div>
+              ) : (
+                ratingData && (
+                  <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-secondary"></div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100">
+                        <span className="text-xl font-bold text-gray-500">{ratingData?.rating}</span>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-base font-bold text-black">Your Review</h3>
+                          <span className="text-sm text-gray-400">{formatDate(ratingData?.created_at)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={16}
+                              className={i < ratingData?.rating ? "fill-orange-400 text-orange-400" : "fill-gray-200 text-gray-200"}
+                            />
+                          ))}
+                        </div>
+                        <p className="mt-3 text-[14px] text-gray-600 leading-relaxed italic">"{ratingData?.message}"</p>
+                      </div>
+                    </div>
+                  </div>
+                )
+              )
+            ) : (
+              // Not owner, but show the review they received if it's rated
+              ratingData ? (
+                <div className="bg-white rounded-3xl border border-gray-100 p-6 shadow-sm relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-secondary"></div>
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100">
+                      <span className="text-xl font-bold text-gray-500">{ratingData?.rating}</span>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-base font-bold text-black">Review from Client</h3>
+                        <span className="text-sm text-gray-400">{formatDate(ratingData?.created_at)}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            size={16}
+                            className={i < ratingData?.rating ? "fill-orange-400 text-orange-400" : "fill-gray-200 text-gray-200"}
+                          />
+                        ))}
+                      </div>
+                        <p className="mt-3 text-[14px] text-gray-600 leading-relaxed italic">{ratingData?.message}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-center items-center py-4 px-2 mt-4 bg-gray-50 rounded-2xl border border-gray-100 w-full">
+                  <p className="text-gray-600 font-medium text-sm">Deal is completed. Your Delivery Rating will appear here if the client rates your work.</p>
+                </div>
+              )
+            )}
           </div>
         ) : (
-          <>
-            <button
-              disabled={isUpdating}
-              onClick={() => handleUpdateStatus("rejected")}
-              className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
-            >
-              Cancel Delivery
-            </button>
-            <button
-              disabled={isUpdating}
-              onClick={() => handleUpdateStatus("completed")}
-              className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
-            >
-              {isUpdating ? "Updating..." : "Accept Delivery"}
-            </button>
-          </>
+          deal?.status === "delivered" && (
+            isOwner ? (
+              <div className="flex items-center justify-between w-full mt-4">
+                <button
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus("rejected")}
+                  className="text-[15px] font-medium text-red-500 hover:opacity-80 transition-opacity cursor-pointer disabled:opacity-50"
+                >
+                  Cancel Delivery
+                </button>
+                <button
+                  disabled={isUpdating}
+                  onClick={() => handleUpdateStatus("completed")}
+                  className="px-8 py-3 rounded-[14px] bg-gradient-to-r from-primary to-secondary text-white text-[15px] font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer disabled:opacity-50"
+                >
+                  {isUpdating ? "Updating..." : "Accept Delivery"}
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-center items-center py-4 px-2 mt-4 bg-gray-50 rounded-2xl border border-gray-100 w-full">
+                <p className="text-gray-600 font-medium text-sm">Waiting for the deal owner to review and accept the delivery.</p>
+              </div>
+            )
+          )
         )}
       </div>
 

@@ -2,6 +2,7 @@
 
 import TabSwitcher from "@/components/common/TabSwitcher";
 import { Ticket } from "@/components/common/Ticket";
+import { PrintTicketManager } from "@/components/common/PrintTicketManager";
 import { getImageUrl } from "@/helper/getImageUrl";
 import {
   useGetMyEventsQuery,
@@ -128,6 +129,8 @@ const MyEventPanel = memo(function MyEventPanel({
 });
 
 const MyTicketPanel = memo(function MyTicketPanel({ tickets }) {
+  const [printingTicketCode, setPrintingTicketCode] = useState(null);
+
   if (!tickets || tickets.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray">
@@ -140,16 +143,27 @@ const MyTicketPanel = memo(function MyTicketPanel({ tickets }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-      {tickets.map((ticket) => (
-        <Ticket
-          key={ticket.id}
-          title={ticket.event_title}
-          ticketNumber={ticket.ticket_code}
-          qrCode={ticket.qrCode}
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+        {tickets.map((ticket, index) => (
+          <Ticket
+            key={ticket.ticket_code || ticket.registration_id || ticket.id || index}
+            title={ticket.event_title}
+            ticketNumber={ticket.ticket_code}
+            qrCode={ticket.qrCode}
+            onDownload={() => setPrintingTicketCode(ticket.ticket_code)}
+          />
+        ))}
+      </div>
+
+      {/* Print/Download Manager */}
+      {printingTicketCode && (
+        <PrintTicketManager
+          ticketCode={printingTicketCode}
+          onReset={() => setPrintingTicketCode(null)}
         />
-      ))}
-    </div>
+      )}
+    </>
   );
 });
 
@@ -278,7 +292,7 @@ export default function EventsPage({ role }) {
               setEditingEvent(null);
               setModalOpen(true);
             }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-b from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 cursor-pointer"
           >
             <Plus size={15} />
             Create New Event
