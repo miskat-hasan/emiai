@@ -1,7 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function DeliveryModal({
   open,
@@ -99,7 +99,9 @@ export default function DeliveryModal({
                       <span className="font-bold underline underline-offset-2">
                         Click to Upload
                       </span>{" "}
-                      <span className="text-gray-600 font-medium">or drag & drop</span>
+                      <span className="text-gray-600 font-medium">
+                        or drag & drop
+                      </span>
                     </p>
                     <p className="text-[13px] text-gray-400">
                       PDF, DOC, PNG, JPG or Video

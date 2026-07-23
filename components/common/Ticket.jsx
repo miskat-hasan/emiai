@@ -5,8 +5,9 @@ import { useState } from 'react';
 import Image from "next/image";
 import { cn } from '@/lib/utils';
 import { TicketSVG, StarSVG, DownloadIconSVG } from './Svg';
+import { QRCodeSVG } from 'qrcode.react';
 
-export const Ticket = ({ title, qrCode, ticketNumber, className }) => {
+export const Ticket = ({ title, qrCode, ticketNumber, className, onDownload }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -24,7 +25,10 @@ export const Ticket = ({ title, qrCode, ticketNumber, className }) => {
         )}
       >
         {/* Front Side */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden]">
+        <div className={cn(
+          "absolute inset-0 w-full h-full [backface-visibility:hidden]",
+          isFlipped ? "pointer-events-none" : ""
+        )}>
           {/* Ticket Background SVG */}
           <TicketSVG className="absolute inset-0 w-full h-full z-0 drop-shadow-xl" />
 
@@ -71,7 +75,10 @@ export const Ticket = ({ title, qrCode, ticketNumber, className }) => {
         </div>
 
         {/* Back Side */}
-        <div className="absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]">
+        <div className={cn(
+          "absolute inset-0 w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)]",
+          !isFlipped ? "pointer-events-none" : ""
+        )}>
           {/* Ticket Background SVG */}
           <TicketSVG className="absolute inset-0 w-full h-full z-0 drop-shadow-xl" />
 
@@ -80,30 +87,34 @@ export const Ticket = ({ title, qrCode, ticketNumber, className }) => {
             {/* QR Code Container */}
             <div className="relative p-[3cqw]">
               {/* QR Image */}
-              <div className="w-[22cqw] h-[22cqw] relative bg-transparent flex items-center justify-center">
-                {qrCode ? (
-                  <Image
-                    src={getImageUrl(qrCode)}
-                    alt="QR Code"
-                    fill
-                    className="object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-white/20"></div>
-                )}
+              <div className="w-[30cqw] h-[30cqw] relative bg-transparent flex items-center justify-center bg-white p-2">
+                <QRCodeSVG 
+                  value={ticketNumber || "UNKNOWN"}
+                  width="100%"
+                  height="100%"
+                  bgColor={"#ffffff"}
+                  fgColor={"#000000"}
+                  level={"H"}
+                />
               </div>
             </div>
 
             {/* Download Button */}
-            <div
-              className="absolute top-[4cqw] right-[6cqw] cursor-pointer hover:scale-110 transition-transform"
+            <button
+              type="button"
+              className="absolute top-[4cqw] right-[6cqw] cursor-pointer hover:scale-110 transition-transform z-50 bg-transparent border-none outline-none p-2"
               onClick={(e) => {
+                e.preventDefault();
                 e.stopPropagation(); // prevent flipping when clicking download
-                // handle download logic here
+                e.nativeEvent.stopImmediatePropagation();
+                console.log("Download button clicked for ticket:", ticketNumber);
+                if (onDownload) {
+                  onDownload();
+                }
               }}
             >
-              <DownloadIconSVG className="w-[7cqw] h-[7cqw] text-white" />
-            </div>
+              <DownloadIconSVG className="w-[7cqw] h-[7cqw] text-white pointer-events-none" />
+            </button>
           </div>
         </div>
       </div>

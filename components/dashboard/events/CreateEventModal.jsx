@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
-import { X, Upload, Sparkles } from "lucide-react";
+import MultiSelect from "@/components/ui/MultiSelect";
+import MultiSelectKeyValue from "@/components/ui/MultiSelectKeyValue";
 import {
   useCreateEventMutation,
   useUpdateEventMutation,
 } from "@/redux/api/services/eventApi";
 import { useGetAllUsersQuery } from "@/redux/api/services/userApi";
-import MultiSelect from "@/components/ui/MultiSelect";
-import MultiSelectKeyValue from "@/components/ui/MultiSelectKeyValue";
+import { Sparkles, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 // Sub-components
 
@@ -124,15 +124,15 @@ export default function CreateEventModal({
         event_date: (() => {
           if (!editingEvent.start_date && !editingEvent.date) return "";
           const dateStr = editingEvent.start_date || editingEvent.date;
-          if (typeof dateStr === "string" && dateStr.includes(' ')) {
-            return dateStr.split(' ')[0];
-          } else if (typeof dateStr === "string" && dateStr.includes('T')) {
-            return dateStr.split('T')[0];
+          if (typeof dateStr === "string" && dateStr.includes(" ")) {
+            return dateStr.split(" ")[0];
+          } else if (typeof dateStr === "string" && dateStr.includes("T")) {
+            return dateStr.split("T")[0];
           }
           try {
             const d = new Date(dateStr);
-            if(isNaN(d)) return "";
-            const pad = (n) => n.toString().padStart(2, '0');
+            if (isNaN(d)) return "";
+            const pad = (n) => n.toString().padStart(2, "0");
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
           } catch (e) {
             return "";
@@ -141,15 +141,15 @@ export default function CreateEventModal({
         event_time: (() => {
           if (!editingEvent.start_date && !editingEvent.date) return "";
           const dateStr = editingEvent.start_date || editingEvent.date;
-          if (typeof dateStr === "string" && dateStr.includes(' ')) {
-            return dateStr.split(' ')[1]?.slice(0, 5) || "";
-          } else if (typeof dateStr === "string" && dateStr.includes('T')) {
-            return dateStr.split('T')[1]?.slice(0, 5) || "";
+          if (typeof dateStr === "string" && dateStr.includes(" ")) {
+            return dateStr.split(" ")[1]?.slice(0, 5) || "";
+          } else if (typeof dateStr === "string" && dateStr.includes("T")) {
+            return dateStr.split("T")[1]?.slice(0, 5) || "";
           }
           try {
             const d = new Date(dateStr);
-            if(isNaN(d)) return "";
-            const pad = (n) => n.toString().padStart(2, '0');
+            if (isNaN(d)) return "";
+            const pad = (n) => n.toString().padStart(2, "0");
             return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
           } catch (e) {
             return "";
@@ -207,7 +207,7 @@ export default function CreateEventModal({
     fd.append("title", data.title);
     fd.append("type", data.event_type);
     fd.append("entry_fee", data.entry_fee ?? "");
-    
+
     const formattedDate = `${data.event_date} ${data.event_time}:00`;
     fd.append("date", formattedDate);
     fd.append("location", data.location);
@@ -357,15 +357,22 @@ export default function CreateEventModal({
                 />
               </Field>
 
-              <Field label="Event Full Location" error={errors.full_location?.message}>
+              <Field
+                label="Event Full Location"
+                error={errors.full_location?.message}
+              >
                 <Input
                   placeholder="https://maps.app.goo.gl/..."
                   {...register("full_location", {
                     validate: (value) => {
                       if (!value) return true;
-                      const isGoogleMaps = value.includes("goo.gl") || value.includes("google.com/maps") || value.includes("maps.app.goo.gl") || value.includes("maps.google.com");
+                      const isGoogleMaps =
+                        value.includes("goo.gl") ||
+                        value.includes("google.com/maps") ||
+                        value.includes("maps.app.goo.gl") ||
+                        value.includes("maps.google.com");
                       return isGoogleMaps || "Must be a valid Google Maps URL";
-                    }
+                    },
                   })}
                 />
               </Field>

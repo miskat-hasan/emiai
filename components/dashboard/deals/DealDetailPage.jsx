@@ -18,20 +18,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
-const MOCK_DEAL = {
-  id: 1,
-  status: "active",
-  person: "Lina Armand",
-  avatar: null,
-  date: "Feb 24, 2026",
-  description:
-    "Pellentesque suscipit fringilla libero eu ullamcorper. Cras risus eros, faucibus sit amet augue id, tempus pellentesque eros. In imperdiet tristique tincidunt. Integer lobortis lorem lorem,",
-  netPayout: "SAR 5400",
-  sponsor: {
-    logo: null,
-    name: "Sponsor by Robiul Tour",
-  },
-};
+
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -50,7 +37,7 @@ export default function DealDetailPage({ role }) {
   const [deliveryData, setDeliveryData] = useState(null);
   const user = useSelector((state) => state.auth?.user);
   console.log(dealDetails);
-  const deal = MOCK_DEAL;
+  const deal = dealDetails?.data;
 
   const isOwner = user?.id === dealDetails?.data?.requested_by?.id;
 
@@ -64,11 +51,10 @@ export default function DealDetailPage({ role }) {
   };
 
   if (
-    isOwner &&
-    (dealDetails?.data?.status === "delivered" ||
-      dealDetails?.data?.status === "completed")
+    dealDetails?.data?.status === "delivered" ||
+    dealDetails?.data?.status === "completed"
   ) {
-    return <AcceptDelivaryPage role={role} dealDetails={dealDetails} />;
+    return <AcceptDelivaryPage role={role} dealDetails={dealDetails} isOwner={isOwner} />;
   }
 
   return (
@@ -192,13 +178,13 @@ export default function DealDetailPage({ role }) {
         {isOwner && dealDetails?.data?.status === "delivered" && (
           <div className="flex items-center justify-between px-6 pb-6">
             <button
-              onClick={() => console.log("reject", deal.id)}
+              onClick={() => console.log("reject", deal?.id)}
               className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
             >
               Cancel
             </button>
             <button
-              onClick={() => console.log("accept", deal.id)}
+              onClick={() => console.log("accept", deal?.id)}
               className="px-8 py-2.5 rounded-xl bg-linear-to-r from-primary to-secondary text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20 hover:cursor-pointer"
             >
               Mark as Completed
@@ -210,7 +196,7 @@ export default function DealDetailPage({ role }) {
         {!isOwner && dealDetails?.data?.status === "active" && (
           <div className="flex items-center justify-between px-6 pb-6">
             <button
-              onClick={() => console.log("reject", deal.id)}
+              onClick={() => console.log("reject", deal?.id)}
               className="text-sm font-semibold text-primary hover:underline transition-colors hover:cursor-pointer"
             >
               Cancel
@@ -319,7 +305,7 @@ export default function DealDetailPage({ role }) {
         isLoading={isUpdating}
         onConfirm={async () => {
           try {
-            await updateDealStatus({ id: deal.id, status: "active" }).unwrap();
+            await updateDealStatus({ id: deal?.id, status: "active" }).unwrap();
             setIsAcceptModalOpen(false);
             toast.success("Deal accepted successfully!");
           } catch (error) {
@@ -352,13 +338,13 @@ export default function DealDetailPage({ role }) {
         onConfirm={async () => {
           try {
             await submitDelivery({
-              deal_id: deal.id,
+              deal_id: deal?.id,
               delivery_message: deliveryData?.message,
               file: deliveryData?.file,
             }).unwrap();
 
             await updateDealStatus({
-              id: deal.id,
+              id: deal?.id,
               status: "delivered",
             }).unwrap();
 

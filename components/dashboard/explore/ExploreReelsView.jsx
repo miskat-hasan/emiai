@@ -101,7 +101,7 @@ function ReelCard({ ad }) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-black"
+      className="relative w-full max-w-4xl shrink-0 h-full snap-center snap-always overflow-hidden shadow-sm group bg-black bg-gradient-to-b from-primary/60 to-primary/60"
     >
       {/* Background Media */}
       {isVideo ? (
@@ -187,11 +187,17 @@ function ReelCard({ ad }) {
       {/* Bottom Content */}
       <div className="absolute bottom-0 left-0 w-full p-6 md:p-8 flex items-end justify-between z-10">
         <div className="flex items-center gap-4">
-          <img
-            src={ad.userAvatar}
-            alt={ad.userName}
-            className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white object-cover shadow-sm"
-          />
+          {ad.userAvatar ? (
+            <img
+              src={ad.userAvatar}
+              alt={ad.userName}
+              className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white object-cover shadow-sm shrink-0"
+            />
+          ) : (
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full border-2 border-white bg-primary flex items-center justify-center text-white font-bold text-xl uppercase shadow-sm shrink-0">
+              {ad.userName ? ad.userName.charAt(0) : "?"}
+            </div>
+          )}
           <div className="flex flex-col">
             <h3 className="text-white text-lg md:text-xl font-semibold">
               {ad.userName}

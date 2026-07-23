@@ -1,18 +1,16 @@
 "use client";
-import { getImageUrl } from "@/helper/getImageUrl";
 
 import MultiSelect from "@/components/ui/MultiSelect";
+import { useCheckCouponPermissionMutation } from "@/redux/api/services/adApi";
 import {
   useGetCategoriesQuery,
   useGetCountriesQuery,
 } from "@/redux/api/services/commonApi";
 import { setDraftData, setStep } from "@/redux/slices/adCreationSlice";
-import { ChevronDown, Minus, Plus, Upload, X } from "lucide-react";
-import Image from "next/image";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { ChevronDown, Minus, Plus, X } from "lucide-react";
+import { forwardRef, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useCheckCouponPermissionMutation } from "@/redux/api/services/adApi";
 
 // Sub-components
 
@@ -80,7 +78,7 @@ export default function CreateNewAdModal({
   const [prizesCount, setPrizesCount] = useState(
     Math.max(1, draft.prizes?.length || 1),
   );
-  
+
   const [checkCouponPermission, { isLoading: isCheckingCoupon }] =
     useCheckCouponPermissionMutation();
 
@@ -111,13 +109,29 @@ export default function CreateNewAdModal({
       setPreviewUrl(draft.previewUrl || null);
       setPrizesCount(Math.max(1, draft.prizes?.length || 1));
     } else if (editingAd) {
-      // Prepopulate form when editing an existing ad
+      let rawPublishAt = editingAd.publishAt || "";
+      
+      // If the ad is already published, do not prefill the schedule time
+      if (editingAd.status === "published") {
+        rawPublishAt = "";
+      }
+      
+      let pDate = "";
+      let pTime = "";
+      if (rawPublishAt) {
+        const normalized = rawPublishAt.replace(" ", "T");
+        const [d, t] = normalized.split("T");
+        pDate = d || "";
+        pTime = t ? t.substring(0, 5) : "";
+      }
+
       reset({
         ...draft,
         id: editingAd.id,
         adsDescription: editingAd.description || "",
         adsCategory: editingAd.category_id || "",
-        publishAt: editingAd.publishAt || "",
+        publishDate: pDate,
+        publishTime: pTime,
         countries: editingAd.countries || [],
         prizeType: editingAd.prizeType || "cash",
         prizes: editingAd.prizes?.length
@@ -156,21 +170,34 @@ export default function CreateNewAdModal({
         if (res?.data?.allowed === false) {
           setError("prizeType", {
             type: "manual",
-            message: res.data.reason || "You need system permission to create coupon prizes.",
+            message:
+              res.data.reason ||
+              "You need system permission to create coupon prizes.",
           });
           return;
         }
       } catch (err) {
         setError("prizeType", {
           type: "manual",
-          message: err?.data?.reason || err?.data?.message || err?.message || "Coupon permission denied",
+          message:
+            err?.data?.reason ||
+            err?.data?.message ||
+            err?.message ||
+            "Coupon permission denied",
         });
         return;
       }
     }
 
     // Save draft and move to next step
-    const dataToSave = { ...data, mediaFile, previewUrl, id: editingAd?.id };
+    let combinedPublishAt = "";
+    if (data.publishDate && data.publishTime) {
+      combinedPublishAt = `${data.publishDate}T${data.publishTime}`;
+    } else if (data.publishDate) {
+      combinedPublishAt = `${data.publishDate}T00:00`;
+    }
+
+    const dataToSave = { ...data, publishAt: combinedPublishAt, mediaFile, previewUrl, id: editingAd?.id };
     dispatch(setDraftData(dataToSave));
 
     if (onSuccess) {
@@ -247,10 +274,15 @@ export default function CreateNewAdModal({
             </div>
           </Field>
 
-          {/* Publish Time */}
-          <Field label="Schedule Publish Time (Optional)">
-            <Input type="datetime-local" {...register("publishAt")} />
-          </Field>
+          {/* Publish Date and Time */}
+          <div className="flex gap-4">
+            <Field label="Schedule Date (Optional)" className="flex-1">
+              <Input type="date" {...register("publishDate")} />
+            </Field>
+            <Field label="Schedule Time (Optional)" className="flex-1">
+              <Input type="time" {...register("publishTime")} />
+            </Field>
+          </div>
 
           {/* Location / Countries */}
           <Controller
@@ -293,76 +325,86 @@ export default function CreateNewAdModal({
 
           {/* Dynamic Prizes */}
           {Array.from({ length: prizesCount }).map((_, index) => (
-              <Field key={index} label={`${getOrdinalNumber(index + 1)} Prize`} error={errors?.prizes?.[index]?.value?.message}>
-                <div className="flex gap-3 items-center">
-                  <input
-                    type="hidden"
-                    value={index + 1}
-                    {...register(`prizes.${index}.rank`)}
-                  />
-                  <Input
-                    type={prizeType === "cash" ? "number" : "text"}
-                    min={prizeType === "cash" ? "0" : undefined}
-                    step={prizeType === "cash" ? "any" : undefined}
-                    placeholder={prizeType === "cash" ? "Write prize amount..." : "Write prize title..."}
-                    {...register(`prizes.${index}.value`, {
-                      required: "Prize is required",
-                      validate: (val) => {
-                        if (prizeType === "cash" && Number(val) <= 0) {
-                          return "Must be a positive number";
-                        }
-                        return true;
+            <Field
+              key={index}
+              label={`${getOrdinalNumber(index + 1)} Prize`}
+              error={errors?.prizes?.[index]?.value?.message}
+            >
+              <div className="flex gap-3 items-center">
+                <input
+                  type="hidden"
+                  value={index + 1}
+                  {...register(`prizes.${index}.rank`)}
+                />
+                <Input
+                  type={prizeType === "cash" ? "number" : "text"}
+                  min={prizeType === "cash" ? "0" : undefined}
+                  step={prizeType === "cash" ? "any" : undefined}
+                  placeholder={
+                    prizeType === "cash"
+                      ? "Write prize amount..."
+                      : "Write prize title..."
+                  }
+                  {...register(`prizes.${index}.value`, {
+                    required: "Prize is required",
+                    validate: (val) => {
+                      if (prizeType === "cash" && Number(val) <= 0) {
+                        return "Must be a positive number";
                       }
-                    })}
-                    className={errors?.prizes?.[index]?.value ? "border-red-500" : ""}
-                  />
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => removePrize(index)}
-                      className="shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm"
-                    >
-                      <Minus size={20} />
-                    </button>
-                  )}
-                  {index === prizesCount - 1 && (
-                    <button
-                      type="button"
-                      onClick={() => setPrizesCount((prev) => prev + 1)}
-                      className="shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:opacity-90 transition-opacity cursor-pointer shadow-sm shadow-primary/20"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  )}
-                </div>
-              </Field>
-            ))}
+                      return true;
+                    },
+                  })}
+                  className={
+                    errors?.prizes?.[index]?.value ? "border-red-500" : ""
+                  }
+                />
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => removePrize(index)}
+                    className="shrink-0 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors cursor-pointer shadow-sm"
+                  >
+                    <Minus size={20} />
+                  </button>
+                )}
+                {index === prizesCount - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => setPrizesCount((prev) => prev + 1)}
+                    className="shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white hover:opacity-90 transition-opacity cursor-pointer shadow-sm shadow-primary/20"
+                  >
+                    <Plus size={20} />
+                  </button>
+                )}
+              </div>
+            </Field>
+          ))}
 
           {/* Promo Code Fields */}
           <>
-              {/* Create Promo Code */}
-              <Field label="Create Promo Code" error={errors.promoCode?.message}>
+            {/* Create Promo Code */}
+            <Field label="Create Promo Code" error={errors.promoCode?.message}>
+              <Input
+                placeholder="Write Promo Code here..."
+                {...register("promoCode")}
+                className={errors.promoCode ? "border-red-500" : ""}
+              />
+            </Field>
+
+            {/* Promo Code Discount & Expiry */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Discount Percentage (%)">
                 <Input
-                  placeholder="Write Promo Code here..."
-                  {...register("promoCode")}
-                  className={errors.promoCode ? "border-red-500" : ""}
+                  type="number"
+                  placeholder="e.g. 10"
+                  {...register("promoCodeDiscount")}
                 />
               </Field>
-
-              {/* Promo Code Discount & Expiry */}
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Discount Percentage (%)">
-                  <Input
-                    type="number"
-                    placeholder="e.g. 10"
-                    {...register("promoCodeDiscount")}
-                  />
-                </Field>
-                <Field label="Expiry Date">
-                  <Input type="date" {...register("promoCodeExpiry")} />
-                </Field>
-              </div>
-            </>
+              <Field label="Expiry Date">
+                <Input type="date" {...register("promoCodeExpiry")} />
+              </Field>
+            </div>
+          </>
 
           {/* Photo/Video */}
           <UploadBox
