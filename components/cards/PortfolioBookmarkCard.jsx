@@ -12,9 +12,13 @@ export default function PortfolioBookmarkCard({
   views = "23k",
   bookmarked = true,
   onBookmark,
+  onClick,
 }) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-[#E5E6E6] flex flex-col p-4 gap-2.5">
+    <div 
+      onClick={onClick}
+      className={`bg-white rounded-2xl overflow-hidden border border-[#E5E6E6] flex flex-col p-4 gap-2.5 ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+    >
       {/* Thumbnail */}
       <div className="relative w-full aspect-[9/10] bg-gray-100 overflow-hidden rounded-lg">
         {/* {image ? ( */}
@@ -42,7 +46,14 @@ export default function PortfolioBookmarkCard({
           <EyeSVG className="text-gray" />
           {views}
         </span>
-        <button onClick={onBookmark} className="ml-auto" aria-label="Bookmark">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            onBookmark?.();
+          }} 
+          className="ml-auto cursor-pointer" 
+          aria-label="Bookmark"
+        >
           <BookmarkFilledSVG
             className={
               bookmarked ? "fill-primary text-primary" : "text-gray-300"

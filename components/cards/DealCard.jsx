@@ -96,13 +96,13 @@ export default function DealCard({ deal, role }) {
               <>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   Accept Delivery
                 </button>
@@ -112,13 +112,13 @@ export default function DealCard({ deal, role }) {
               <>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   Accept Extension
                 </button>
@@ -128,13 +128,13 @@ export default function DealCard({ deal, role }) {
               <>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2.5 px-2 rounded-full border border-gray-300 text-sm font-medium text-black hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   {isRatingGiven ? "View Rating" : "Give Rating"}
                 </button>
                 <button
                   onClick={e => e.preventDefault()}
-                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap"
+                  className="flex-1 py-2.5 px-2 rounded-full bg-primary text-white text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm whitespace-nowrap cursor-pointer"
                 >
                   Publish Ads
                 </button>

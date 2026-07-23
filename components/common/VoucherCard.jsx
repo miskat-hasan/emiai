@@ -52,7 +52,7 @@ export const VoucherCard = ({
         <div className="absolute bottom-6 w-full flex justify-center left-0">
           <button
             onClick={onCopy}
-            className="border border-white text-white text-lg rounded-full px-16 py-2 hover:bg-white/10 hover:cursor-pointer transition-colors"
+            className="border border-white text-white text-lg rounded-full px-16 py-2 hover:bg-white/10 cursor-pointer transition-colors"
           >
             Copy
           </button>

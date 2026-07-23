@@ -247,6 +247,7 @@ export default function AdDetailsPage({
                     description: ad.description[0] || "",
                     category_id: ad.category_id,
                     publishAt: safePublishAt,
+                    status: ad.rawAd.status,
                     imageUrl: ad.imageUrl,
                     countries:
                       ad.rawAd.target_countries?.map((c) => c.country_code) ||

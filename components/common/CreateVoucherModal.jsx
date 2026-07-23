@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { toast } from "react-toastify";
+import MultiSelect from "@/components/ui/MultiSelect";
+import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 import {
   useCreateVoucherMutation,
   useGetVoucherCategoriesQuery,
 } from "@/redux/api/services/voucherApi";
-import { useGetCountriesQuery } from "@/redux/api/services/commonApi";
 import { CalendarIcon } from "lucide-react";
-import MultiSelect from "@/components/ui/MultiSelect";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 function Field({ label, error, children, className = "" }) {
   return (
@@ -70,7 +70,7 @@ export default function CreateVoucherModal({
   } = useForm({
     defaultValues: {
       countries: [],
-    }
+    },
   });
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function CreateVoucherModal({
       fd.append("description", data.description);
 
       if (data.countries && data.countries.length > 0) {
-        data.countries.forEach(country => {
+        data.countries.forEach((country) => {
           fd.append("countries[]", country);
         });
       }
@@ -266,8 +266,8 @@ export default function CreateVoucherModal({
                   required: "Description is required",
                   maxLength: {
                     value: 120,
-                    message: "Description must be at most 120 characters long"
-                  }
+                    message: "Description must be at most 120 characters long",
+                  },
                 })}
               />
             </Field>
