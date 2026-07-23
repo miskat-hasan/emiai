@@ -16,6 +16,7 @@ import {
 } from "@/redux/api/services/peerInvitationsApi";
 import SentInvitationCard from "./SentInvitationCard";
 import PaymentRequestCard from "./PaymentRequestCard";
+import { useSelector } from "react-redux";
 
 export const invitationTabs = [
   { label: "Incoming Requests", value: "incoming" },
@@ -306,6 +307,8 @@ const RequestPaymentModal = ({ open, invitation, onClose }) => {
 };
 
 export default function PeerInvitations() {
+  const user = useSelector(state => state.auth?.user);
+  
   const [activeTab, setActiveTab] = useState("incoming");
   const [selectedInvitation, setSelectedInvitation] = useState(null);
   const [actioningId, setActioningId] = useState(null);
