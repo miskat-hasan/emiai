@@ -238,8 +238,8 @@ export default function CreateContestModal({
           <div className="grid grid-cols-2 gap-3">
             <Input
               label="Prize"
-              placeholder="1500"
-              type="number"
+              placeholder="e.g. 1000 or PS5"
+              type="text"
               error={errors.prize?.message}
               {...register("prize", { required: "Prize is required" })}
             />

@@ -14,6 +14,8 @@ import LogoutModal from "./LogoutModal";
 import { useLogoutUserMutation } from "@/redux/api/authApi";
 import { removeUser } from "@/redux/slices/authSlice";
 import { getCookie } from "@/lib/cookies";
+import { apiSlice } from "@/redux/api/apiSlice";
+import { teardownEcho } from "@/lib/echo";
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("about-me");
@@ -49,18 +51,22 @@ export default function ProfilePage() {
     return tabs;
   }, [isInfluencer]);
 
-  const handleLogoutConfirm = async () => {
-    try {
-      await logoutUser().unwrap();
-    } catch {
-      // fail silently
-    } finally {
-      dispatch(removeUser());
-      document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
-      document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
-      toast.success("Logged out successfully");
-      router.push("/login");
-    }
+  const handleLogoutConfirm = () => {
+    logoutUser()
+      .unwrap()
+      .then(() => {
+        dispatch(removeUser());
+        dispatch(apiSlice.util.resetApiState());
+        teardownEcho();
+        document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+        document.cookie = "role=; path=/; max-age=0; SameSite=Lax";
+        toast.success("Logged out successfully");
+        router.refresh();
+        router.push("/login");
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const handleAvatarSelect = e => {
@@ -76,8 +82,7 @@ export default function ProfilePage() {
   };
 
   const displayAvatar =
-    avatarPreview ||
-    (user?.avatar ? `${user.avatar}` : null);
+    avatarPreview || (user?.avatar ? `${user.avatar}` : null);
 
   return (
     <div className="space-y-8 pb-16">

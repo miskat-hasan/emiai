@@ -48,6 +48,7 @@ export default function LoginPage() {
         rebuildEcho();
 
         toast.success("Welcome back!");
+        router.refresh();
         const route = getRoleHomeRoute(userData.role);
         router.push(route);
       }
