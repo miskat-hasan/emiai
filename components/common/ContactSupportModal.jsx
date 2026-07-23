@@ -5,7 +5,12 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "react-toastify";
 
-export default function ContactSupportModal({ open, onClose, collapsed, role = "advertiser" }) {
+export default function ContactSupportModal({
+  open,
+  onClose,
+  collapsed,
+  role = "advertiser",
+}) {
   const [mounted, setMounted] = useState(false);
   const [supportType, setSupportType] = useState("Suggestion");
   const [message, setMessage] = useState("");
@@ -44,9 +49,11 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
       }}
     >
       {/* Modal panel */}
-      <div className={`relative w-full max-w-[500px] bg-white bg-gradient-to-b from-white from-50% to-primary/20 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent transition-all duration-200
+      <div
+        className={`relative w-full max-w-[500px] bg-white bg-gradient-to-b from-white from-50% to-primary/20 rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent transition-all duration-200
         ${isAnimating ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 translate-y-2"}
-      `}>
+      `}
+      >
         {/* Header */}
         <div className="px-6 pt-7 pb-4 border-b border-gray-100">
           <h2 className="text-xl font-bold text-black">Contact Support</h2>
@@ -56,15 +63,17 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
           onSubmit={async (e) => {
             e.preventDefault();
             if (!message.trim()) {
-               toast.error("Message is required.");
-               return;
+              toast.error("Message is required.");
+              return;
             }
             try {
               const res = await submitSupportTicket({
                 subject: supportType,
                 message: message.trim(),
               }).unwrap();
-              toast.success(res.message || "Support ticket submitted successfully.");
+              toast.success(
+                res.message || "Support ticket submitted successfully.",
+              );
               setMessage("");
               onClose();
             } catch (err) {
@@ -74,7 +83,9 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
           className="px-6 py-6 flex flex-col gap-6"
         >
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray">Support Type</label>
+            <label className="text-sm font-medium text-gray">
+              Support Type
+            </label>
             <div className="relative">
               <select
                 value={supportType}
@@ -87,15 +98,29 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
                 <option value="Other">Other</option>
               </select>
               <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray">
-                <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <svg
+                  width="12"
+                  height="8"
+                  viewBox="0 0 12 8"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M1 1.5L6 6.5L11 1.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               </span>
             </div>
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-gray">Your Message</label>
+            <label className="text-sm font-medium text-gray">
+              Your Message
+            </label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
@@ -124,9 +149,8 @@ export default function ContactSupportModal({ open, onClose, collapsed, role = "
             </button>
           </div>
         </form>
-
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

@@ -63,6 +63,10 @@ export const eventApi = apiSlice.injectEndpoints({
       query: (params) => ({ url: "/api/events/my-sent-invitations", method: "GET", params }),
       providesTags: ["Event"],
     }),
+    getTicketDetails: builder.query({
+      query: (ticketCode) => ({ url: `/api/events/ticket-details?ticket_code=${ticketCode}`, method: "GET" }),
+      providesTags: (result, error, ticketCode) => [{ type: "Event", id: ticketCode }],
+    }),
   }),
 });
 
@@ -76,4 +80,5 @@ export const {
   useGetMyTicketsQuery,
   useRegisterTicketMutation,
   useGetMySentInvitationsQuery,
+  useGetTicketDetailsQuery,
 } = eventApi;

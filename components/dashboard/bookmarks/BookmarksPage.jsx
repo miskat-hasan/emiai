@@ -13,6 +13,8 @@ import {
   useGetBookmarksQuery,
 } from "@/redux/api/services/bookmarkApi";
 import { getImageUrl } from "@/helper/getImageUrl";
+import PortfolioDetailsModal from "@/app/dashboard/influencer/portfolio/components/PortfolioDetailsModal";
+import { useSelector } from "react-redux";
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 
@@ -70,7 +72,7 @@ function FilterDropdown({ value, onChange }) {
 
 // ─── Grid layouts per filter ──────────────────────────────────────────────────
 
-function PortfolioGrid({ items, onToggle }) {
+function PortfolioGrid({ items, onToggle, onPortfolioClick }) {
   if (!items || items.length === 0) {
     return (
       <div className="text-gray text-sm py-10 text-center w-full">
@@ -96,6 +98,7 @@ function PortfolioGrid({ items, onToggle }) {
             views={pf.views || "0"}
             bookmarked={true}
             onBookmark={() => onToggle(pf.id)}
+            onClick={() => onPortfolioClick?.(pf.id)}
           />
         );
       })}
@@ -103,7 +106,7 @@ function PortfolioGrid({ items, onToggle }) {
   );
 }
 
-function EventGrid({ items, onToggle }) {
+function EventGrid({ items, onToggle, onEventClick }) {
   if (!items || items.length === 0) {
     return (
       <div className="text-gray text-sm py-10 text-center w-full">
@@ -133,6 +136,7 @@ function EventGrid({ items, onToggle }) {
             date={ev.date || ev.start_date || "Event Date"}
             bookmarked={true}
             onBookmark={() => onToggle(ev.id)}
+            onClick={() => onEventClick?.(ev.id)}
           />
         );
       })}
@@ -193,10 +197,14 @@ function AdGrid({ items, onToggle, onAdClick }) {
 
 export default function BookmarksPage({ role }) {
   const router = useRouter();
+  const user = useSelector((state) => state.auth?.user);
   const [filter, setFilter] = useState("Ads");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
+  
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState(null);
+  const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
 
   const typeMap = {
     Portfolio: "portfolio",
@@ -262,6 +270,15 @@ export default function BookmarksPage({ role }) {
     }
   };
 
+  const handleEventClick = (id) => {
+    router.push(`/dashboard/${role}/events/${id}`);
+  };
+
+  const handlePortfolioClick = (id) => {
+    setSelectedPortfolioId(id);
+    setPortfolioModalOpen(true);
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-100px)] space-y-6">
       {/* Page heading */}
@@ -318,13 +335,15 @@ export default function BookmarksPage({ role }) {
           {filter === "Portfolio" && (
             <PortfolioGrid
               items={visibleItems}
-              onToggle={id => handleToggle(id, "portfolio")}
+              onToggle={id => handleToggle(id, typeMap.Portfolio)}
+              onPortfolioClick={handlePortfolioClick}
             />
           )}
           {filter === "Events" && (
             <EventGrid
               items={visibleItems}
-              onToggle={id => handleToggle(id, "event")}
+              onToggle={id => handleToggle(id, typeMap.Events)}
+              onEventClick={handleEventClick}
             />
           )}
           {filter === "Ads" && (
@@ -350,6 +369,16 @@ export default function BookmarksPage({ role }) {
           />
         )}
       </div>
+      <PortfolioDetailsModal
+        open={portfolioModalOpen}
+        onClose={() => setPortfolioModalOpen(false)}
+        portfolioId={selectedPortfolioId}
+        user={{
+          name: user?.name ?? "User",
+          role: user?.role ?? "Influencer",
+          avatar: user?.avatar ?? "",
+        }}
+      />
     </div>
   );
 }

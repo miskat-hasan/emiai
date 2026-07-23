@@ -104,7 +104,7 @@ export default function ExploreFeedCard({
     }
 
     return (
-      <div className="relative w-full aspect-[16/9] md:aspect-[2/1] max-h-[65vh] bg-black overflow-hidden rounded-md mt-4">
+      <div className="relative w-full aspect-[16/9] md:aspect-[2/1] max-h-[65vh] bg-black bg-gradient-to-b from-primary/60 to-primary/30 overflow-hidden rounded-md mt-4">
         <Image
           src={imageUrl}
           alt={description || "Ad Media"}

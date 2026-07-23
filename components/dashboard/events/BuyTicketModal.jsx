@@ -1,10 +1,10 @@
 "use client";
 
-import { X, ChevronDown } from "lucide-react";
+import { useRegisterTicketMutation } from "@/redux/api/services/eventApi";
+import { ChevronDown, X } from "lucide-react";
+import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "react-toastify";
-import { useEffect } from "react";
-import { useRegisterTicketMutation } from "@/redux/api/services/eventApi";
 
 export default function BuyTicketModal({ open, onClose, event, onSuccess }) {
   const { register, handleSubmit, reset, control } = useForm();
@@ -41,7 +41,10 @@ export default function BuyTicketModal({ open, onClose, event, onSuccess }) {
 
   const onSubmit = async (data) => {
     const fd = new FormData();
-    fd.append("event_id", selectedTicket?.event_id || event?.event_id || event?.id);
+    fd.append(
+      "event_id",
+      selectedTicket?.event_id || event?.event_id || event?.id,
+    );
     fd.append("ticket_id", data.ticketType);
 
     try {
