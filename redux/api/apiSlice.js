@@ -31,6 +31,8 @@ export const apiSlice = createApi({
     "Portfolio",
     "PeerInvitations",
     "NotificationCount",
+    "Wallet",
+    "WalletConnect",
   ],
 
   endpoints: () => ({}),
